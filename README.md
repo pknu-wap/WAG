@@ -1,4 +1,5 @@
-# WAG
+# WAG 
+## Webs Appends Game
 
 ## Introduction  
 
