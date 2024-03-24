@@ -1,5 +1,4 @@
 # WAG
-2024-1 WEB 5팀입니다. 
 
 ## Introduction  
 
