@@ -1,4 +1,4 @@
-<img src="https://capsule-render.vercel.app/api?type=waving&color=B931FC&height=130&section=header&text=&fontSize=0" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=B931FC&height=150&section=header&text=&fontSize=0" />
 
 # WAG - Webs Appends Game
 
