@@ -14,6 +14,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/stomp/chat")  //웹소켓의 엔드포인트를 추가합니다. witSockJS()는 웹소켓을 지원하지 않는 브라우저에서도 작동하게 합니다.
                 .setAllowedOrigins("http://localhost:8080")
                 .withSockJS();
+
     }
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
