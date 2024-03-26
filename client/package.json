@@ -34,5 +34,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1",
+    "@babel/plugin-proposal-private-property-in-object": "^7.18.0"
   }
 }
