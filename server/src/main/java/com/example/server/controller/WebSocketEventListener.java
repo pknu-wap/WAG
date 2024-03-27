@@ -1,7 +1,7 @@
 package com.example.server.controller;
 
 import com.example.server.domain.ChatMessage;
-import com.example.server.repository.ChatRoomRepository;
+import com.example.server.repository.RoomRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class WebSocketEventListener {
     private SimpMessageSendingOperations messagingTemplate;
 
     @Autowired
-    private ChatRoomRepository chatRoomRepository;
+    private RoomRepository roomRepository;
 
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
@@ -41,7 +41,7 @@ public class WebSocketEventListener {
             chatMessage.setMessageType(ChatMessage.MessageType.LEAVE);
             chatMessage.setSender(username);
 
-            chatRoomRepository.deleteUser(username, roomId);
+            roomRepository.deleteUser(username, roomId);
 
             messagingTemplate.convertAndSend("/topic/public/"+roomId, chatMessage);
         }

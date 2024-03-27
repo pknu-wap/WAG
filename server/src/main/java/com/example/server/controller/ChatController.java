@@ -1,8 +1,8 @@
 package com.example.server.controller;
 
 import com.example.server.domain.ChatMessage;
-import com.example.server.domain.ChatRoom;
-import com.example.server.repository.ChatRoomRepository;
+import com.example.server.domain.Room;
+import com.example.server.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,12 +13,10 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Controller
 public class ChatController {
     @Autowired
-    private ChatRoomRepository chatRoomRepository;
+    private RoomRepository roomRepository;
     @Autowired
     private SimpMessageSendingOperations messagingTemplate;
 
@@ -30,12 +28,20 @@ public class ChatController {
         return chatMessage;
     }
 
+    @MessageMapping("/chat.sendGameMessage")
+    public ChatMessage sendGameMessage(@Payload ChatMessage chatMessage) {
+        String destination = "/pub/"+chatMessage.getRoomId();
+
+        messagingTemplate.convertAndSend(destination, chatMessage);
+        return chatMessage;
+    }
+
     @MessageMapping("/chat.addUser")
     public ChatMessage addUser(@Payload ChatMessage chatMessage,
                                SimpMessageHeaderAccessor headerAccessor) {
         headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
 
-        String sender = chatRoomRepository.addUser(chatMessage.getRoomId(), chatMessage.getSender());
+        String sender = roomRepository.addUser(chatMessage.getRoomId(), chatMessage.getSender());
 
         headerAccessor.getSessionAttributes().put("username", sender);
         headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
@@ -51,8 +57,8 @@ public class ChatController {
     }
 
 //    @GetMapping("/chatrooms")
-//    public ResponseEntity<List<ChatRoom>> getChatRoomList(){
-//        List<ChatRoom> chatRooms = chatRoomRepository.getChatRoomList();
+//    public ResponseEntity<List<Room>> getChatRoomList(){
+//        List<Room> chatRooms = chatRoomRepository.getChatRoomList();
 //
 //        return new ResponseEntity<>(chatRooms, HttpStatus.OK);
 //    }
@@ -67,13 +73,13 @@ public class ChatController {
 
 //    @GetMapping("/room/info")
 //    public ResponseEntity<> returnRoominfo(@RequestBody String nickName){
-//        ChatRoom chatroom = chatRoomRepository.createChatRoom();
+//        Room chatroom = chatRoomRepository.createChatRoom();
 //        return new ResponseEntity<>(chatroom, HttpStatus.OK);
 //    }
 
-    @PostMapping("/chatroom")
-    public ResponseEntity<ChatRoom> createChatRoom(@RequestBody String roomName){
-        ChatRoom chatroom = chatRoomRepository.createChatRoom(roomName);
+    @PostMapping("/room/create")
+    public ResponseEntity<Room> createChatRoom(@RequestBody String roomName){
+        Room chatroom = roomRepository.createChatRoom(roomName);
         return new ResponseEntity<>(chatroom, HttpStatus.OK);
     }
 }
