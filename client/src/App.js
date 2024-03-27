@@ -1,15 +1,12 @@
 import "./App.css";
-import ButtonTag from "./component/button/Button";
+import Button from "./component/Button/Button";
 
 function App() {
   return (
     <div className="App">
-      <div className="justify-center dark:text-5xl">
-        Please,,,
-      </div>
+      <div className="justify-center dark:text-5xl">Please,,,</div>
       <div className="  flex items-center  justify-center bg-rose-500">
-        <ButtonTag color="white" size='mid'>Hi</ButtonTag>
-
+        <Button size="lg">Hi</Button>
       </div>
       <button className="btn">HiHIHIHI</button>
     </div>
