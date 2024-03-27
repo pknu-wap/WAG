@@ -4,8 +4,15 @@ module.exports = {
   theme: {
     extend: {},
     colors: {
-      light_bg: "#FFE5E5",
-      dark_bg: "#595959",
+      light: {
+        bg: "#FFE5E5",
+        text: "#262626"
+
+      },
+      dark: {
+        bg: "#595959",
+        text: "rgb(255, 255, 255)"
+      },
     },
   },
   plugins: [],

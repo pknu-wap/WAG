@@ -2,7 +2,7 @@ import { connect } from "react-redux";
 import { toggleDarkMode } from "../../modules/darkSlice";
 import { useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
+import { faMoon, faSun } from "@fortawesome/free-regular-svg-icons";
 
 const Header = ({ dark, toggleDarkMode }) => {
   useEffect(() => {
@@ -24,7 +24,7 @@ const Header = ({ dark, toggleDarkMode }) => {
           {dark ? (
             <FontAwesomeIcon icon={faMoon} size="2x" />
           ) : (
-            <FontAwesomeIcon icon={faSun} size="2x" />
+            <FontAwesomeIcon icon={faSun} size="2x" regula />
           )}
         </button>
       </div>
