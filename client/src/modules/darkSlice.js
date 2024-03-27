@@ -11,9 +11,8 @@ const darkSlice = createSlice({
   name: "darkSlice",
   initialState,
   reducers: {
-    toggleDarkMode: (state, action) => {
+    toggleDarkMode: (state) => {
       const update = !state.isDark;
-      console.log(action.payload);
       if (update) {
         localStorage.theme = "dark";
       } else {

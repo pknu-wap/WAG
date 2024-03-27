@@ -15,10 +15,10 @@ const Header = ({ dark, toggleDarkMode }) => {
 
   return (
     <header className="m-5">
-      <div className="flex justify-end text-black dark:text-white">
+      <div className="flex justify-end ">
         <button
           onClick={() => {
-            toggleDarkMode("이렇게전달해요");
+            toggleDarkMode();
           }}
         >
           {dark ? (
