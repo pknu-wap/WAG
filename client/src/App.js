@@ -11,7 +11,7 @@ function App() {
   }
   return (
     <div className="App">
-      <div className="justify-center text-9xl mb-20">WAG</div>
+      <div className="justify-center text-9xl mb-20 text-black dark:text-dark-text">WAG</div>
       <div className="flex flex-col items-center justify-center space-y-5">
         <Button size="lg" >방 생성</Button>
         <Button size="lg" >방 참가</Button>

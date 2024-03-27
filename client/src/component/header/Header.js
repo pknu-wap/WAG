@@ -3,6 +3,7 @@ import { toggleDarkMode } from "../../modules/darkSlice";
 import { useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoon, faSun } from "@fortawesome/free-regular-svg-icons";
+import IconButton from "../button/IconButton";
 
 const Header = ({ dark, toggleDarkMode }) => {
   useEffect(() => {
@@ -16,17 +17,17 @@ const Header = ({ dark, toggleDarkMode }) => {
   return (
     <header className="m-5">
       <div className="flex justify-end ">
-        <button
+        <IconButton
           onClick={() => {
             toggleDarkMode();
           }}
         >
           {dark ? (
-            <FontAwesomeIcon icon={faMoon} size="2x" />
+            <FontAwesomeIcon icon={faMoon} size="x" />
           ) : (
-            <FontAwesomeIcon icon={faSun} size="2x" regula />
+            <FontAwesomeIcon icon={faSun} size="x" regula />
           )}
-        </button>
+        </IconButton>
       </div>
     </header>
   );
