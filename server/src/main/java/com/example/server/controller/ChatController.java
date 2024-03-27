@@ -22,7 +22,7 @@ public class ChatController {
 
     @MessageMapping("/chat.sendMessage")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
-        String destination = "/pub/"+chatMessage.getRoomId();
+        String destination = "/topic/public/"+chatMessage.getRoomId();
 
         messagingTemplate.convertAndSend(destination, chatMessage);
         return chatMessage;
@@ -30,7 +30,7 @@ public class ChatController {
 
     @MessageMapping("/chat.sendGameMessage")
     public ChatMessage sendGameMessage(@Payload ChatMessage chatMessage) {
-        String destination = "/pub/"+chatMessage.getRoomId();
+        String destination = "/topic/public/"+chatMessage.getRoomId();
 
         messagingTemplate.convertAndSend(destination, chatMessage);
         return chatMessage;
@@ -51,7 +51,7 @@ public class ChatController {
         response.setSender(sender);
         response.setContent(sender + " 님이 입장하셨습니다.");
         response.setRoomId(chatMessage.getRoomId());
-        messagingTemplate.convertAndSend("/pub/" + chatMessage.getRoomId(), response);
+        messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getRoomId(), response);
 
         return response;
     }
