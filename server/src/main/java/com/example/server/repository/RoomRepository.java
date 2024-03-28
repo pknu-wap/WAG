@@ -1,62 +1,19 @@
 package com.example.server.repository;
 
 import com.example.server.domain.Room;
+import com.example.server.dto.UserDto;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 @Repository
-public class RoomRepository {
-    private static List<Room> rooms = new ArrayList<>();
+public interface RoomRepository extends JpaRepository<Room, Long> {
+    @Query("SELECT r FROM Room r WHERE r.roomEnterCode = :enterCode ")
+    int findByCode(@Param("enterCode") int enterCode);
+    @Query("SELECT r FROM Room r JOIN r.roomUsers ru WHERE ru.roomNickname = :nickName ")
+    Room findByNickName(@Param("nickName") String nickName);
 
-    public List<Room> getChatRoomList() {
-        List<Room> result = new ArrayList<>(rooms);
-        Collections.reverse(result);
-        return result;
-    }
-
-    public static Room getChatRoom(String roomId) {
-        return rooms.stream()
-                .filter(room -> roomId.equals(room.getRoomId()))
-                .findFirst()
-                .orElse(null);
-    }
-    public static void plusUserCnt(Room room) {
-        room.setUserCount(room.getUserCount()+1);
-    }
-
-    public String addUser(String roomId, String sender) {
-        Room room = getChatRoom(roomId);
-        plusUserCnt(room);
-        room.getUsers().add("sender");
-        return sender;
-    }
-
-    public void deleteUser(String username, String roomId) {
-        Room room = getChatRoom(roomId);
-
-        List<String> chatRoomUsers = room.getUsers();
-        room.setUserCount(room.getUserCount()-1);
-
-        if(room.getUserCount()==0){
-//            rooms.remove(room);
-        }
-
-        Iterator<String> iterator = chatRoomUsers.iterator();
-        while (iterator.hasNext()) {
-            String name = iterator.next();
-            if (name.equals(username)) {
-                iterator.remove();
-            }
-        }
-    }
-
-    public Room createChatRoom(String roomName){
-        Room room = Room.create(roomName);
-        rooms.add(room);
-        return room;
-    }
 }

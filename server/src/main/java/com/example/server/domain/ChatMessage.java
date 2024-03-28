@@ -1,6 +1,5 @@
 package com.example.server.domain;
 
-import com.example.server.dto.UserDto;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +10,7 @@ public class ChatMessage {
     private MessageType messageType;
     private String content;
     private String sender;
-    private String roomId;
+    private Long roomId;
     public enum MessageType{
         CHAT,
         JOIN,

@@ -2,7 +2,11 @@ package com.example.server.controller;
 
 import com.example.server.domain.ChatMessage;
 import com.example.server.domain.Room;
+import com.example.server.payload.RoomCreateRequest;
+import com.example.server.payload.RoomResponse;
 import com.example.server.repository.RoomRepository;
+import com.example.server.repository.RoomRepositoryy;
+import com.example.server.service.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +20,9 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 public class ChatController {
     @Autowired
-    private RoomRepository roomRepository;
-    @Autowired
     private SimpMessageSendingOperations messagingTemplate;
+    @Autowired
+    private ChatService chatService;
 
     @MessageMapping("/chat.sendMessage")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
@@ -36,25 +40,26 @@ public class ChatController {
         return chatMessage;
     }
 
-    @MessageMapping("/chat.addUser")
-    public ChatMessage addUser(@Payload ChatMessage chatMessage,
-                               SimpMessageHeaderAccessor headerAccessor) {
-        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
+//    @MessageMapping("/chat.addUser")
+//    public ChatMessage addUser(@Payload ChatMessage chatMessage,
+//                               SimpMessageHeaderAccessor headerAccessor) {
+//        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
+//
+//        String sender = roomRepository.addUser(chatMessage.getRoomId(), chatMessage.getSender());
+//
+//        headerAccessor.getSessionAttributes().put("username", sender);
+//        headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
+//
+//        ChatMessage response = new ChatMessage();
+//        response.setMessageType(ChatMessage.MessageType.JOIN);
+//        response.setSender(sender);
+//        response.setContent(sender + " 님이 입장하셨습니다.");
+//        response.setRoomId(chatMessage.getRoomId());
+//        messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getRoomId(), response);
+//
+//        return response;
+//    }
 
-        String sender = roomRepository.addUser(chatMessage.getRoomId(), chatMessage.getSender());
-
-        headerAccessor.getSessionAttributes().put("username", sender);
-        headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
-
-        ChatMessage response = new ChatMessage();
-        response.setMessageType(ChatMessage.MessageType.JOIN);
-        response.setSender(sender);
-        response.setContent(sender + " 님이 입장하셨습니다.");
-        response.setRoomId(chatMessage.getRoomId());
-        messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getRoomId(), response);
-
-        return response;
-    }
 
 //    @GetMapping("/chatrooms")
 //    public ResponseEntity<List<Room>> getChatRoomList(){
@@ -62,6 +67,7 @@ public class ChatController {
 //
 //        return new ResponseEntity<>(chatRooms, HttpStatus.OK);
 //    }
+
 
 //    @ResponseBody
 //    @GetMapping("/roomname")
@@ -71,15 +77,15 @@ public class ChatController {
 //    }
 
 
-//    @GetMapping("/room/info")
-//    public ResponseEntity<> returnRoominfo(@RequestBody String nickName){
-//        Room chatroom = chatRoomRepository.createChatRoom();
-//        return new ResponseEntity<>(chatroom, HttpStatus.OK);
-//    }
+    @GetMapping("/room/info")
+    public ResponseEntity<RoomResponse> returnRoominfo(@RequestBody String nickName){// 닉네임으로 게임 방 정보주기
+        RoomResponse roomResponse = chatService.getRoomInfo(nickName);
+        return new ResponseEntity<>(roomResponse, HttpStatus.OK);
+    }
 
     @PostMapping("/room/create")
-    public ResponseEntity<Room> createChatRoom(@RequestBody String roomName){
-        Room chatroom = roomRepository.createChatRoom(roomName);
-        return new ResponseEntity<>(chatroom, HttpStatus.OK);
+    public ResponseEntity<RoomResponse> createChatRoom(@RequestBody RoomCreateRequest roomCreateRequest){// 게임 방 생성
+        RoomResponse roomResponse = chatService.create(roomCreateRequest);
+        return new ResponseEntity<>(roomResponse, HttpStatus.OK);
     }
 }
