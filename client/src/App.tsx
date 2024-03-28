@@ -1,7 +1,7 @@
-import { useState } from "react";
-import "./App.css";
-import Button from "./component/button/Button";
-import Modal from "./component/modal/Modal";
+import { useState } from 'react';
+import './App.css';
+import Button from './components/button/Button';
+import Modal from './components/modal/Modal';
 
 function App() {
 
@@ -9,6 +9,7 @@ function App() {
   const modalOnClick = () => {
     setOpenModal(!openModal)
   }
+
   return (
     <div className="App">
       <div className="justify-center text-9xl mb-20 text-black dark:text-dark-text">WAG</div>
