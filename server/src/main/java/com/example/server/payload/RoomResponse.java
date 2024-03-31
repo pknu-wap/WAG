@@ -18,6 +18,7 @@ public class RoomResponse {
     private boolean isPrivateRoom;
     private int roomEnterCode; // 랜덤 4자리 생성
     private boolean gameStatus;
+    private int userCount;
     private List<UserDto> UserDtos;
 
     public static RoomResponse create(Room room, List<UserDto> userDtos){
@@ -26,6 +27,7 @@ public class RoomResponse {
                 room.isPrivateRoom(),
                 room.getRoomEnterCode(),
                 room.isGameStatus(),
+                room.getUserCount(),
                 userDtos
         );
     }
