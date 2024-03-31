@@ -1,4 +1,4 @@
-package com.example.server.payload;
+package com.example.server.payload.request;
 
 import lombok.Getter;
 import lombok.Setter;

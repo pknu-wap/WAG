@@ -1,18 +1,17 @@
 package com.example.server.controller;
 
-import com.example.server.payload.RoomCreateRequest;
-import com.example.server.payload.RoomEnterResponse;
-import com.example.server.payload.RoomResponse;
+import com.example.server.payload.request.RoomCreateRequest;
+import com.example.server.payload.response.RoomEnterResponse;
+import com.example.server.payload.response.RoomResponse;
 import com.example.server.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class RoomController {
-    private RoomService roomService;
+    private final RoomService roomService;
     @Autowired
     public RoomController(RoomService roomService){
         this.roomService = roomService;
