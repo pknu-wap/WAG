@@ -8,12 +8,14 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
     @Query("SELECT r FROM Room r WHERE r.roomEnterCode = :enterCode ")
-    int findByCode(@Param("enterCode") int enterCode);
-    @Query("SELECT r FROM Room r JOIN r.roomUsers ru WHERE ru.roomNickname = :nickName ")
-    Room findByNickName(@Param("nickName") String nickName);
-
+    Optional<Integer> findByCode(@Param("enterCode") int enterCode);
+    @Query("SELECT r FROM Room r WHERE r.roomEnterCode = :enterCode ")
+    Optional<Room> findRoomByCode(@Param("enterCode") int enterCode);
+    @Query("SELECT r FROM Room r WHERE r.gameStatus = false AND r.isPrivateRoom = false order by RAND() limit 1")
+    Optional<Room> findByRandom();
 }

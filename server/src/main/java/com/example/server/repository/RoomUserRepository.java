@@ -1,4 +1,5 @@
 package com.example.server.repository;
+import com.example.server.domain.Room;
 import com.example.server.domain.RoomUser;
 import com.example.server.dto.UserDto;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,5 +12,9 @@ import java.util.List;
 @Repository
 public interface RoomUserRepository extends JpaRepository<RoomUser, Long> {
     @Query("SELECT ru FROM RoomUser ru WHERE ru.roomNickname = :nickName ")
-    List<UserDto> findByNickName(@Param("nickName") String nickName);
+    List<RoomUser> findByNickName(@Param("nickName") String nickName);
+    @Query("SELECT ru.room FROM RoomUser ru WHERE ru.roomNickname = :nickName ")
+    Room findRoomIdByNickName(@Param("nickName") String nickName);
+    @Query("SELECT ru FROM RoomUser ru JOIN ru.room r WHERE r.id = :roomid ")
+    List<RoomUser> findByRoomId(@Param("roomid") Long roomid);
 }

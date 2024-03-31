@@ -1,5 +1,6 @@
 package com.example.server.controller;
 
+import com.example.server.domain.ChatGameMessage;
 import com.example.server.domain.ChatMessage;
 import com.example.server.domain.Room;
 import com.example.server.payload.RoomCreateRequest;
@@ -17,7 +18,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 public class ChatController {
     @Autowired
     private SimpMessageSendingOperations messagingTemplate;
@@ -33,59 +34,31 @@ public class ChatController {
     }
 
     @MessageMapping("/chat.sendGameMessage")
-    public ChatMessage sendGameMessage(@Payload ChatMessage chatMessage) {
-        String destination = "/topic/public/"+chatMessage.getRoomId();
+    public ChatGameMessage sendGameMessage(@Payload ChatGameMessage chatGameMessage) {
+        String destination = "/topic/public/"+chatGameMessage.getRoomId();
 
-        messagingTemplate.convertAndSend(destination, chatMessage);
-        return chatMessage;
+        messagingTemplate.convertAndSend(destination, chatGameMessage);
+        return chatGameMessage;
     }
 
-//    @MessageMapping("/chat.addUser")
-//    public ChatMessage addUser(@Payload ChatMessage chatMessage,
-//                               SimpMessageHeaderAccessor headerAccessor) {
-//        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
-//
-//        String sender = roomRepository.addUser(chatMessage.getRoomId(), chatMessage.getSender());
-//
-//        headerAccessor.getSessionAttributes().put("username", sender);
-//        headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
-//
-//        ChatMessage response = new ChatMessage();
-//        response.setMessageType(ChatMessage.MessageType.JOIN);
-//        response.setSender(sender);
-//        response.setContent(sender + " 님이 입장하셨습니다.");
-//        response.setRoomId(chatMessage.getRoomId());
-//        messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getRoomId(), response);
-//
-//        return response;
-//    }
+    @MessageMapping("/chat.addUser")
+    public ChatMessage addUser(@Payload ChatMessage chatMessage,
+                               SimpMessageHeaderAccessor headerAccessor) {
+        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
 
+        String sender = chatMessage.getSender();
 
-//    @GetMapping("/chatrooms")
-//    public ResponseEntity<List<Room>> getChatRoomList(){
-//        List<Room> chatRooms = chatRoomRepository.getChatRoomList();
-//
-//        return new ResponseEntity<>(chatRooms, HttpStatus.OK);
-//    }
+        headerAccessor.getSessionAttributes().put("username", sender);
+        headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
 
+        ChatMessage response = new ChatMessage();
+        response.setMessageType(ChatMessage.MessageType.JOIN);
+        response.setSender(sender);
+        response.setContent(sender + " 님이 입장하셨습니다.");
+        response.setRoomId(chatMessage.getRoomId());
+        messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getRoomId(), response);
 
-//    @ResponseBody
-//    @GetMapping("/roomname")
-//    public ResponseEntity<String> getRoomName(@RequestParam String roomId){
-//        String roomName = chatRoomRepository.getRoomName(roomId);
-//        return new ResponseEntity<>(roomName, HttpStatus.OK);
-//    }
-
-
-    @GetMapping("/room/info")
-    public ResponseEntity<RoomResponse> returnRoominfo(@RequestBody String nickName){// 닉네임으로 게임 방 정보주기
-        RoomResponse roomResponse = chatService.getRoomInfo(nickName);
-        return new ResponseEntity<>(roomResponse, HttpStatus.OK);
+        return response;
     }
 
-    @PostMapping("/room/create")
-    public ResponseEntity<RoomResponse> createChatRoom(@RequestBody RoomCreateRequest roomCreateRequest){// 게임 방 생성
-        RoomResponse roomResponse = chatService.create(roomCreateRequest);
-        return new ResponseEntity<>(roomResponse, HttpStatus.OK);
-    }
 }
