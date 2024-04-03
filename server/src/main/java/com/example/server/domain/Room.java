@@ -2,13 +2,10 @@ package com.example.server.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Getter @Setter
@@ -25,6 +22,7 @@ public class Room {
     private int roomEnterCode;
     @NotNull
     private int userCount;
+
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RoomUser> roomUsers;
