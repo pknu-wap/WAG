@@ -8,14 +8,18 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ChatController {
+    private final SimpMessageSendingOperations messagingTemplate;
+    private final ChatService chatService;
+
     @Autowired
-    private SimpMessageSendingOperations messagingTemplate;
-    @Autowired
-    private ChatService chatService;
+    public ChatController(SimpMessageSendingOperations messagingTemplate, ChatService chatService){
+        this.messagingTemplate = messagingTemplate;
+        this.chatService = chatService;
+    }
 
     @MessageMapping("/chat.sendMessage")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
@@ -26,9 +30,9 @@ public class ChatController {
     }
 
     @MessageMapping("/chat.sendGameMessage")
-    public ChatGameMessage sendGameMessage(@Payload ChatGameMessage chatGameMessage) {
-        String destination = "/topic/public/"+chatGameMessage.getRoomId();
-
+    public ChatGameMessage sendGameMessage(@Payload ChatMessage chatMessage) {
+        String destination = "/topic/public/"+chatMessage.getRoomId();
+        ChatGameMessage chatGameMessage = chatService.setGame(chatMessage);
         messagingTemplate.convertAndSend(destination, chatGameMessage);
         return chatGameMessage;
     }

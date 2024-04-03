@@ -23,9 +23,14 @@ public class Room {
     @NotNull
     private int userCount;
 
+    private int cycle;
+    private int currentOrder;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RoomUser> roomUsers;
+
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<GameOrder> gameOrders;
 
 //    public static Room create(RoomCreateRequest roomCreateRequest){
 //        return new Room(
