@@ -3,8 +3,6 @@ package com.example.server.domain;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter @Setter
 public class ChatMessage {
     private MessageType messageType;
@@ -14,6 +12,11 @@ public class ChatMessage {
     public enum MessageType{
         CHAT,
         JOIN,
-        LEAVE
+        LEAVE,
+        ASK,
+        ANSWER,
+        CORRECT,
+        START,
+        END
     }
 }

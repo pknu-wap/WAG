@@ -5,10 +5,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+
 @Getter
 @Setter
 public class ChatGameMessage {
-    private ChatMessage.MessageType messageType;
+    private MessageType messageType;
     private String content;
     private String sender;
     private Long roomId;
@@ -18,6 +19,8 @@ public class ChatGameMessage {
     public enum MessageType{
         ASK,
         ANSWER,
-        CORRECT
+        CORRECT,
+        START,
+        END
     }
 }

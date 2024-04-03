@@ -8,20 +8,13 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "roomUser")
-public class RoomUser {
+@Table(name = "answerList")
+public class AnswerList {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Room room;
     @NotNull
-    private boolean isCaptain;
+    private String name;
     @NotNull
-    private String roomNickname;
-
-    private String profileImage;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    private GameOrder gameOrder;
+    private String answerGroup;
 }

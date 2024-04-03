@@ -21,7 +21,7 @@ public class ChatGptService {
 
     private static RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${gpt.api.key}")
+//    @Value("${gpt.api.key}")
     private String API_KEY;
 
     public HttpEntity<ChatGptRequestDto> buildHttpEntity(ChatGptRequestDto requestDto) {
