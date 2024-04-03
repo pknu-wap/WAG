@@ -6,6 +6,7 @@ import com.example.server.dto.gptDto.ChatGptRequestDto;
 import com.example.server.dto.gptDto.ChatGptResponseDto;
 import com.example.server.dto.gptDto.GptMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -20,10 +21,13 @@ public class ChatGptService {
 
     private static RestTemplate restTemplate = new RestTemplate();
 
+    @Value("${gpt.api.key}")
+    private String API_KEY;
+
     public HttpEntity<ChatGptRequestDto> buildHttpEntity(ChatGptRequestDto requestDto) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(ChatGptConfig.MEDIA_TYPE));
-        headers.add(ChatGptConfig.AUTHORIZATION, ChatGptConfig.BEARER + AppProperties.API_KEY);
+        headers.add(ChatGptConfig.AUTHORIZATION, ChatGptConfig.BEARER + API_KEY);
         return new HttpEntity<>(requestDto, headers);
     }
 
