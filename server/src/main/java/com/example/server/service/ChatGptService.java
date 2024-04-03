@@ -1,5 +1,6 @@
 package com.example.server.service;
 
+import com.example.server.config.AppProperties;
 import com.example.server.config.ChatGptConfig;
 import com.example.server.dto.gptDto.ChatGptRequestDto;
 import com.example.server.dto.gptDto.ChatGptResponseDto;
@@ -22,7 +23,7 @@ public class ChatGptService {
     public HttpEntity<ChatGptRequestDto> buildHttpEntity(ChatGptRequestDto requestDto) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(ChatGptConfig.MEDIA_TYPE));
-        headers.add(ChatGptConfig.AUTHORIZATION, ChatGptConfig.BEARER + ChatGptConfig.API_KEY);
+        headers.add(ChatGptConfig.AUTHORIZATION, ChatGptConfig.BEARER + AppProperties.API_KEY);
         return new HttpEntity<>(requestDto, headers);
     }
 
