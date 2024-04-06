@@ -28,6 +28,17 @@ public class OAuth2UserInfoFactory {
                  return new GithubOAuth2UserInfo(setAttributesGithubEmail(attributes,oAuth2UserRequest.getAccessToken().getTokenValue()));
             }
             return new GithubOAuth2UserInfo(attributes);
+        } else if (registrationId.equalsIgnoreCase(AuthProvider.kakao.toString())) {
+            Map<String, Object> kakaoUserInfo = new HashMap<>();
+            kakaoUserInfo.put("id", String.valueOf(attributes.get("id")));
+            LinkedHashMap<String, Object> temporaryProperties = (LinkedHashMap<String, Object>) attributes.get("properties");
+            kakaoUserInfo.put("nickname", temporaryProperties.get("nickname"));
+            kakaoUserInfo.put("picture", temporaryProperties.get("profile_image"));
+            LinkedHashMap<String, Object> temporaryProperties2 = (LinkedHashMap<String, Object>) attributes.get("kakao_account");
+            kakaoUserInfo.put("email", temporaryProperties2.get("email"));
+
+
+            return new KakaoOAuth2UserInfo(kakaoUserInfo);
         } else {
             throw new OAuth2AuthenticationProcessingException("Sorry! Login with " + registrationId + " is not supported yet.");
         }
