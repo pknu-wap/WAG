@@ -26,7 +26,7 @@ public class NickNameService {
         if (userPrincipal == null)  return null;
 
         Optional<User> user = userRepository.findById(userPrincipal.getId());
-        return user.get().getName();
+        return user.get().getNickName();
     }
 
     public NickNameResponse settingNickName(String nickName){

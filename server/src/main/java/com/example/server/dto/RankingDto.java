@@ -14,7 +14,7 @@ public class RankingDto {
 
     private List<Ranking> ranking;
     private boolean isLogin;
-    private String nickname;
+    private String nickName;
     private Integer my_ranking;
     private String imageUrl;
 
