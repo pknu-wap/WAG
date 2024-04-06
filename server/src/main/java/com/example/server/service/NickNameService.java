@@ -23,6 +23,8 @@ public class NickNameService {
     }
 
     public String getNickName(UserPrincipal userPrincipal){
+        if (userPrincipal == null)  return null;
+
         Optional<User> user = userRepository.findById(userPrincipal.getId());
         return user.get().getName();
     }
