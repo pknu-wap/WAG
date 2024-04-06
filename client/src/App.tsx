@@ -1,16 +1,16 @@
-import "./App.css";
 import { Route, Routes } from "react-router-dom";
 import GamePlaying from "./GamePlaying/GamePlaying";
 import MainPage from "./main/MainPage";
+import FullLayout from "./components/layout/FullLayout";
 
 function App() {
   return (
-    <div className="App">
+    <FullLayout>
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/GamePlaying" element={<GamePlaying />} />
       </Routes>
-    </div>
+    </FullLayout>
   );
 }
 
