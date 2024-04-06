@@ -9,6 +9,7 @@
 편리하고 빠르게 즐길 수 있는 웹 미니게임을 제작하는 WAG 입니다!
 <br>
 <br>
+<br>
 
 ---
 ## Stack
@@ -20,6 +21,18 @@
 
 ### Coop&Deploy
 <img src="https://img.shields.io/badge/notion-000000?style=for-the-badge&logo=notion&logoColor=white"> <img src="https://img.shields.io/badge/figma-E7157B?style=for-the-badge&logo=figma&logoColor=white"> <img src="https://img.shields.io/badge/github-000000?style=for-the-badge&logo=github&logoColor=white">
+
+<br>
+
+---
+
+## Contributor
+|  <img src="https://avatars.githubusercontent.com/u/112786665?v=4" alt="3_pano" width="120" height="120">  | <img src="https://avatars.githubusercontent.com/u/80705329?v=4" alt="3_jumo" width="120" height="120"> | <img src="https://avatars.githubusercontent.com/u/111286262?v=4" alt="3_simba" width="120" height="120">  | <img src="https://avatars.githubusercontent.com/u/35947667?v=4" alt="3_pano" width="120" height="120"> | <img src="https://avatars.githubusercontent.com/u/130421104?v=4" alt="3_miki" width="120" height="120"> |
+| :------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: |
+|  [김준서](https://github.com/oesnuj)   |    [하준서](https://github.com/dev-junseo)     |    [김종경](https://github.com/JONG-KYEONG)   |     [장홍준](https://github.com/wkdghdwns199)   |      [함규빈](https://github.com/PororoAndFriends)      |
+| Front-End |  Front-End |  Back-End  |  Back-End |  Back-End
+
+<br>
 
 ---
 
@@ -76,9 +89,3 @@ ex) 베이스 브랜치에 포함되기 위한 코드는 모두 정상적으로 
 ### To reviewer
 ex) 여기에서 이 부분 잘 모르겠는데 한번 봐주실 수 있나요?
 ```
-
-## Contributor
-|  <img src="https://avatars.githubusercontent.com/u/112786665?v=4" alt="3_pano" width="120" height="120">  | <img src="https://avatars.githubusercontent.com/u/80705329?v=4" alt="3_jumo" width="120" height="120"> | <img src="https://avatars.githubusercontent.com/u/111286262?v=4" alt="3_simba" width="120" height="120">  | <img src="https://avatars.githubusercontent.com/u/35947667?v=4" alt="3_pano" width="120" height="120"> | <img src="https://avatars.githubusercontent.com/u/130421104?v=4" alt="3_miki" width="120" height="120"> |
-| :------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: |
-|  [김준서](https://github.com/oesnuj)   |    [하준서](https://github.com/dev-junseo)     |    [김종경](https://github.com/JONG-KYEONG)   |     [장홍준](https://github.com/wkdghdwns199)   |      [함규빈](https://github.com/PororoAndFriends)      |
-| Front-End |  Front-End |  Back-End  |  Back-End |  Back-End
