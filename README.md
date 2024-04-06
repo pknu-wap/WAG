@@ -7,6 +7,8 @@
 ## Introduction  
 
 편리하고 빠르게 즐길 수 있는 웹 미니게임을 제작하는 WAG 입니다!
+<br>
+<br>
 
 ---
 ## Stack
@@ -21,7 +23,7 @@
 
 ---
 
-### Git Flow
+## Git Flow
 기본적으로 Git Flow 전략을 이용합니다. 작업 시작 시 선행되어야 할 작업은 다음과 같습니다.
 
 ```gradle
@@ -74,3 +76,9 @@ ex) 베이스 브랜치에 포함되기 위한 코드는 모두 정상적으로 
 ### To reviewer
 ex) 여기에서 이 부분 잘 모르겠는데 한번 봐주실 수 있나요?
 ```
+
+## Contributor
+|  <img src="https://avatars.githubusercontent.com/u/112786665?v=4" alt="3_pano" width="160" height="160">  | <img src="https://avatars.githubusercontent.com/u/80705329?v=4" alt="3_jumo" width="160" height="160"> | <img src="https://avatars.githubusercontent.com/u/111286262?v=4" alt="3_simba" width="160" height="160">  | <img src="https://avatars.githubusercontent.com/u/35947667?v=4" alt="3_pano" width="160" height="160"> | <img src="https://avatars.githubusercontent.com/u/130421104?v=4" alt="3_miki" width="160" height="160"> |
+| :------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: |
+|  [김준서](https://github.com/oesnuj)   |    [하준서](https://github.com/dev-junseo)     |    [김종경](https://github.com/JONG-KYEONG)   |     [장홍준](https://github.com/wkdghdwns199)   |      [함규빈](https://github.com/PororoAndFriends)      |
+| Front-End |  Front-End |  Back-End  |  Back-End |  Back-End
