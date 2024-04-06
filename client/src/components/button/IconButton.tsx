@@ -18,7 +18,7 @@ const IconButton = ({
   children,
 }: ButtonProps) => {
   let combinedClassName =
-    "p-2 px-3 rounded-full flex justify-center items-center bg-transparent shadow-xl hover:shadow-sm dark:shadow-xl dark:bg-transparent"; // 이 변수에 className을 중첩시킨다.
+    "p-2 px-3 rounded-full flex justify-center items-center text-light-text dark:text-dark-text bg-transparent shadow-xl hover:shadow-sm dark:shadow-xl dark:bg-transparent"; // 이 변수에 className을 중첩시킨다.
 
   switch (size) {
     case "sm": {
