@@ -2,7 +2,7 @@
 
 # WAG - Web Appends Game
 
-![WAG_LOGO_Dark](https://github.com/pknu-wap/WAG/assets/112786665/561b96be-7c74-4348-adef-c5a0e5a4941a)
+![WAG_LOGO_Dark](https://github.com/pknu-wap/WAG/assets/112786665/e0d26e4f-16e4-4a81-adaf-adb5f77e86c4)
 
 ## Introduction  
 
