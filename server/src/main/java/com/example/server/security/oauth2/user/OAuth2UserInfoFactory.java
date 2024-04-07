@@ -28,20 +28,36 @@ public class OAuth2UserInfoFactory {
                  return new GithubOAuth2UserInfo(setAttributesGithubEmail(attributes,oAuth2UserRequest.getAccessToken().getTokenValue()));
             }
             return new GithubOAuth2UserInfo(attributes);
-        } else if (registrationId.equalsIgnoreCase(AuthProvider.kakao.toString())) {
-            Map<String, Object> kakaoUserInfo = new HashMap<>();
-            kakaoUserInfo.put("id", String.valueOf(attributes.get("id")));
-            LinkedHashMap<String, Object> temporaryProperties = (LinkedHashMap<String, Object>) attributes.get("properties");
-            kakaoUserInfo.put("nickname", temporaryProperties.get("nickname"));
-            kakaoUserInfo.put("picture", temporaryProperties.get("profile_image"));
-            LinkedHashMap<String, Object> temporaryProperties2 = (LinkedHashMap<String, Object>) attributes.get("kakao_account");
-            kakaoUserInfo.put("email", temporaryProperties2.get("email"));
-
-
-            return new KakaoOAuth2UserInfo(kakaoUserInfo);
+        }  else if (registrationId.equalsIgnoreCase(AuthProvider.kakao.toString())) {
+            return makeKakaoUserInfo(attributes);
+        }  else if (registrationId.equalsIgnoreCase(AuthProvider.naver.toString())) {
+            return makeNaverUserInfo(attributes);
         } else {
             throw new OAuth2AuthenticationProcessingException("Sorry! Login with " + registrationId + " is not supported yet.");
         }
+    }
+
+    public static OAuth2UserInfo makeKakaoUserInfo(Map<String, Object> attributes){
+        Map<String, Object> kakaoUserInfo = new HashMap<>();
+        kakaoUserInfo.put("id", String.valueOf(attributes.get("id")));
+        LinkedHashMap<String, Object> temporaryProperties = (LinkedHashMap<String, Object>) attributes.get("properties");
+        kakaoUserInfo.put("nickname", temporaryProperties.get("nickname"));
+        kakaoUserInfo.put("picture", temporaryProperties.get("profile_image"));
+        LinkedHashMap<String, Object> temporaryProperties2 = (LinkedHashMap<String, Object>) attributes.get("kakao_account");
+        kakaoUserInfo.put("email", temporaryProperties2.get("email"));
+
+        return new KakaoOAuth2UserInfo(kakaoUserInfo);
+    }
+
+    public static OAuth2UserInfo makeNaverUserInfo(Map<String, Object> attributes){
+        Map<String, Object> naverUserInfo = new HashMap<>();
+        LinkedHashMap<String, Object> temporaryProperties = (LinkedHashMap<String, Object>) attributes.get("response");
+        naverUserInfo.put("id", String.valueOf(temporaryProperties.get("id")));
+        naverUserInfo.put("nickname", temporaryProperties.get("nickname"));
+        naverUserInfo.put("picture", temporaryProperties.get("profile_image"));
+        naverUserInfo.put("email", temporaryProperties.get("email"));
+
+        return new NaverOAuth2UserInfo(naverUserInfo);
     }
 
     public static Map<String, Object> setAttributesGithubEmail(Map<String, Object> attributes, String accessToken){
