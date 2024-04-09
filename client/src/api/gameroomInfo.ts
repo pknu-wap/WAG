@@ -4,13 +4,17 @@ import { IGetRoomInfo } from "../types/dto";
 
 // 방 정보 가져오기
 const GetRoomInfoApi = async (params: IGetRoomInfo) => {
-    const { data } = await defaultInstance.get('/room/info', { params });
+  const { data } = await defaultInstance.get("/room/info", { params });
 
-    return data;
-}
+  return data;
+};
 
 export const useGetRoomInfoQuery = (params: IGetRoomInfo) => {
-    const { isLoading, error, data } = useQuery(['roomInfo', params], () => GetRoomInfoApi(params));
+  const { isLoading, error, data } = useQuery(["roomInfo", params], () =>
+    GetRoomInfoApi(params)
+  );
 
-    return { isLoading, error, data };
-}
+  return { isLoading, error, data };
+};
+
+// 참여코드로 입장
