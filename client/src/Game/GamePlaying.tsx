@@ -74,7 +74,7 @@ const GamePlaying = () => {
             className="items-center bg-light-btn dark:bg-dark-btn relative"
           >
             <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-12 absolute">
-              ???
+              ? ? ?
             </div>
             <FontAwesomeIcon icon={faUser} size="xl" />
           </IconButton>
