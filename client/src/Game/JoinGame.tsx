@@ -11,7 +11,7 @@ function JoinGame() {
   const [disabled, setDisabled] = useState<boolean>(false);
   const [inputNickname, setInputNickname] = useState("");
   const { data: nicknameData } = useGetNicknamePossibleQuery({
-    nickName: inputNickname,
+    nickname: inputNickname,
   });
   const [checkNickname, setCheckNickname] = useState<INicknamePossible>();
   const modalOnClick = () => {
