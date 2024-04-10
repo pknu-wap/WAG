@@ -7,18 +7,22 @@ import { Provider } from "react-redux";
 import store from "./modules";
 import Header from "./components/layout/Header";
 import { BrowserRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "react-query";
 
+const queryClient = new QueryClient()
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <BrowserRouter>
-        <Header />
-        <App />
-      </BrowserRouter>
-    </Provider>
+    <QueryClientProvider client={queryClient}>
+      <Provider store={store}>
+        <BrowserRouter>
+          <Header />
+          <App />
+        </BrowserRouter>
+      </Provider>
+    </QueryClientProvider>
   </React.StrictMode>
 );
 

@@ -2,8 +2,7 @@ import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleDarkMode } from '../modules/darkSlice';
 import { RootState } from '../modules';
-
-export type useDark = [boolean, (text: string) => void];
+import { useDark } from '../types/common';
 
 const useDarkMode = (): useDark => {
     const isDark = useSelector((state: RootState) => state.dark.isDark);
