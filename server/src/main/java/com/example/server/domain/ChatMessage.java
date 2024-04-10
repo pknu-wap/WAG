@@ -17,6 +17,5 @@ public class ChatMessage {
         ANSWER,
         CORRECT,
         START,
-        END
     }
 }

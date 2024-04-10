@@ -16,7 +16,6 @@ public class GameUserDto {
     private String profileImage;
     @Max(3)
     private int penalty;
-    private String answerName;
     private boolean isMyTurn;
     private boolean isNextTurn;
     private boolean haveAnswerChance;
@@ -28,7 +27,6 @@ public class GameUserDto {
                 roomUser.getRoomNickname(),
                 roomUser.getProfileImage(),
                 gameOrder.getPenalty(),
-                gameOrder.getAnswerName(),
                 gameOrder.isNowTurn(),
                 gameOrder.isNextTurn(),
                 gameOrder.isHaveAnswerChance(),
