@@ -22,4 +22,6 @@ public interface RoomUserRepository extends JpaRepository<RoomUser, Long> {
     List<RoomUser> findRandomByRoomId(@Param("roomid") Long roomid);
     @Query("SELECT ru FROM RoomUser ru WHERE ru.roomNickname = :nickName ")
     Optional<RoomUser> hasNickName(@Param("nickName") String nickName);
+    @Query("DELETE FROM RoomUser ru WHERE ru.roomNickname = :nickname ")
+    Void deleteRoomUserByNickname(@Param("nickname") String nickname);
 }
