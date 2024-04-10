@@ -6,7 +6,7 @@ export interface INicknamePossible {
 
 // 닉네임 get
 export interface IGetNickname {
-    nickName: string;
+    nickname: string;
 }
 
 // 방 정보 get
