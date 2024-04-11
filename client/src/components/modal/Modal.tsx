@@ -1,29 +1,60 @@
-import Button from "../button/Button"
+import React from "react";
+import ReactModal from "react-modal";
+import { useRecoilState } from "recoil";
+import { modalState } from "../../recoil/modal";
 
-interface onClickProps {
-    onOpenModal: () => void;
+const customModalStyles: ReactModal.Styles = {
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    width: "100%",
+    height: "auto",
+    zIndex: 10,
+    position: "fixed",
+    top: 0,
+    left: 0,
+  },
+  content: {
+    width: "50%",
+    maxWidth: "650px",
+    height: "auto",
+    minHeight: "310px",
+    maxHeight: "400px",
+    zIndex: 150,
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    borderRadius: "10px",
+    boxShadow: "2px 2px 2px rgba(0, 0, 0, 0.25)",
+    backgroundColor: "#FFE5E5",
+    justifyContent: "center",
+    overflow: "auto",
+  },
+};
+
+interface ModalProps {
+  children: React.ReactNode;
+  onRequestClose: () => void;
 }
 
-const Modal = ({ onOpenModal }: onClickProps) => {
-    return (
-        <div className="h-screen w-full fixed left-0 top-0 flex justify-center item-center bg-black bg-opacity-70 text-center">
-            <div className="bg-white rounded w-10/12 md:w-1/3">
-                <div className="border-b px-4 py-2 flex justify-between items-center">
-                    {/* 모달 이름 */}
-                    <h3 className="font-extrabold">Warning</h3>
-                </div>
-                <div className="text-sm px-4 py-8">
-                    {/* 모달 주 컨텐츠 */}
-                    {"이름을 지어주세요(예시)"}
-                </div>
-                <div className="flex justify-end items-center-w-100 border-t p-3">
-                    {/* 모달 액션 */}
-                    <Button onClick={onOpenModal} size="md">확인</Button>
-                </div>
-            </div>
+const Modal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
+  const [isOpen] = useRecoilState(modalState);
 
-        </div>
-    )
-}
+  // 모달을 닫을 때 onRequestClose 함수 호출
+  const closeModal = () => {
+    onRequestClose();
+  };
 
-export default Modal
+  return (
+    <ReactModal
+      isOpen={isOpen}
+      style={customModalStyles} // 스타일 적용
+      onRequestClose={closeModal} // 모달 창 닫기 요청을 받을 때 호출
+      shouldCloseOnOverlayClick={true} // 외부 클릭으로 모달 닫기 활성화
+    >
+      <div className="modal-content">{children}</div>
+    </ReactModal>
+  );
+};
+
+export default Modal;

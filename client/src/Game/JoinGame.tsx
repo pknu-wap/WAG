@@ -3,26 +3,20 @@ import FullLayout from "../components/layout/FullLayout";
 import Button from "../components/button/Button";
 import { useGetNicknamePossibleQuery } from "../api/joinRoom";
 import { INicknamePossible } from "../types/dto";
-import Modal from "../components/modal/Modal";
 
 // 방장이 아닌 초대된 사람들 참가 페이지(비공개방)
 function JoinGame() {
-  const [openModal, setOpenModal] = useState(false);
   const [disabled, setDisabled] = useState<boolean>(false);
   const [inputNickname, setInputNickname] = useState("");
   const { data: nicknameData } = useGetNicknamePossibleQuery({
     nickname: inputNickname,
   });
   const [checkNickname, setCheckNickname] = useState<INicknamePossible>();
-  const modalOnClick = () => {
-    setOpenModal(!openModal);
-  };
+
   const CheckNicknameOnClick = () => {
     if (!checkNickname?.isPossible) {
-      modalOnClick();
       setDisabled(true);
     } else {
-      modalOnClick();
       setDisabled(false);
     }
   };
@@ -74,8 +68,6 @@ function JoinGame() {
           )}
         </div>
       </div>
-
-      {openModal && <Modal onOpenModal={modalOnClick} />}
     </FullLayout>
   );
 }

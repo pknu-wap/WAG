@@ -8,8 +8,9 @@ import store from "./modules";
 import Header from "./components/layout/Header";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { RecoilRoot } from "recoil";
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
@@ -17,10 +18,12 @@ root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
-        <BrowserRouter>
-          <Header />
-          <App />
-        </BrowserRouter>
+        <RecoilRoot>
+          <BrowserRouter>
+            <Header />
+            <App />
+          </BrowserRouter>
+        </RecoilRoot>
       </Provider>
     </QueryClientProvider>
   </React.StrictMode>
