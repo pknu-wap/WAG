@@ -52,7 +52,8 @@
 ### Branch Convention
 
 ```yaml
-- [develop] : 최종 배포
+- [release] : 현재 배포 중인 브랜치
+- [develop] : 배포되기 직전 테스트 단계의 브랜치
 - [feature] : 기능 추가
 - [fix] : 에러 수정, 버그 수정
 - [docs] : README, 문서
