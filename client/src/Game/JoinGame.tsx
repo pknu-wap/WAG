@@ -1,30 +1,18 @@
 import { useEffect, useState } from "react";
 import FullLayout from "../components/layout/FullLayout";
 import Button from "../components/button/Button";
-import { useGetNicknamePossibleQuery } from "../api/joinRoom";
-import { INicknamePossible } from "../types/dto";
 
 // 방장이 아닌 초대된 사람들 참가 페이지(비공개방)
 function JoinGame() {
-  const [disabled, setDisabled] = useState<boolean>(false);
-  const [inputNickname, setInputNickname] = useState("");
-  const { data: nicknameData } = useGetNicknamePossibleQuery({
-    nickname: inputNickname,
-  });
-  const [checkNickname, setCheckNickname] = useState<INicknamePossible>();
+  const [disabled,] = useState<boolean>(false);
+  const [, setInputNickname] = useState("")
 
-  const CheckNicknameOnClick = () => {
-    if (!checkNickname?.isPossible) {
-      setDisabled(true);
-    } else {
-      setDisabled(false);
-    }
-  };
+
+
 
   useEffect(() => {
-    setCheckNickname(nicknameData);
-    setDisabled(disabled);
-  }, [nicknameData, disabled]);
+
+  }, []);
 
   return (
     <FullLayout>
@@ -41,7 +29,7 @@ function JoinGame() {
                 setInputNickname(e.target.value);
               }}
             />
-            <Button className="" size="sm" onClick={CheckNicknameOnClick}>
+            <Button className="" size="sm" >
               중복 확인
             </Button>
           </div>
@@ -68,6 +56,7 @@ function JoinGame() {
           )}
         </div>
       </div>
+
     </FullLayout>
   );
 }

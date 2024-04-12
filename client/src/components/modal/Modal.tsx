@@ -27,7 +27,6 @@ const customModalStyles: ReactModal.Styles = {
     borderRadius: "10px",
     boxShadow: "2px 2px 2px rgba(0, 0, 0, 0.25)",
     backgroundColor: "#FFE5E5",
-    justifyContent: "center",
     overflow: "auto",
   },
 };

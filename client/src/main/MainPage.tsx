@@ -8,6 +8,8 @@ import { modalState } from "../recoil/modal";
 import Modal from "../components/modal/Modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
+import axios from "axios";
+import { IGetRoomIdCode } from "../types/dto";
 
 type Props = {
   children?: React.ReactNode;
@@ -22,6 +24,7 @@ const connector = connect(
 
 function MainPage({ dark }: ComponentProps) {
   const [theme, setTheme] = useState(localStorage.theme);
+  const [enterCode, setEnterCode] = useState<number>();
   const [, setIsOpen] = useRecoilState(modalState);
   const openModal = () => {
     setIsOpen(true);
@@ -30,7 +33,37 @@ function MainPage({ dark }: ComponentProps) {
   const closeModal = () => {
     setIsOpen(false);
   };
-  const [disabled] = useState<boolean>(true);
+  const [disabled, setDisabled] = useState<boolean>(true);
+  // const { data: enterCodeData } = useGetRoomIdCodeQuery({
+  //   enterCode: enterCode,
+  // })
+  // const [roomIdCode, setRoomIdCode] = useState<IGetRoomIdCode>()
+
+  const getRoomIdCode = async (): Promise<IGetRoomIdCode> => {
+    try {
+      const response = await axios.get<IGetRoomIdCode>("http://182.215.121.80/roomId/code", {
+        params: {
+          enterCode: enterCode
+        }
+      });
+      return response.data
+    } catch (e) {
+      console.error(e)
+      throw e;
+    }
+  }
+  const buttonCheckHandler = () => {
+    const roomIdFromCode = getRoomIdCode();
+    console.log(roomIdFromCode);
+  }
+
+  useEffect(() => {
+    if (enterCode === undefined || Number.isNaN(enterCode)) {
+      setDisabled(true)
+    } else {
+      setDisabled(false)
+    }
+  }, [enterCode])
 
   useEffect(() => {
     if (dark) {
@@ -39,6 +72,10 @@ function MainPage({ dark }: ComponentProps) {
       setTheme("light");
     }
   }, [dark]);
+
+  // useEffect(() => {
+  //   setRoomIdCode(enterCodeData)
+  // }, [enterCodeData])
 
   return (
     <FullLayout>
@@ -55,34 +92,36 @@ function MainPage({ dark }: ComponentProps) {
         <Button size="lg">방 참가</Button>
       </div>
       <Modal onRequestClose={closeModal}>
-        <div className="flex flex-col justify-between items-end">
-          <div>
-            <div className="my-5 flex flex-row justify-between items-center">
-              <div className="text-4xl">JOIN</div>
-              <button onClick={closeModal}>
-                <FontAwesomeIcon icon={faX} />
-              </button>
-            </div>
-
-            <input
-              className="w-3/4 h-12 mb-5 rounded shadow-md pl-5 text-[#000000]"
-              type="text"
-              required
-              placeholder={"입장코드를 입력해주세요"}
-            ></input>
-            <Button className="" size="sm">
-              중복 확인
-            </Button>
+        <div className="flex flex-col justify-between">
+          <div className="my-5 flex flex-row justify-between items-center">
+            <div className="text-4xl">JOIN</div>
+            <button onClick={closeModal}>
+              <FontAwesomeIcon icon={faX} />
+            </button>
           </div>
+
+          <input
+            className="w-3/4 h-12 mb-5 rounded shadow-md pl-5 text-[#000000]"
+            type="error"
+            required
+            placeholder={"입장코드를 숫자로 입력해주세요"}
+            onChange={(e) => {
+              const value = e.target.value;
+              const regex = /^[0-9]*$/; // 숫자만 허용하는 정규식
+              if (regex.test(value) || value === '') {
+                setEnterCode(parseInt(value, 10));
+              }
+            }}
+          ></input>
 
           <div className="m-auto flex justify-end items-end">
             {!disabled ? (
-              <Button disabled={disabled} size="lg">
+              <Button disabled={disabled} size="lg" onClick={buttonCheckHandler}>
                 드가자
               </Button>
             ) : (
               <Button
-                className="bg-light-btn_disabled dark:bg-light-btn_disabled hover:shadow-sm hover:bg-light-btn_disabled active:bg-light-btn_disabled dark:hover:bg-light-btn_disabled dark:active:bg-light-btn_disabled"
+                className=""
                 disabled={disabled}
                 size="lg"
               >
