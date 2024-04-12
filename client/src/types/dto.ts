@@ -9,6 +9,14 @@ export interface IGetNickname {
     nickname: string;
 }
 
+// 코드로 방 입장
+export interface IGetRoomIdCodeParams {
+    enterCode?: number;
+}
+export interface IGetRoomIdCode {
+    roomId: number;
+}
+
 // 방 정보 get
 export interface IGetRoomInfo {
     nickname: string;
