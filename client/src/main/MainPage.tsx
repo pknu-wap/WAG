@@ -38,32 +38,38 @@ function MainPage({ dark }: ComponentProps) {
   //   enterCode: enterCode,
   // })
   // const [roomIdCode, setRoomIdCode] = useState<IGetRoomIdCode>()
+  // useEffect(() => {
+  //   setRoomIdCode(enterCodeData)
+  // }, [enterCodeData])
 
   const getRoomIdCode = async (): Promise<IGetRoomIdCode> => {
     try {
-      const response = await axios.get<IGetRoomIdCode>("http://182.215.121.80/roomId/code", {
-        params: {
-          enterCode: enterCode
+      const response = await axios.get<IGetRoomIdCode>(
+        "http://182.215.121.80/roomId/code",
+        {
+          params: {
+            enterCode: enterCode,
+          },
         }
-      });
-      return response.data
+      );
+      return response.data;
     } catch (e) {
-      console.error(e)
+      console.error(e);
       throw e;
     }
-  }
+  };
   const buttonCheckHandler = () => {
     const roomIdFromCode = getRoomIdCode();
     console.log(roomIdFromCode);
-  }
+  };
 
   useEffect(() => {
     if (enterCode === undefined || Number.isNaN(enterCode)) {
-      setDisabled(true)
+      setDisabled(true);
     } else {
-      setDisabled(false)
+      setDisabled(false);
     }
-  }, [enterCode])
+  }, [enterCode]);
 
   useEffect(() => {
     if (dark) {
@@ -72,10 +78,6 @@ function MainPage({ dark }: ComponentProps) {
       setTheme("light");
     }
   }, [dark]);
-
-  // useEffect(() => {
-  //   setRoomIdCode(enterCodeData)
-  // }, [enterCodeData])
 
   return (
     <FullLayout>
@@ -108,7 +110,7 @@ function MainPage({ dark }: ComponentProps) {
             onChange={(e) => {
               const value = e.target.value;
               const regex = /^[0-9]*$/; // 숫자만 허용하는 정규식
-              if (regex.test(value) || value === '') {
+              if (regex.test(value) || value === "") {
                 setEnterCode(parseInt(value, 10));
               }
             }}
@@ -116,15 +118,15 @@ function MainPage({ dark }: ComponentProps) {
 
           <div className="m-auto flex justify-end items-end">
             {!disabled ? (
-              <Button disabled={disabled} size="lg" onClick={buttonCheckHandler}>
+              <Button
+                disabled={disabled}
+                size="lg"
+                onClick={buttonCheckHandler}
+              >
                 드가자
               </Button>
             ) : (
-              <Button
-                className=""
-                disabled={disabled}
-                size="lg"
-              >
+              <Button className="" disabled={disabled} size="lg">
                 아직 멀었다
               </Button>
             )}
