@@ -10,6 +10,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { IGetRoomIdCode } from "../types/dto";
+import { io } from "socket.io-client";
+
 
 type Props = {
   children?: React.ReactNode;
@@ -60,6 +62,7 @@ function MainPage({ dark }: ComponentProps) {
   };
   const buttonCheckHandler = () => {
     const roomIdFromCode = getRoomIdCode();
+    const socket = io(`http://182.215.121.80/topic/public/${roomIdFromCode}`); //해당 방으로 소켓 연결
     console.log(roomIdFromCode);
   };
 
