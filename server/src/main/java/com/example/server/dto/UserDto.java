@@ -15,4 +15,11 @@ public class UserDto {
     private boolean isCaptain;
     private String roomNickname;
     private String profileImage;
+    public static List<UserDto> makeUserDtos(List<RoomUser> roomUsers){ // UserDtos 생성 메소드
+        List<UserDto> userDtos = new ArrayList<>();
+        for(RoomUser roomUser : roomUsers){
+            userDtos.add(new UserDto(roomUser.isCaptain(), roomUser.getRoomNickname(), roomUser.getProfileImage()));
+        }
+        return userDtos;
+    }
 }

@@ -1,6 +1,11 @@
 package com.example.server.controller;
 
-import com.example.server.domain.ChatMessage;
+import com.example.server.domain.Room;
+import com.example.server.domain.RoomUser;
+import com.example.server.dto.ChatMessage;
+import com.example.server.dto.ChatRoomInfoMessage;
+import com.example.server.dto.UserDto;
+import com.example.server.payload.response.RoomResponse;
 import com.example.server.repository.RoomRepository;
 import com.example.server.repository.RoomUserRepository;
 import org.slf4j.Logger;
@@ -13,16 +18,21 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
+import java.util.List;
+
 @Component
 public class WebSocketEventListener {
     private static final Logger logger = LoggerFactory.getLogger(WebSocketEventListener.class);
 
     private final SimpMessageSendingOperations messagingTemplate;
     private final RoomUserRepository roomUserRepository;
+    private final RoomRepository roomRepository;
     @Autowired
-    public WebSocketEventListener(RoomUserRepository roomUserRepository, SimpMessageSendingOperations messagingTemplate){
+    public WebSocketEventListener(RoomUserRepository roomUserRepository, SimpMessageSendingOperations messagingTemplate,
+                                  RoomRepository roomRepository){
         this.roomUserRepository = roomUserRepository;
         this.messagingTemplate = messagingTemplate;
+        this.roomRepository = roomRepository;
     }
 
     @EventListener
@@ -35,18 +45,38 @@ public class WebSocketEventListener {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
         String username = (String) headerAccessor.getSessionAttributes().get("username"); //TODO : username이 맞는가? 맞네요
-        String roomId = (String) headerAccessor.getSessionAttributes().get("roomId");
+        Long roomId = (Long) headerAccessor.getSessionAttributes().get("roomId");
 
         if(username != null && roomId != null) {
             logger.info("User Disconnected : " + username);
 
-            ChatMessage chatMessage = new ChatMessage();
-            chatMessage.setMessageType(ChatMessage.MessageType.LEAVE);
-            chatMessage.setSender(username);
+            RoomUser roomUser = roomUserRepository.hasNickName(username).get();
+            Room room = roomRepository.findById(roomId).get();
+            roomUserRepository.delete(roomUser);
+            room.setUserCount(room.getUserCount() - 1);  // 유저 수 -1
 
-            roomUserRepository.deleteRoomUserByNickname(username);
+            ChatRoomInfoMessage chatRoomInfoMessage = new ChatRoomInfoMessage();
+            chatRoomInfoMessage.setContent(username + " 이 방을 떠났습니다. ");
 
-            messagingTemplate.convertAndSend("/topic/public/"+roomId, chatMessage);
+            if(room.getUserCount() == 0){  // 나간 사람이 마지막 사람이라면 방 삭제
+                roomRepository.delete(room);
+                return;
+            }
+            else if(roomUser.isCaptain()){   // 나간 사람이 방장이라면 방장 위임
+                RoomUser nextCaption = roomUserRepository.findNextCaptinByRandom(roomId).get();
+                nextCaption.setCaptain(true);
+                roomUserRepository.save(nextCaption);
+                chatRoomInfoMessage.setContent(username + " 이 방을 떠나 " + nextCaption.getRoomNickname() + " 이 방장이 되었습니다.");
+            }
+
+            roomRepository.save(room);  // 룸 정보 저장.
+            List <RoomUser> roomUsers = roomUserRepository.findByRoomId(roomId);
+            chatRoomInfoMessage.setMessageType(ChatMessage.MessageType.LEAVE);
+            chatRoomInfoMessage.setSender(username);
+            chatRoomInfoMessage.setRoomId(roomId);
+            chatRoomInfoMessage.setRoomResponse(RoomResponse.create(room, UserDto.makeUserDtos(roomUsers)));
+
+            messagingTemplate.convertAndSend("/topic/public/"+roomId, chatRoomInfoMessage);
         }
     }
 }

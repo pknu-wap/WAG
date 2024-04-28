@@ -1,7 +1,7 @@
 package com.example.server.service;
 
 import com.example.server.domain.*;
-import com.example.server.dto.GameUserDto;
+import com.example.server.dto.*;
 import com.example.server.payload.response.AnswerListResponse;
 import com.example.server.payload.response.ResultResponse;
 import com.example.server.repository.AnswerListRepository;
@@ -9,7 +9,6 @@ import com.example.server.repository.GameOrderRepository;
 import com.example.server.repository.RoomRepository;
 import com.example.server.repository.RoomUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -59,7 +58,7 @@ public class ChatService {
         roomRepository.save(room);
 
         ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
-        chatGameMessage.setMessageType(ChatGameMessage.MessageType.START);
+        chatGameMessage.setMessageType(ChatMessage.MessageType.START);
 
         return chatGameMessage;
     }
@@ -124,10 +123,10 @@ public class ChatService {
         makeChatGameMessage(chatMessage, room);
 
         if(room.getCorrectMemberCnt() >= 3 || room.getUserCount()-1 <= room.getCorrectMemberCnt()){ // 게임 끝나는 경우
-            chatGameMessage.setMessageType(ChatGameMessage.MessageType.END);
+            chatGameMessage.setMessageType(ChatMessage.MessageType.END);
         }
         else{
-            chatGameMessage.setMessageType(ChatGameMessage.MessageType.CORRECT);
+            chatGameMessage.setMessageType(ChatMessage.MessageType.CORRECT);
         }
         return chatGameMessage;
     }
@@ -182,6 +181,20 @@ public class ChatService {
             gameUserDtos.add(gameUserDto);
         }
         return gameUserDtos;
+    }
+
+    public ChatRoomModeMessage changeRoomMode(ChatMessage chatMessage){
+        Room room = roomRepository.findById(chatMessage.getRoomId()).get();
+
+        if(room.isPrivateRoom()){
+            room.setPrivateRoom(false);
+        }
+        else{
+            room.setPrivateRoom(true);
+        }
+
+        roomRepository.save(room);
+        return new ChatRoomModeMessage(chatMessage,room);
     }
 
 

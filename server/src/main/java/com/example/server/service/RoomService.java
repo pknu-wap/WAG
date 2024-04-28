@@ -3,6 +3,7 @@ package com.example.server.service;
 import com.example.server.domain.Room;
 import com.example.server.domain.RoomUser;
 import com.example.server.dto.UserDto;
+import com.example.server.exception.MaxUserCountExceededException;
 import com.example.server.payload.request.RoomCreateRequest;
 import com.example.server.payload.response.RoomEnterResponse;
 import com.example.server.payload.response.RoomResponse;
@@ -58,7 +59,7 @@ public class RoomService {
 
     public RoomResponse getRoomInfo(String nickName){ // 닉네임으로 게임방 정보 주기
         Room room = roomUserRepository.findRoomIdByNickName(nickName);
-        List<UserDto> userDtos = makeUserDtos(roomUserRepository.findByNickName(nickName));
+        List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByNickName(nickName));
 
         return RoomResponse.create(room, userDtos);
     }
@@ -72,7 +73,7 @@ public class RoomService {
             Room room = optionalRoom.get();
             addUser(room, nickName);
 
-            List<UserDto> userDtos = makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
+            List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
             return RoomEnterResponse.create(room, userDtos);
         }
     }
@@ -92,17 +93,19 @@ public class RoomService {
             Room room = optionalRoom.get();
             addUser(room, nickName);
 
-            List<UserDto> userDtos = makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
+            List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
             return RoomEnterResponse.create(room, userDtos);
         }
     }
 
-    public List<UserDto> makeUserDtos(List<RoomUser> roomUsers){ // UserDtos 생성 메소드
-        List<UserDto> userDtos = new ArrayList<>();
-        for(RoomUser roomUser : roomUsers){
-            userDtos.add(new UserDto(roomUser.isCaptain(), roomUser.getRoomNickname(), roomUser.getProfileImage()));
+    public RoomResponse enterRoomByRoomId(String nickName, Long roomId){ // 소켓 + roomId로 방 입장.
+        Room room = roomRepository.findById(roomId).get();
+        if (room.getUserCount() >= 6) {
+            throw new MaxUserCountExceededException();  // 최대 인원 예외 처리.
         }
-        return userDtos;
+        addUser(room, nickName);
+        List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
+        return RoomResponse.create(room, userDtos);
     }
 
     public void addUser(Room room, String nickName){  // 방에 유저 추가 로직
