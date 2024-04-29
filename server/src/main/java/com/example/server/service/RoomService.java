@@ -57,11 +57,15 @@ public class RoomService {
         return RoomResponse.create(room, userDtos);
     }
 
-    public RoomResponse getRoomInfo(String nickName){ // 닉네임으로 게임방 정보 주기
-        Room room = roomUserRepository.findRoomIdByNickName(nickName);
-        List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByNickName(nickName));
+    public RoomResponse getRoomInfo(Long roomId){ // 닉네임으로 게임방 정보 주기
+        Optional<Room> room = roomRepository.findById(roomId);
+        List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(roomId));
 
-        return RoomResponse.create(room, userDtos);
+        if (room.isEmpty()) {
+            return new RoomResponse();
+        }
+
+        return RoomResponse.create(room.get(), userDtos);
     }
 
     public RoomEnterResponse enterRandomRoom(String nickName){ // 랜덤으로 방 입장
@@ -121,5 +125,24 @@ public class RoomService {
 
     public int makeEnterCode(){ // 4자리 랜덤 코드 생성
         return (int)(Math.random() * 8999) + 1000;
+    }
+
+    public String getRoomIdByEnterCode(int enterCode){
+        Optional<Room> room = roomRepository.findRoomByCode(enterCode);
+        if(room.isEmpty()){
+            return "invalid enterCode";
+        }else{
+            return String.valueOf(room.get().getId());
+        }
+    }
+
+    public String getRandomRoomId(){
+        Optional<Long> randomRoomId = roomRepository.findRandomRoomId();
+        if(randomRoomId.isEmpty()){
+            return "no available room";
+        }else{
+            return String.valueOf(randomRoomId.get());
+        }
+
     }
 }
