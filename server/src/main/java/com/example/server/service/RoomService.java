@@ -3,6 +3,7 @@ package com.example.server.service;
 import com.example.server.domain.Room;
 import com.example.server.domain.RoomUser;
 import com.example.server.dto.UserDto;
+import com.example.server.exception.MaxUserCountExceededException;
 import com.example.server.payload.request.RoomCreateRequest;
 import com.example.server.payload.response.RoomEnterResponse;
 import com.example.server.payload.response.RoomResponse;
@@ -56,11 +57,15 @@ public class RoomService {
         return RoomResponse.create(room, userDtos);
     }
 
-    public RoomResponse getRoomInfo(String nickName){ // 닉네임으로 게임방 정보 주기
-        Room room = roomUserRepository.findRoomIdByNickName(nickName);
-        List<UserDto> userDtos = makeUserDtos(roomUserRepository.findByNickName(nickName));
+    public RoomResponse getRoomInfo(Long roomId){ // 닉네임으로 게임방 정보 주기
+        Optional<Room> room = roomRepository.findById(roomId);
+        List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(roomId));
 
-        return RoomResponse.create(room, userDtos);
+        if (room.isEmpty()) {
+            return new RoomResponse();
+        }
+
+        return RoomResponse.create(room.get(), userDtos);
     }
 
     public RoomEnterResponse enterRandomRoom(String nickName){ // 랜덤으로 방 입장
@@ -72,7 +77,7 @@ public class RoomService {
             Room room = optionalRoom.get();
             addUser(room, nickName);
 
-            List<UserDto> userDtos = makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
+            List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
             return RoomEnterResponse.create(room, userDtos);
         }
     }
@@ -92,17 +97,19 @@ public class RoomService {
             Room room = optionalRoom.get();
             addUser(room, nickName);
 
-            List<UserDto> userDtos = makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
+            List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
             return RoomEnterResponse.create(room, userDtos);
         }
     }
 
-    public List<UserDto> makeUserDtos(List<RoomUser> roomUsers){ // UserDtos 생성 메소드
-        List<UserDto> userDtos = new ArrayList<>();
-        for(RoomUser roomUser : roomUsers){
-            userDtos.add(new UserDto(roomUser.isCaptain(), roomUser.getRoomNickname(), roomUser.getProfileImage()));
+    public RoomResponse enterRoomByRoomId(String nickName, Long roomId){ // 소켓 + roomId로 방 입장.
+        Room room = roomRepository.findById(roomId).get();
+        if (room.getUserCount() >= 6) {
+            throw new MaxUserCountExceededException();  // 최대 인원 예외 처리.
         }
-        return userDtos;
+        addUser(room, nickName);
+        List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
+        return RoomResponse.create(room, userDtos);
     }
 
     public void addUser(Room room, String nickName){  // 방에 유저 추가 로직
@@ -118,5 +125,24 @@ public class RoomService {
 
     public int makeEnterCode(){ // 4자리 랜덤 코드 생성
         return (int)(Math.random() * 8999) + 1000;
+    }
+
+    public String getRoomIdByEnterCode(int enterCode){
+        Optional<Room> room = roomRepository.findRoomByCode(enterCode);
+        if(room.isEmpty()){
+            return "invalid enterCode";
+        }else{
+            return String.valueOf(room.get().getId());
+        }
+    }
+
+    public String getRandomRoomId(){
+        Optional<Long> randomRoomId = roomRepository.findRandomRoomId();
+        if(randomRoomId.isEmpty()){
+            return "no available room";
+        }else{
+            return String.valueOf(randomRoomId.get());
+        }
+
     }
 }

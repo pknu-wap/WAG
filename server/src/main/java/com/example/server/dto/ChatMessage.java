@@ -1,4 +1,4 @@
-package com.example.server.domain;
+package com.example.server.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +17,7 @@ public class ChatMessage {
         ANSWER,
         CORRECT,
         START,
-        END
+        END,
+        CHAGE,
     }
 }

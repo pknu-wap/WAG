@@ -1,17 +1,17 @@
 import { useQuery } from "react-query";
-import { defaultInstance } from ".";
-import { IGetRoomInfo } from "../types/dto";
+import { unAxiosDefaultInstance } from ".";
+import { IGetRoomIdCodeParams } from "../types/dto";
 
 // 방 정보 가져오기
-const GetRoomInfoApi = async (params: IGetRoomInfo) => {
-  const { data } = await defaultInstance.get("/room/info", { params });
+const GetRoomIdCodeApi = async (params: IGetRoomIdCodeParams) => {
+  const { data } = await unAxiosDefaultInstance.get("/room/info", { params });
 
   return data;
 };
 
-export const useGetRoomInfoQuery = (params: IGetRoomInfo) => {
+export const useGetRoomIdCodeQuery = (params: IGetRoomIdCodeParams) => {
   const { isLoading, error, data } = useQuery(["roomInfo", params], () =>
-    GetRoomInfoApi(params)
+    GetRoomIdCodeApi(params)
   );
 
   return { isLoading, error, data };

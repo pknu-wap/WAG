@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Button from '../components/button/Button';
 import RadioButton from '../components/radioButton/RadioButton';
-//import FullLayout from "../components/layout/FullLayout";
+import FullLayout from "../components/layout/FullLayout";
 
 function CreateRoom() {
   const [isPrivate, setIsPrivate] = useState<string | null>("1"); //일단은 공개방을 default로
@@ -21,7 +21,7 @@ function CreateRoom() {
   };
 
   return (
-    //<FullLayout>
+    <FullLayout>
       <div className="p-4">
         <div className="justify-center text-4xl mb-20">방장으로 참가</div>
         <div className="rounded-xl font-extrabold min-w-44 ">방 공개 / 비공개 여부 선택</div>
@@ -47,7 +47,7 @@ function CreateRoom() {
           {renderButton()}
         </div>
       </div>
-    //</FullLayout>
+    </FullLayout>
     
   );
 }
