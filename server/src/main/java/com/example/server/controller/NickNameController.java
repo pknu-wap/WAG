@@ -24,8 +24,8 @@ public class NickNameController {
     }
 
     @GetMapping("/nickname/possible")
-    public ResponseEntity<NickNameResponse> postNickName(@RequestParam String nickName){// 게임 방 생성
-        return new ResponseEntity<>(nickNameService.settingNickName(nickName), HttpStatus.OK);
+    public ResponseEntity<NickNameResponse> postNickName(@RequestParam String nickname, @RequestParam Long roomId){// 게임 방 생성
+        return new ResponseEntity<>(nickNameService.settingNickName(nickname, roomId), HttpStatus.OK);
     }
 
 

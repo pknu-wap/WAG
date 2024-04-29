@@ -29,9 +29,9 @@ public class NickNameService {
         return user.get().getNickName();
     }
 
-    public NickNameResponse settingNickName(String nickName){
+    public NickNameResponse settingNickName(String nickName, Long roomId){
         boolean isPos;
-        Optional <RoomUser> hasNickName = roomUserRepository.hasNickName(nickName);
+        Optional <RoomUser> hasNickName = roomUserRepository.hasRoomNickName(nickName, roomId);
         if(hasNickName.isEmpty()){
             isPos = true;
         }
