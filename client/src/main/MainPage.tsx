@@ -11,7 +11,7 @@ import { faX } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { IGetRoomIdCode } from "../types/dto";
 import { io } from "socket.io-client";
-
+import { useNavigate } from 'react-router-dom';
 
 type Props = {
   children?: React.ReactNode;
@@ -65,6 +65,13 @@ function MainPage({ dark }: ComponentProps) {
     const socket = io(`http://182.215.121.80/topic/public/${roomIdFromCode}`); //해당 방으로 소켓 연결
     console.log(roomIdFromCode);
   };
+  const navigate = useNavigate(); // useNavigate 훅을 컴포넌트 내부에서 사용
+
+  const handleCreateRoomClick = () => {
+    navigate('/CreateRoom'); // 페이지 이동 처리
+  };
+
+
 
   useEffect(() => {
     if (enterCode === undefined || Number.isNaN(enterCode)) {
@@ -93,7 +100,7 @@ function MainPage({ dark }: ComponentProps) {
         <Button size="lg" onClick={openModal}>
           랜덤 참가
         </Button>
-        <Button size="lg">방 생성</Button>
+        <Button size="lg" onClick={handleCreateRoomClick}>방 생성</Button>
         <Button size="lg">방 참가</Button>
       </div>
       <Modal onRequestClose={closeModal}>
