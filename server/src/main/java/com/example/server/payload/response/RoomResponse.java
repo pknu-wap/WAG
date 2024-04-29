@@ -4,10 +4,12 @@ import com.example.server.domain.Room;
 import com.example.server.dto.UserDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 public class RoomResponse {
