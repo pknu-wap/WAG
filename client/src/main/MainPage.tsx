@@ -47,7 +47,7 @@ function MainPage({ dark }: ComponentProps) {
   const getRoomIdCode = async (): Promise<IGetRoomIdCode> => {
     try {
       const response = await axios.get<IGetRoomIdCode>(
-        "http://182.215.121.80/roomId/code",
+        "http://wwwag.co.kr:8080/roomId/code",
         {
           params: {
             enterCode: enterCode,
@@ -62,7 +62,7 @@ function MainPage({ dark }: ComponentProps) {
   };
   const buttonCheckHandler = () => {
     const roomIdFromCode = getRoomIdCode();
-    const socket = io(`http://182.215.121.80/topic/public/${roomIdFromCode}`); //해당 방으로 소켓 연결
+    const socket = io(`http://wwwag.co.kr:8080/topic/public/${roomIdFromCode}`); //해당 방으로 소켓 연결
     console.log(roomIdFromCode);
   };
   const navigate = useNavigate(); // useNavigate 훅을 컴포넌트 내부에서 사용
