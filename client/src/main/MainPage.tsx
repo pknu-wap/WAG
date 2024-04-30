@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Button from "../components/button/Button";
 import FullLayout from "../components/layout/FullLayout";
 import { ConnectedProps, connect } from "react-redux";
@@ -10,10 +10,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { IGetRoomIdCode } from "../types/dto";
-import { io } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import * as StompJs from "@stomp/stompjs";
-import SockJS from "sockjs-client";
 
 type Props = {
   children?: React.ReactNode;
@@ -27,10 +25,8 @@ const connector = connect(
 );
 
 function MainPage({ dark }: ComponentProps) {
-  const socketUrl = "http://wwwag.co.kr:8080";
-  const sock = new SockJS(socketUrl);
-  const ws = StompJs.Stomp.over(sock);
-
+  const client = useRef<any>({});
+  const navigate = useNavigate(); // useNavigate 훅을 컴포넌트 내부에서 사용
   const [theme, setTheme] = useState(localStorage.theme);
   const [enterCode, setEnterCode] = useState<number>();
   const [, setIsOpen] = useRecoilState(modalState);
@@ -79,28 +75,33 @@ function MainPage({ dark }: ComponentProps) {
     }
   };
 
-  //빠른 입장 버튼 클릭 이벤트 핸들러
-  const handleRandomEnterClick = async () => {
+  const subscribe = async () => {
     try {
-      const roomId = await getRandomRoomId(); // API 호출
-      if (roomId) {
-        // roomId가 존재하는 경우, 해당 방 ID로 소켓 연결
-        console.log("입장할 방 ID:", roomId);
-
-        ws.connect({}, (roomId: number) => {
-          ws.subscribe(`/topic/public/${roomId}`, (data) => {});
+      const connect = () => {
+        client.current = new StompJs.Client({
+          brokerURL: "ws://wwwag.co.kr:8080/ws",
+          onConnect: async () => {
+            const roomId = await getRandomRoomId(); // API 호출
+            console.log("roomId : " + roomId);
+            if (roomId) {
+              client.current.subscribe(`/topic/public/${roomId}`, () => {
+                navigate(`/ReadyToGame/${roomId}`);
+              });
+              console.log("구독 성공");
+            }
+          },
         });
-
-        navigate("/JoinGame");
-        // 소켓 이벤트 리스너 등록 및 기타 로직 처리
-        // 예시: navigate(`/room/${data.roomId}`); // 방 페이지로 이동
-      } else if (roomId === "no available room") {
-        // 사용 가능한 방이 없는 경우
-        alert("사용 가능한 방이 없습니다.");
-      }
+        client.current.activate();
+      };
+      connect();
     } catch (error) {
       console.error("랜덤 입장 처리 중 오류 발생:", error);
     }
+  };
+  //빠른 입장 버튼 클릭 이벤트 핸들러
+  const handleRandomEnterClick = async () => {
+    subscribe();
+    console.log("구독 성공22222");
   };
 
   const buttonCheckHandler = () => {
@@ -108,7 +109,6 @@ function MainPage({ dark }: ComponentProps) {
     // const socket = io(`http://wwwag.co.kr:8080/topic/public/`); //해당 방으로 소켓 연결
     console.log(roomIdFromCode);
   };
-  const navigate = useNavigate(); // useNavigate 훅을 컴포넌트 내부에서 사용
 
   const handleCreateRoomClick = () => {
     navigate("/CreateRoom"); // 페이지 이동 처리
