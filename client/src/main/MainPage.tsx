@@ -77,22 +77,24 @@ function MainPage({ dark }: ComponentProps) {
 
   const subscribe = async () => {
     try {
-      const connect = () => {
-        client.current = new StompJs.Client({
-          brokerURL: "ws://wwwag.co.kr:8080/ws",
-          onConnect: async () => {
-            const roomId = await getRandomRoomId(); // API 호출
-            console.log("roomId : " + roomId);
-            if (roomId) {
-              client.current.subscribe(`/topic/public/${roomId}`, () => {
-                navigate(`/ReadyToGame/${roomId}`);
-              });
+      const roomId = await getRandomRoomId(); // API 호출
+      if (roomId) {
+        const connect = () => {
+          client.current = new StompJs.Client({
+            brokerURL: "ws://wwwag.co.kr:8080/ws",
+            onConnect: () => {
+              console.log("구독 전 roomId : " + roomId);
+              client.current.subscribe(`/topic/public/${roomId}`, () => {});
               console.log("구독 성공");
-            }
-          },
-        });
-        client.current.activate();
-      };
+              navigate(`/ReadyToGame/${roomId}`);
+            },
+          });
+          client.current.activate();
+        };
+        connect();
+      } else {
+        console.log("roomId 없음");
+      }
       connect();
     } catch (error) {
       console.error("랜덤 입장 처리 중 오류 발생:", error);
