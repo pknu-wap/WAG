@@ -25,10 +25,9 @@ const RadioButton = ({
       onChange={onChange}
       checked={checked}
     />
-    <label
-      htmlFor={id}
-      className="w-full py-4 ms-2 text-xl font-medium text-gray-900"
-    >
+
+    <label htmlFor={id} className="w-full py-4 text-xl font-medium text-gray-900">
+
       {label}
     </label>
   </div>

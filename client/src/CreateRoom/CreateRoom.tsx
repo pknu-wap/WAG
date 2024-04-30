@@ -23,9 +23,9 @@ function CreateRoom() {
   return (
     <FullLayout>
       <div className="p-4">
-        <div className="justify-center text-4xl mb-20">방장으로 참가</div>
+        <div className="justify-center text-6xl mb-20">방 만들기</div>
         <div className="rounded-xl font-extrabold min-w-44 ">방 공개 / 비공개 여부 선택</div>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 mt-5 gap-2">
           <RadioButton
             id="public"
             label="공개"
