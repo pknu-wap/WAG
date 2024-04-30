@@ -3,8 +3,11 @@ import IconButton from "../components/button/IconButton";
 import { faUser } from "@fortawesome/free-regular-svg-icons";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import FullLayout from "../components/layout/FullLayout";
+import { useParams } from "react-router-dom";
 
 const ReadyToGame = () => {
+  const params = useParams(); // params를 상수에 할당
+  console.log(params.roomId);
   return (
     <FullLayout>
       <div className="flex flex-row justify-between items-center mt-10 mx-7">

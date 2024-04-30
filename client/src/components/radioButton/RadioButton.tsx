@@ -1,5 +1,3 @@
-import { ReactNode } from "react";
-
 interface RadioButtonProps {
   id: string;
   label: string;
@@ -9,7 +7,14 @@ interface RadioButtonProps {
   checked?: boolean;
 }
 
-const RadioButton = ({ id, label, value, name, onChange, checked }: RadioButtonProps) => (
+const RadioButton = ({
+  id,
+  label,
+  value,
+  name,
+  onChange,
+  checked,
+}: RadioButtonProps) => (
   <div className="flex items-center ps-4 border border-gray-200 rounded shadow-sm">
     <input
       id={id}
@@ -20,7 +25,9 @@ const RadioButton = ({ id, label, value, name, onChange, checked }: RadioButtonP
       onChange={onChange}
       checked={checked}
     />
+
     <label htmlFor={id} className="w-full py-4 text-xl font-medium text-gray-900">
+
       {label}
     </label>
   </div>
