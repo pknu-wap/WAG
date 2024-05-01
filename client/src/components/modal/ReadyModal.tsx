@@ -53,6 +53,7 @@ const ReadyToGameModal: React.FC<ModalProps> = ({
       style={customModalStyles} // 스타일 적용
       onRequestClose={closeModal} // 모달 창 닫기 요청을 받을 때 호출
       shouldCloseOnOverlayClick={false} // 외부 클릭으로 모달 닫기 활성화
+      shouldCloseOnEsc={false}
     >
       <div className="modal-content">{children}</div>
     </ReactModal>
