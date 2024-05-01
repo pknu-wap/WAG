@@ -11,11 +11,13 @@ import { faX } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { IGetRoomIdCode } from "../types/dto";
 import { useNavigate } from "react-router-dom";
-import * as StompJs from "@stomp/stompjs";
+import {Stomp} from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 type Props = {
   children?: React.ReactNode;
 };
+var stompClient : any = null;   //웹소켓 선언
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 type ComponentProps = Props & PropsFromRedux;
@@ -67,7 +69,10 @@ function MainPage({ dark }: ComponentProps) {
   //빠른 입장으로 roomid받기
   const getRandomRoomId = async () => {
     try {
-      const response = await axios.get("http://wwwag.co.kr:8080/roomId");
+      const response = await axios.get("http://wwwag.co.kr:8080/roomId")
+      //.then((response) => setRoomId(response.data));
+      //const num:number = parseInt(response);
+  
       return response.data; // 서버로부터 받은 데이터 반환
     } catch (error) {
       console.error("랜덤 입장 요청 중 오류 발생:", error);
@@ -75,35 +80,49 @@ function MainPage({ dark }: ComponentProps) {
     }
   };
 
-  const subscribe = async () => {
-    try {
-      const roomId = await getRandomRoomId(); // API 호출
-      if (roomId) {
-        const connect = () => {
-          client.current = new StompJs.Client({
-            brokerURL: "ws://wwwag.co.kr:8080/ws",
-            onConnect: () => {
-              console.log("구독 전 roomId : " + roomId);
-              client.current.subscribe(`/topic/public/${roomId}`, () => {});
-              console.log("구독 성공");
-              navigate(`/ReadyToGame/${roomId}`);
-            },
-          });
-          client.current.activate();
-        };
-        connect();
-      } else {
-        console.log("roomId 없음");
-      }
-      connect();
-    } catch (error) {
-      console.error("랜덤 입장 처리 중 오류 발생:", error);
-    }
+ const socketConnect = () => {
+    const socket = new SockJS("http://wwwag.co.kr:8080/ws");
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, onConnected, onError);
+    // return Stomp.over(socket);
   };
-  //빠른 입장 버튼 클릭 이벤트 핸들러
+
+  async function onConnected() {
+    const roomId = await getRandomRoomId();
+    // Subscribe to the Public Topic
+    console.log("우리가 입장할 방 : " + roomId)
+    stompClient.subscribe('/topic/public/'+roomId, onMessageReceived);
+
+    // Tell your username to the server
+    // stompClient.send("/app/chat.addUser",
+    //     {},
+    //     JSON.stringify({sender: 'test', content : '된거냐? 된거냐?', type: 'JOIN', roomId: roomId})
+    // )
+}
+
+function onError(error:any) {
+
+  console.log('에러발생');
+}
+
+function onMessageReceived(payload:any) {
+  var message = JSON.parse(payload.body);
+
+  console.log(message);
+  if(message.messageType === 'JOIN') {
+    console.log(message.sender + ' joined!');
+  } else if (message.type === 'LEAVE') {
+    message.content = message.sender + ' LEAVE!';
+    console.log(message);
+  } else {
+    console.log(message);
+  }
+
+}
+  
+
   const handleRandomEnterClick = async () => {
-    subscribe();
-    console.log("구독 성공22222");
+    socketConnect();
   };
 
   const buttonCheckHandler = () => {
