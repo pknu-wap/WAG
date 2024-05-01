@@ -17,7 +17,7 @@ import { INicknamePossible } from "../types/dto";
 const ReadyToGame = () => {
   const params = useParams(); // params를 상수에 할당
   const [, setIsOpen] = useRecoilState(readyToGameModalState);
-  const [nickname, setNickname] = useState<string>();
+  const [nickname, setNickname] = useState<string>('');
   const [possible, setPossible] = useState<boolean>();
   const location = useLocation();
   const roomInfo = { ...location.state };
@@ -59,6 +59,12 @@ const ReadyToGame = () => {
     }
   };
   const nicknamePossibleClick = async () => {
+    if (nickname==='' || nickname.includes(' ')){
+      console.log('error with blank')
+      setPossible(false)
+      return ;
+    }
+    
     const data = await getNicknamePossible();
     setPossible(data.possible);
   };
