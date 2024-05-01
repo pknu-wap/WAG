@@ -91,7 +91,7 @@ function MainPage({ dark }: ComponentProps) {
   async function onConnected() {
     const roomId = await getRandomRoomId();
     console.log("우리가 입장할 방 : " + roomId)
-    stompClient.subscribe('/topic/public/'+roomId);
+    stompClient.subscribe(`/ReadyToGame/${roomId}`);
 }
 
   //랜덤입장 버튼 클릭
@@ -102,7 +102,6 @@ function MainPage({ dark }: ComponentProps) {
         socketConnect();
         navigate(`/ReadyToGame/${roomId}`);
       }
-        
     else
       alert("입장가능한 방이 없습니다.");
   };
