@@ -22,3 +22,19 @@ export interface IGetRoomIdCodeParams {
 export interface IGetRoomIdCode {
   roomId: number;
 }
+
+// 방 생성
+export interface IRoomCreate {
+  isPrivateRoom: boolean;
+  userNickName: string;
+}
+
+// 방 정보 get response
+export interface IRoomResponseInfo {
+  gameStatus: boolean,
+  privateRoom: boolean,
+  roomEnterCode: Number,
+  roomId: Number,
+  userCount: Number,
+  userDtos: Array<Object>,
+}
