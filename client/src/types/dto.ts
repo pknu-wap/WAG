@@ -29,3 +29,12 @@ export interface IRoomResponseInfo {
   userCount: Number,
   userDtos: Array<Object>,
 }
+
+//소켓으로 주고받는 채팅 객체
+export interface ChatMessage {
+  messageType : string
+  sender: string; // 사용자 이름
+  content: string; // 메시지 텍스트
+  roomId : number;
+  isPrivateRoom : boolean;
+}

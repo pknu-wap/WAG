@@ -4,14 +4,23 @@ import { faUser } from "@fortawesome/free-regular-svg-icons";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import FullLayout from "../components/layout/FullLayout";
 import { useParams } from "react-router-dom";
-import { useRecoilState } from "recoil";
+import { constSelector, useRecoilState } from "recoil";
 import { readyToGameModalState } from "../recoil/modal";
 import { useEffect, useState } from "react";
 import ReadyToGameModal from "../components/modal/ReadyModal";
 import Button from "../components/button/Button";
 import axios from "axios";
+import { ChatMessage, INicknamePossible } from "../types/dto";
+import {Stomp} from "@stomp/stompjs";
+import SockJS from "sockjs-client";
+import ChatBubble from "../components/chatBubble/ChatBubble";
 import { useLocation } from "react-router-dom";
 import { INicknamePossible } from "../types/dto";
+
+var stompClient : any = null;   //웹소켓 변수 선언
+
+
+
 
 
 const ReadyToGame = () => {
@@ -19,19 +28,25 @@ const ReadyToGame = () => {
   const [, setIsOpen] = useRecoilState(readyToGameModalState);
   const [nickname, setNickname] = useState<string>('');
   const [possible, setPossible] = useState<boolean>();
+  const [myChatMessages, setMyChatMessages] = useState<string>()
   const location = useLocation();
   const roomInfo = { ...location.state };
-  
+
   const closeModal = () => {
     setIsOpen(false);
   };
   const openModal = () => {
     setIsOpen(true);
   };
+  
+ const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
 
+  //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
   useEffect(() => {
     openModal();
   }, []);
+
+
   // useEffect(() => {
   //   setNickname()
   // }, [nickname])
@@ -67,7 +82,73 @@ const ReadyToGame = () => {
     
     const data = await getNicknamePossible();
     setPossible(data.possible);
+    localStorage.setItem('nickName', data.nickName);
   };
+
+
+
+    //웹소켓 만들기
+  const socketConnect = () => {
+    const socket = new SockJS("http://wwwag.co.kr:8080/ws");
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, onConnected);
+  };
+
+  //STOMP 소켓 구독
+  async function onConnected() {
+    const roomId = localStorage.getItem('roomId');
+    const nickName = localStorage.getItem('nickName');
+    stompClient.subscribe(`/topic/public/${roomId}`, onMessageReceived);
+    stompClient.send("/app/chat.addUser",
+        {},
+        JSON.stringify({sender: nickName, type: 'JOIN', roomId: roomId})
+    )
+  }
+
+ //드가자 버튼 클릭시
+  const handleGoIn = async () => {
+    socketConnect();
+    closeModal();
+    console.log(isOpen);
+  };
+
+  function sendMessage(){
+
+    stompClient.send("/app/chat.sendMessage",
+    {},
+    JSON.stringify({sender: localStorage.getItem('nickName') ,content : myChatMessages,  messageType: 'CHAT', roomId: localStorage.getItem('roomId')})
+  )
+  console.log(myChatMessages);
+  }
+
+
+  function onMessageReceived(payload:any) {
+    var message = JSON.parse(payload.body);
+  
+    console.log(message);
+    if(message.messageType === 'JOIN') {
+      console.log(message.sender + ' joined!');
+    } else if (message.type === 'LEAVE') {
+      message.content = message.sender + ' LEAVE!';
+      console.log(message);
+    } else if (message.messageType === 'CHAT') {
+      receiveChatMessage(message);
+      console.log("보내기")
+    }
+
+    else {
+      console.log(message);
+    }
+  
+  }
+
+  const receiveChatMessage = (message : ChatMessage) => {
+    setChatMessages([...chatMessages, message]); // 채팅 데이터 상태 업데이트
+  };
+
+  // useEffect(() => {
+  //   receiveChatMessage()
+  // })
 
   return (
     <FullLayout>
@@ -145,36 +226,9 @@ const ReadyToGame = () => {
         </div>
       </div>
       <div className="m-auto w-3/4 h-96 mt-10 overflow-y-scroll rounded-3xl shadow-xl flex flex-col p-5 tracking-wider bg-[#A072BC]">
-        <div className="mt-1 flex flex-col items-start">
-          <span className="text-[#ffffff]">user 2</span>
-          <span className="w-auto h-auto px-4 rounded-lg rounded-tl-none bg-light-chat dark:bg-dark-btn">
-            ㅇㅇ 사람아님
-          </span>
-        </div>
-        <div className="mt-1 flex flex-col items-start">
-          <span className="text-[#ffffff]">user 3</span>
-          <span className="w-auto h-auto px-4 rounded-lg rounded-tl-none bg-light-chat dark:bg-dark-btn">
-            근데 너도 사람 아니잖아
-          </span>
-        </div>
-        <div className="mt-1 flex flex-col items-end">
-          <span className="text-[#ffffff]">Me</span>
-          <span className="w-auto h-auto px-4 rounded-lg rounded-tr-none bg-light-chat dark:bg-dark-btn">
-            헉
-          </span>
-        </div>
-        <div className="mt-1 flex flex-col items-start">
-          <span className="text-[#ffffff]">user 5</span>
-          <span className="w-auto h-auto px-4 rounded-lg rounded-tl-none bg-light-chat dark:bg-dark-btn">
-            ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
-          </span>
-        </div>
-        <div className="mt-1 flex flex-col items-start">
-          <span className="text-[#ffffff]">user 6</span>
-          <span className="w-auto h-auto px-4 rounded-lg rounded-tl-none bg-light-chat dark:bg-dark-btn">
-            아니 게임을 하라고
-          </span>
-        </div>
+        {chatMessages.map((m) => (
+            <ChatBubble message={m} />
+          ))}
       </div>
 
       <div className="mt-10 flex flex-row justify-center algin-center">
@@ -184,7 +238,18 @@ const ReadyToGame = () => {
         <input
           className="w-3/4 rounded-2xl shadow-md pl-5 text-[#000000]"
           type="text"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+
+            }
+          }}
+          onChange={(e) => {
+            setMyChatMessages(e.target.value)
+          }}
         ></input>
+        <Button size="sm" disabled={false} onClick={sendMessage}>
+          보내기
+        </Button>
       </div>
 
       <ReadyToGameModal onRequestClose={closeModal}>
@@ -222,7 +287,9 @@ const ReadyToGame = () => {
 
           <div className="m-auto flex justify-end items-end">
             {possible ? (
-              <Button disabled={false} size="lg" onClick={closeModal}>
+
+              <Button disabled={false} size="lg" onClick={handleGoIn}>
+
                 드가자
               </Button>
             ) : (

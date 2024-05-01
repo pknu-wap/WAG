@@ -84,10 +84,14 @@ function MainPage({ dark }: ComponentProps) {
   //랜덤입장 버튼 클릭
   const handleRandomEnterClick = async () => {
     const roomId = await getRandomRoomId();
-    if (roomId !== "no available room") {
-      socketConnect();
-      navigate(`/ReadyToGame/${roomId}`);
-    } else alert("입장 가능한 방이 없습니다.");
+    if(roomId != 'no available room')
+      {
+        socketConnect();
+        localStorage.setItem('roomId', roomId);
+        navigate(`/ReadyToGame/${roomId}`);
+      }
+    else
+      alert("입장가능한 방이 없습니다.");
   };
 
   //코드입장시 버튼 클릭
