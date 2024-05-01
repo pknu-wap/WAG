@@ -1,41 +1,40 @@
 // 닉네임 중복확인 get response
 export interface INicknamePossible {
-    isPossible: boolean;
-    nickName: string
+  possible: boolean;
+  nickName: string;
 }
 
 // 닉네임 get
 export interface IGetNickname {
-    nickname: string;
+  nickname: string;
 }
 
 // 코드로 방 입장
-export interface IGetRoomIdCodeParams {
-    enterCode?: number;
-}
 export interface IGetRoomIdCode {
-    roomId: number;
+  roomId?: string;
 }
 
-// 방 정보 get
-export interface IGetRoomInfo {
-    nickname: string;
-}
-
-interface IUserDto {
-    isCaptain: boolean;
-    userNickname: string;
-    profileImage: string;
+// 방 생성
+export interface IRoomCreate {
+  isPrivateRoom: boolean;
+  userNickName: string;
 }
 
 // 방 정보 get response
-export interface IGetRoomInfoResponse {
-    roomId: number;
-    isPrivateRoom: boolean;
-    roomEnterCode: number;
-    gameStatus: boolean;
-    useCount: number;
-    userList: {
-        userDto: IUserDto
-    }[]
+export interface IRoomResponseInfo {
+  gameStatus: boolean,
+  privateRoom: boolean,
+  roomEnterCode: Number,
+  roomId: Number,
+  userCount: Number,
+  userDtos: Array<Object>,
+}
+
+//소켓으로 주고받는 채팅 객체
+export interface ChatMessage {
+  messageType : string
+  sender: string; // 사용자 이름
+  content: string; // 메시지 텍스트
+  roomId : number;
+  isPrivateRoom : boolean;
 }

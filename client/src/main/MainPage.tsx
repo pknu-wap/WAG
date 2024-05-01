@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "../components/button/Button";
 import FullLayout from "../components/layout/FullLayout";
 import { ConnectedProps, connect } from "react-redux";
@@ -9,13 +9,15 @@ import Modal from "../components/modal/Modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
-import { IGetRoomIdCode } from "../types/dto";
 import { useNavigate } from "react-router-dom";
-import * as StompJs from "@stomp/stompjs";
+import { Stomp } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 type Props = {
   children?: React.ReactNode;
 };
+
+var stompClient: any = null; //웹소켓 변수 선언
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 type ComponentProps = Props & PropsFromRedux;
@@ -25,7 +27,6 @@ const connector = connect(
 );
 
 function MainPage({ dark }: ComponentProps) {
-  const client = useRef<any>({});
   const navigate = useNavigate(); // useNavigate 훅을 컴포넌트 내부에서 사용
   const [theme, setTheme] = useState(localStorage.theme);
   const [enterCode, setEnterCode] = useState<number>();
@@ -38,29 +39,19 @@ function MainPage({ dark }: ComponentProps) {
     setIsOpen(false);
   };
   const [disabled, setDisabled] = useState<boolean>(true);
-  // const { data: enterCodeData } = useGetRoomIdCodeQuery({
-  //   enterCode: enterCode,
-  // })
-  // const [roomIdCode, setRoomIdCode] = useState<IGetRoomIdCode>()
-  // useEffect(() => {
-  //   setRoomIdCode(enterCodeData)
-  // }, [enterCodeData])
 
   //입장코드로 입력으로 roomid받기
-  const getRoomIdCode = async (): Promise<IGetRoomIdCode> => {
+  const getRoomIdCode = async () => {
     try {
-      const response = await axios.get<IGetRoomIdCode>(
-        "http://wwwag.co.kr:8080/roomId/code",
-        {
-          params: {
-            enterCode: enterCode,
-          },
-        }
-      );
+      const response = await axios.get("http://wwwag.co.kr:8080/roomId/code", {
+        params: {
+          enterCode: enterCode,
+        },
+      });
       return response.data;
-    } catch (e) {
-      console.error(e);
-      throw e;
+    } catch (error) {
+      console.error(error);
+      throw error;
     }
   };
 
@@ -68,48 +59,47 @@ function MainPage({ dark }: ComponentProps) {
   const getRandomRoomId = async () => {
     try {
       const response = await axios.get("http://wwwag.co.kr:8080/roomId");
-      return response.data; // 서버로부터 받은 데이터 반환
+      return response.data;
     } catch (error) {
       console.error("랜덤 입장 요청 중 오류 발생:", error);
       throw error;
     }
   };
 
-  const subscribe = async () => {
-    try {
-      const roomId = await getRandomRoomId(); // API 호출
-      if (roomId) {
-        const connect = () => {
-          client.current = new StompJs.Client({
-            brokerURL: "ws://wwwag.co.kr:8080/ws",
-            onConnect: () => {
-              console.log("구독 전 roomId : " + roomId);
-              client.current.subscribe(`/topic/public/${roomId}`, () => {});
-              console.log("구독 성공");
-              navigate(`/ReadyToGame/${roomId}`);
-            },
-          });
-          client.current.activate();
-        };
-        connect();
-      } else {
-        console.log("roomId 없음");
-      }
-      connect();
-    } catch (error) {
-      console.error("랜덤 입장 처리 중 오류 발생:", error);
-    }
-  };
-  //빠른 입장 버튼 클릭 이벤트 핸들러
-  const handleRandomEnterClick = async () => {
-    subscribe();
-    console.log("구독 성공22222");
+  //웹소켓 만들기
+  const socketConnect = () => {
+    const socket = new SockJS("http://wwwag.co.kr:8080/ws");
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, onConnected);
+    // return Stomp.over(socket);
   };
 
-  const buttonCheckHandler = () => {
-    const roomIdFromCode = getRoomIdCode();
-    // const socket = io(`http://wwwag.co.kr:8080/topic/public/`); //해당 방으로 소켓 연결
-    console.log(roomIdFromCode);
+  //STOMP 소켓 구독
+  async function onConnected() {
+    const roomId = await getRandomRoomId();
+    console.log("우리가 입장할 방 : " + roomId);
+    stompClient.subscribe(`/ReadyToGame/${roomId}`);
+  }
+
+  //랜덤입장 버튼 클릭
+  const handleRandomEnterClick = async () => {
+    const roomId = await getRandomRoomId();
+    if(roomId != 'no available room')
+      {
+        socketConnect();
+        localStorage.setItem('roomId', roomId);
+        navigate(`/ReadyToGame/${roomId}`);
+      }
+    else
+      alert("입장가능한 방이 없습니다.");
+  };
+
+  //코드입장시 버튼 클릭
+  const buttonCheckHandler = async () => {
+    const roomId = await getRoomIdCode();
+    if (roomId !== "invalid enterCode") {
+      navigate(`/ReadyToGame/${roomId}`);
+    } else alert("입장 가능한 방이 없습니다.");
   };
 
   const handleCreateRoomClick = () => {
@@ -150,6 +140,7 @@ function MainPage({ dark }: ComponentProps) {
           입장코드 입력
         </Button>
       </div>
+
       <Modal onRequestClose={closeModal}>
         <div className="flex flex-col justify-between">
           <div className="my-5 flex flex-row justify-between items-center">
@@ -164,6 +155,11 @@ function MainPage({ dark }: ComponentProps) {
             type="error"
             required
             placeholder={"입장코드를 숫자로 입력해주세요"}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                buttonCheckHandler();
+              }
+            }}
             onChange={(e) => {
               const value = e.target.value;
               const regex = /^[0-9]*$/; // 숫자만 허용하는 정규식
