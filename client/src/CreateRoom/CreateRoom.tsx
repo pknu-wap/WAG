@@ -2,21 +2,47 @@ import React, { useState } from 'react';
 import Button from '../components/button/Button';
 import RadioButton from '../components/radioButton/RadioButton';
 import FullLayout from "../components/layout/FullLayout";
+import { useNavigate } from "react-router-dom";
+import axios from 'axios';
+import {IRoomResponseInfo} from '../types/dto'
 
 function CreateRoom() {
-  const [isPrivate, setIsPrivate] = useState<string | null>("1"); //일단은 공개방을 default로
+  const [isPrivate, setIsPrivate] = useState<string | null>("false"); //일단은 공개방을 default로
+  const navigate = useNavigate();
 
   const radioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setIsPrivate(event.target.value);
   };
 
+  const createRoom = async () => {
+    try {
+      const response = await axios.post<IRoomResponseInfo>(
+        "http://wwwag.co.kr:8080/room/create",
+        {
+            isPrivateRoom : Boolean(isPrivate),
+            userNickName: 'King'          
+        }
+      );
+      
+      const roomId = response.data.roomId
+      navigate(`/ReadyToGame/${roomId}`, {state: response.data});
+      
+    } catch (error) {
+      console.error("랜덤 입장 요청 중 오류 발생:", error);
+      throw error;
+      
+    }
+  };
+
+  
+
   const renderButton = () => {
     if (isPrivate === null) {
       return <p>방 공개 / 비공개 여부를 선택해주십시오</p>;//체크가 안된 상태를 defult로 만들 수도 있음
     } else if (isPrivate === '1') {
-      return <Button size="lg">공개방 생성</Button>;
+      return <Button size="lg" onClick={createRoom}>공개방 생성</Button>;
     } else {
-      return <Button size="lg">비공개방 생성</Button>;
+      return <Button size="lg" onClick={createRoom}>비공개방 생성</Button>;
     }
   };
 
@@ -29,15 +55,15 @@ function CreateRoom() {
           <RadioButton
             id="public"
             label="공개"
-            value="1"
+            value="false"
             name="roomType"
             onChange={radioChange}
-            checked={isPrivate === '1'}
+            checked={isPrivate === 'false'}
           />
           <RadioButton
             id="private"
             label="비공개"
-            value="0"
+            value="true"
             name="roomType"
             onChange={radioChange}
           />

@@ -10,19 +10,25 @@ import { useEffect, useState } from "react";
 import ReadyToGameModal from "../components/modal/ReadyModal";
 import Button from "../components/button/Button";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
 import { INicknamePossible } from "../types/dto";
+
 
 const ReadyToGame = () => {
   const params = useParams(); // params를 상수에 할당
   const [, setIsOpen] = useRecoilState(readyToGameModalState);
   const [nickname, setNickname] = useState<string>();
   const [possible, setPossible] = useState<boolean>();
+  const location = useLocation();
+  const roomInfo = { ...location.state };
+  
   const closeModal = () => {
     setIsOpen(false);
   };
   const openModal = () => {
     setIsOpen(true);
   };
+
   useEffect(() => {
     openModal();
   }, []);
