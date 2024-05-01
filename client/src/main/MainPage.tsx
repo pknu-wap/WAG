@@ -10,8 +10,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Stomp } from "@stomp/stompjs";
-import SockJS from "sockjs-client";
 
 type Props = {
   children?: React.ReactNode;
@@ -66,32 +64,13 @@ function MainPage({ dark }: ComponentProps) {
     }
   };
 
-  //웹소켓 만들기
-  const socketConnect = () => {
-    const socket = new SockJS("http://wwwag.co.kr:8080/ws");
-    stompClient = Stomp.over(socket);
-    stompClient.connect({}, onConnected);
-    // return Stomp.over(socket);
-  };
-
-  //STOMP 소켓 구독
-  async function onConnected() {
-    const roomId = await getRandomRoomId();
-    console.log("우리가 입장할 방 : " + roomId);
-    stompClient.subscribe(`/ReadyToGame/${roomId}`);
-  }
-
   //랜덤입장 버튼 클릭
   const handleRandomEnterClick = async () => {
     const roomId = await getRandomRoomId();
-    if(roomId != 'no available room')
-      {
-        socketConnect();
-        localStorage.setItem('roomId', roomId);
-        navigate(`/ReadyToGame/${roomId}`);
-      }
-    else
-      alert("입장가능한 방이 없습니다.");
+    if (roomId !== "no available room") {
+      localStorage.setItem("roomId", roomId);
+      navigate(`/ReadyToGame/${roomId}`);
+    } else alert("입장가능한 방이 없습니다.");
   };
 
   //코드입장시 버튼 클릭

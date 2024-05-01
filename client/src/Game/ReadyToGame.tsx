@@ -4,31 +4,26 @@ import { faUser } from "@fortawesome/free-regular-svg-icons";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import FullLayout from "../components/layout/FullLayout";
 import { useParams } from "react-router-dom";
-import { constSelector, useRecoilState } from "recoil";
+import { useRecoilState } from "recoil";
 import { readyToGameModalState } from "../recoil/modal";
 import { useEffect, useState } from "react";
 import ReadyToGameModal from "../components/modal/ReadyModal";
 import Button from "../components/button/Button";
 import axios from "axios";
 import { ChatMessage, INicknamePossible } from "../types/dto";
-import {Stomp} from "@stomp/stompjs";
+import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import ChatBubble from "../components/chatBubble/ChatBubble";
 import { useLocation } from "react-router-dom";
-import { INicknamePossible } from "../types/dto";
 
-var stompClient : any = null;   //웹소켓 변수 선언
-
-
-
-
+var stompClient: any = null; //웹소켓 변수 선언
 
 const ReadyToGame = () => {
   const params = useParams(); // params를 상수에 할당
   const [, setIsOpen] = useRecoilState(readyToGameModalState);
-  const [nickname, setNickname] = useState<string>('');
+  const [nickname, setNickname] = useState<string>("");
   const [possible, setPossible] = useState<boolean>();
-  const [myChatMessages, setMyChatMessages] = useState<string>()
+  const [myChatMessages, setMyChatMessages] = useState<string>();
   const location = useLocation();
   const roomInfo = { ...location.state };
 
@@ -38,14 +33,16 @@ const ReadyToGame = () => {
   const openModal = () => {
     setIsOpen(true);
   };
-  
- const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
+
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
 
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
   useEffect(() => {
-    openModal();
+    if (roomInfo.userCount === 1) {
+    } else {
+      openModal();
+    }
   }, []);
-
 
   // useEffect(() => {
   //   setNickname()
@@ -74,20 +71,18 @@ const ReadyToGame = () => {
     }
   };
   const nicknamePossibleClick = async () => {
-    if (nickname==='' || nickname.includes(' ')){
-      console.log('error with blank')
-      setPossible(false)
-      return ;
+    if (nickname === "" || nickname.includes(" ")) {
+      console.log("error with blank");
+      setPossible(false);
+      return;
     }
-    
+
     const data = await getNicknamePossible();
     setPossible(data.possible);
-    localStorage.setItem('nickName', data.nickName);
+    localStorage.setItem("nickName", data.nickName);
   };
 
-
-
-    //웹소켓 만들기
+  //웹소켓 만들기
   const socketConnect = () => {
     const socket = new SockJS("http://wwwag.co.kr:8080/ws");
     stompClient = Stomp.over(socket);
@@ -96,59 +91,60 @@ const ReadyToGame = () => {
 
   //STOMP 소켓 구독
   async function onConnected() {
-    const roomId = localStorage.getItem('roomId');
-    const nickName = localStorage.getItem('nickName');
+    const roomId = localStorage.getItem("roomId");
+    const nickName = localStorage.getItem("nickName");
     stompClient.subscribe(`/topic/public/${roomId}`, onMessageReceived);
-    stompClient.send("/app/chat.addUser",
-        {},
-        JSON.stringify({sender: nickName, type: 'JOIN', roomId: roomId})
-    )
+    stompClient.send(
+      "/app/chat.addUser",
+      {},
+      JSON.stringify({ sender: nickName, type: "JOIN", roomId: roomId })
+    );
   }
 
- //드가자 버튼 클릭시
+  //드가자 버튼 클릭시
   const handleGoIn = async () => {
     socketConnect();
     closeModal();
-    console.log(isOpen);
   };
 
-  function sendMessage(){
-
-    stompClient.send("/app/chat.sendMessage",
-    {},
-    JSON.stringify({sender: localStorage.getItem('nickName') ,content : myChatMessages,  messageType: 'CHAT', roomId: localStorage.getItem('roomId')})
-  )
-  console.log(myChatMessages);
+  function sendMessage() {
+    const roomId = localStorage.getItem("roomId");
+    const nickName = localStorage.getItem("nickName");
+    console.log(nickName);
+    console.log(roomId);
+    stompClient.send(
+      "/app/chat.sendMessage",
+      {},
+      JSON.stringify({
+        sender: localStorage.getItem("nickName"),
+        content: myChatMessages,
+        messageType: "CHAT",
+        roomId: localStorage.getItem("roomId"),
+      })
+    );
+    console.log(myChatMessages);
   }
 
-
-  function onMessageReceived(payload:any) {
+  function onMessageReceived(payload: any) {
     var message = JSON.parse(payload.body);
-  
-    console.log(message);
-    if(message.messageType === 'JOIN') {
-      console.log(message.sender + ' joined!');
-    } else if (message.type === 'LEAVE') {
-      message.content = message.sender + ' LEAVE!';
-      console.log(message);
-    } else if (message.messageType === 'CHAT') {
-      receiveChatMessage(message);
-      console.log("보내기")
-    }
 
-    else {
+    console.log(message);
+    if (message.messageType === "JOIN") {
+      console.log(message.sender + " joined!");
+    } else if (message.type === "LEAVE") {
+      message.content = message.sender + " LEAVE!";
+      console.log(message);
+    } else if (message.messageType === "CHAT") {
+      receiveChatMessage(message);
+      console.log("보내기");
+    } else {
       console.log(message);
     }
-  
   }
 
-  const receiveChatMessage = (message : ChatMessage) => {
+  const receiveChatMessage = (message: ChatMessage) => {
     setChatMessages([...chatMessages, message]); // 채팅 데이터 상태 업데이트
   };
-
-  // useEffect(() => {
-  //   receiveChatMessage()
-  // })
 
   return (
     <FullLayout>
@@ -227,8 +223,8 @@ const ReadyToGame = () => {
       </div>
       <div className="m-auto w-3/4 h-96 mt-10 overflow-y-scroll rounded-3xl shadow-xl flex flex-col p-5 tracking-wider bg-[#A072BC]">
         {chatMessages.map((m) => (
-            <ChatBubble message={m} />
-          ))}
+          <ChatBubble message={m} />
+        ))}
       </div>
 
       <div className="mt-10 flex flex-row justify-center algin-center">
@@ -240,11 +236,10 @@ const ReadyToGame = () => {
           type="text"
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-
             }
           }}
           onChange={(e) => {
-            setMyChatMessages(e.target.value)
+            setMyChatMessages(e.target.value);
           }}
         ></input>
         <Button size="sm" disabled={false} onClick={sendMessage}>
@@ -287,9 +282,7 @@ const ReadyToGame = () => {
 
           <div className="m-auto flex justify-end items-end">
             {possible ? (
-
               <Button disabled={false} size="lg" onClick={handleGoIn}>
-
                 드가자
               </Button>
             ) : (
