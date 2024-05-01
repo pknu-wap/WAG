@@ -4,7 +4,7 @@ import RadioButton from '../components/radioButton/RadioButton';
 import FullLayout from "../components/layout/FullLayout";
 
 function CreateRoom() {
-  const [isPrivate, setIsPrivate] = useState<string | null>("1"); //일단은 공개방을 default로
+  const [isPrivate, setIsPrivate] = useState<string | null>("false"); //일단은 공개방을 default로
 
   const radioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setIsPrivate(event.target.value);
@@ -29,15 +29,15 @@ function CreateRoom() {
           <RadioButton
             id="public"
             label="공개"
-            value="1"
+            value="false"
             name="roomType"
             onChange={radioChange}
-            checked={isPrivate === '1'}
+            checked={isPrivate === 'false'}
           />
           <RadioButton
             id="private"
             label="비공개"
-            value="0"
+            value="true"
             name="roomType"
             onChange={radioChange}
           />
