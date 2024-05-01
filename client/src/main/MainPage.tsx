@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Button from "../components/button/Button";
 import FullLayout from "../components/layout/FullLayout";
 import { ConnectedProps, connect } from "react-redux";
@@ -10,8 +10,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { IGetRoomIdCode } from "../types/dto";
-import { io } from "socket.io-client";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import * as StompJs from "@stomp/stompjs";
 
 type Props = {
   children?: React.ReactNode;
@@ -25,6 +25,8 @@ const connector = connect(
 );
 
 function MainPage({ dark }: ComponentProps) {
+  const client = useRef<any>({});
+  const navigate = useNavigate(); // useNavigate 훅을 컴포넌트 내부에서 사용
   const [theme, setTheme] = useState(localStorage.theme);
   const [enterCode, setEnterCode] = useState<number>();
   const [, setIsOpen] = useRecoilState(modalState);
@@ -44,10 +46,11 @@ function MainPage({ dark }: ComponentProps) {
   //   setRoomIdCode(enterCodeData)
   // }, [enterCodeData])
 
+  //입장코드로 입력으로 roomid받기
   const getRoomIdCode = async (): Promise<IGetRoomIdCode> => {
     try {
       const response = await axios.get<IGetRoomIdCode>(
-        "http://182.215.121.80/roomId/code",
+        "http://wwwag.co.kr:8080/roomId/code",
         {
           params: {
             enterCode: enterCode,
@@ -60,18 +63,58 @@ function MainPage({ dark }: ComponentProps) {
       throw e;
     }
   };
+
+  //빠른 입장으로 roomid받기
+  const getRandomRoomId = async () => {
+    try {
+      const response = await axios.get("http://wwwag.co.kr:8080/roomId");
+      return response.data; // 서버로부터 받은 데이터 반환
+    } catch (error) {
+      console.error("랜덤 입장 요청 중 오류 발생:", error);
+      throw error;
+    }
+  };
+
+  const subscribe = async () => {
+    try {
+      const roomId = await getRandomRoomId(); // API 호출
+      if (roomId) {
+        const connect = () => {
+          client.current = new StompJs.Client({
+            brokerURL: "ws://wwwag.co.kr:8080/ws",
+            onConnect: () => {
+              console.log("구독 전 roomId : " + roomId);
+              client.current.subscribe(`/topic/public/${roomId}`, () => {});
+              console.log("구독 성공");
+              navigate(`/ReadyToGame/${roomId}`);
+            },
+          });
+          client.current.activate();
+        };
+        connect();
+      } else {
+        console.log("roomId 없음");
+      }
+      connect();
+    } catch (error) {
+      console.error("랜덤 입장 처리 중 오류 발생:", error);
+    }
+  };
+  //빠른 입장 버튼 클릭 이벤트 핸들러
+  const handleRandomEnterClick = async () => {
+    subscribe();
+    console.log("구독 성공22222");
+  };
+
   const buttonCheckHandler = () => {
     const roomIdFromCode = getRoomIdCode();
-    const socket = io(`http://182.215.121.80/topic/public/${roomIdFromCode}`); //해당 방으로 소켓 연결
+    // const socket = io(`http://wwwag.co.kr:8080/topic/public/`); //해당 방으로 소켓 연결
     console.log(roomIdFromCode);
   };
-  const navigate = useNavigate(); // useNavigate 훅을 컴포넌트 내부에서 사용
 
   const handleCreateRoomClick = () => {
-    navigate('/CreateRoom'); // 페이지 이동 처리
+    navigate("/CreateRoom"); // 페이지 이동 처리
   };
-
-
 
   useEffect(() => {
     if (enterCode === undefined || Number.isNaN(enterCode)) {
@@ -97,11 +140,15 @@ function MainPage({ dark }: ComponentProps) {
         <img src="images/WAG_dark.2.png" alt="logo dark mode"></img>
       )}
       <div className="flex flex-col items-center justify-center space-y-5">
-        <Button size="lg" onClick={openModal}>
-          랜덤 참가
+        <Button size="lg" onClick={handleRandomEnterClick}>
+          랜덤 입장
         </Button>
-        <Button size="lg" onClick={handleCreateRoomClick}>방 생성</Button>
-        <Button size="lg">방 참가</Button>
+        <Button size="lg" onClick={handleCreateRoomClick}>
+          방 생성
+        </Button>
+        <Button size="lg" onClick={openModal}>
+          입장코드 입력
+        </Button>
       </div>
       <Modal onRequestClose={closeModal}>
         <div className="flex flex-col justify-between">
