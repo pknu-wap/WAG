@@ -6,6 +6,7 @@ module.exports = {
     colors: {
       light: {
         bg: "#FFE5E5",
+        chat: "#FFCCFF",
         text: "#262626",
         btn: "#B931FC",
         btn_hover: "rgba(185,49,252, 0.9)",

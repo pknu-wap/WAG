@@ -1,41 +1,24 @@
+// 닉네임 중복확인 get
+export interface INicknamePossibleParams {
+  roomId: number;
+  nickname?: string;
+}
+
 // 닉네임 중복확인 get response
 export interface INicknamePossible {
-    isPossible: boolean;
-    nickName: string
+  possible: boolean;
+  nickName: string;
 }
 
 // 닉네임 get
 export interface IGetNickname {
-    nickname: string;
+  nickname: string;
 }
 
 // 코드로 방 입장
 export interface IGetRoomIdCodeParams {
-    enterCode?: number;
+  enterCode?: number;
 }
 export interface IGetRoomIdCode {
-    roomId: number;
-}
-
-// 방 정보 get
-export interface IGetRoomInfo {
-    nickname: string;
-}
-
-interface IUserDto {
-    isCaptain: boolean;
-    userNickname: string;
-    profileImage: string;
-}
-
-// 방 정보 get response
-export interface IGetRoomInfoResponse {
-    roomId: number;
-    isPrivateRoom: boolean;
-    roomEnterCode: number;
-    gameStatus: boolean;
-    useCount: number;
-    userList: {
-        userDto: IUserDto
-    }[]
+  roomId: number;
 }

@@ -96,6 +96,7 @@ function MainPage({ dark }: ComponentProps) {
 
   //랜덤입장 버튼 클릭
   const handleRandomEnterClick = async () => {
+
     const roomId = await getRandomRoomId();
     if(roomId != 'no available room')
       {
@@ -151,6 +152,7 @@ function MainPage({ dark }: ComponentProps) {
           입장코드 입력
         </Button>
       </div>
+
       <Modal onRequestClose={closeModal}>
         <div className="flex flex-col justify-between">
           <div className="my-5 flex flex-row justify-between items-center">
