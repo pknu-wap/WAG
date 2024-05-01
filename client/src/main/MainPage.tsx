@@ -78,8 +78,6 @@ function MainPage({ dark }: ComponentProps) {
   const subscribe = async () => {
     try {
       const roomId = await getRandomRoomId(); // API 호출
-      console.log(roomId);
-      console.log(typeof roomId);
       if (Number(roomId)) {
         const connect = () => {
           client.current = new StompJs.Client({

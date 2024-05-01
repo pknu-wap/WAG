@@ -38,7 +38,6 @@ interface ModalProps {
 
 const Modal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
   const [isOpen] = useRecoilState(modalState);
-  console.log("모달 컴포넌트 : " + isOpen);
 
   // 모달을 닫을 때 onRequestClose 함수 호출
   const closeModal = () => {

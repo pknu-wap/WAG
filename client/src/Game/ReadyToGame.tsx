@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import ReadyToGameModal from "../components/modal/ReadyModal";
 import Button from "../components/button/Button";
 import axios from "axios";
-import { INicknamePossible, INicknamePossibleParams } from "../types/dto";
+import { INicknamePossible } from "../types/dto";
 
 const ReadyToGame = () => {
   const params = useParams(); // params를 상수에 할당
@@ -19,16 +19,13 @@ const ReadyToGame = () => {
   const [possible, setPossible] = useState<boolean>();
   const closeModal = () => {
     setIsOpen(false);
-    console.log("close");
   };
   const openModal = () => {
     setIsOpen(true);
-    console.log(isOpen);
-    console.log("open");
   };
   useEffect(() => {
     openModal();
-  }, []);
+  });
   // useEffect(() => {
   //   setNickname()
   // }, [nickname])
@@ -40,8 +37,6 @@ const ReadyToGame = () => {
   // };
   const GetNicknamePossible = async () => {
     try {
-      console.log(nickname);
-
       const response = await axios.get<INicknamePossible>(
         "http://wwwag.co.kr:8080/nickname/possible",
         {
@@ -191,11 +186,24 @@ const ReadyToGame = () => {
             type="error"
             required
             placeholder={"닉네임을 입력해주세요"}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                NicknamePossibleClick();
+              }
+            }}
             onChange={(e) => {
               setNickname(e.target.value);
               setPossible(false);
             }}
           ></input>
+          <div>
+            {possible ? (
+              <div className="text-[#33B3FF]">사용가능</div>
+            ) : (
+              <div className="text-[#FF0000]">다른 닉네임을 입력해주세요</div>
+            )}
+          </div>
+
           <Button size="md" disabled={false} onClick={NicknamePossibleClick}>
             닉네임 확인
           </Button>

@@ -41,7 +41,6 @@ const ReadyToGameModal: React.FC<ModalProps> = ({
   onRequestClose,
 }) => {
   const [isOpen] = useRecoilState(readyToGameModalState);
-  console.log("모달 컴포넌트 : " + isOpen);
 
   // 모달을 닫을 때 onRequestClose 함수 호출
   const closeModal = () => {
@@ -53,7 +52,7 @@ const ReadyToGameModal: React.FC<ModalProps> = ({
       isOpen={isOpen}
       style={customModalStyles} // 스타일 적용
       onRequestClose={closeModal} // 모달 창 닫기 요청을 받을 때 호출
-      shouldCloseOnOverlayClick={true} // 외부 클릭으로 모달 닫기 활성화
+      shouldCloseOnOverlayClick={false} // 외부 클릭으로 모달 닫기 활성화
     >
       <div className="modal-content">{children}</div>
     </ReactModal>
