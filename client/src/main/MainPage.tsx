@@ -11,11 +11,14 @@ import { faX } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { IGetRoomIdCode } from "../types/dto";
 import { useNavigate } from "react-router-dom";
-import * as StompJs from "@stomp/stompjs";
+import {Stomp} from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 type Props = {
   children?: React.ReactNode;
 };
+
+var stompClient : any = null;   //웹소켓 변수 선언
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 type ComponentProps = Props & PropsFromRedux;
@@ -67,48 +70,46 @@ function MainPage({ dark }: ComponentProps) {
   //빠른 입장으로 roomid받기
   const getRandomRoomId = async () => {
     try {
-      const response = await axios.get("http://wwwag.co.kr:8080/roomId");
-      return response.data; // 서버로부터 받은 데이터 반환
+      const response = await axios.get("http://wwwag.co.kr:8080/roomId")
+      return response.data;
     } catch (error) {
       console.error("랜덤 입장 요청 중 오류 발생:", error);
       throw error;
     }
   };
 
-  const subscribe = async () => {
-    try {
-      const roomId = await getRandomRoomId(); // API 호출
-      if (roomId) {
-        const connect = () => {
-          client.current = new StompJs.Client({
-            brokerURL: "ws://wwwag.co.kr:8080/ws",
-            onConnect: () => {
-              console.log("구독 전 roomId : " + roomId);
-              client.current.subscribe(`/topic/public/${roomId}`, () => {});
-              console.log("구독 성공");
-              navigate(`/ReadyToGame/${roomId}`);
-            },
-          });
-          client.current.activate();
-        };
-        connect();
-      } else {
-        console.log("roomId 없음");
-      }
-      connect();
-    } catch (error) {
-      console.error("랜덤 입장 처리 중 오류 발생:", error);
-    }
-  };
-  //빠른 입장 버튼 클릭 이벤트 핸들러
-  const handleRandomEnterClick = async () => {
-    subscribe();
-    console.log("구독 성공22222");
+
+  //웹소켓 만들기
+ const socketConnect = () => {
+    const socket = new SockJS("http://wwwag.co.kr:8080/ws");
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, onConnected);
+    // return Stomp.over(socket);
   };
 
+  //STOMP 소켓 구독
+  async function onConnected() {
+    const roomId = await getRandomRoomId();
+    console.log("우리가 입장할 방 : " + roomId)
+    stompClient.subscribe(`/ReadyToGame/${roomId}`);
+}
+
+  //랜덤입장 버튼 클릭
+  const handleRandomEnterClick = async () => {
+    const roomId = await getRandomRoomId();
+    if(roomId != 'no available room')
+      {
+        socketConnect();
+        navigate(`/ReadyToGame/${roomId}`);
+      }
+    else
+      alert("입장가능한 방이 없습니다.");
+  };
+
+  //코드입장시 버튼 클릭
   const buttonCheckHandler = () => {
     const roomIdFromCode = getRoomIdCode();
-    // const socket = io(`http://wwwag.co.kr:8080/topic/public/`); //해당 방으로 소켓 연결
+    socketConnect();
     console.log(roomIdFromCode);
   };
 
