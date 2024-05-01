@@ -101,6 +101,7 @@ function MainPage({ dark }: ComponentProps) {
     if(roomId != 'no available room')
       {
         socketConnect();
+        localStorage.setItem('roomId', roomId);
         navigate(`/ReadyToGame/${roomId}`);
       }
     else

@@ -7,5 +7,5 @@ export const modalState = atom<boolean>({
 
 export const readyToGameModalState = atom<boolean>({
   key: "gameModalState",
-  default: true,
+  default: false,
 });
