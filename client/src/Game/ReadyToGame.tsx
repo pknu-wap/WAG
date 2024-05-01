@@ -14,16 +14,24 @@ import { ChatMessage, INicknamePossible } from "../types/dto";
 import {Stomp} from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import ChatBubble from "../components/chatBubble/ChatBubble";
-
+import { useLocation } from "react-router-dom";
+import { INicknamePossible } from "../types/dto";
 
 var stompClient : any = null;   //웹소켓 변수 선언
 
+
+
+
+
 const ReadyToGame = () => {
   const params = useParams(); // params를 상수에 할당
-  const [isOpen, setIsOpen] = useRecoilState(readyToGameModalState);
-  const [nickname, setNickname] = useState<string>();
+  const [, setIsOpen] = useRecoilState(readyToGameModalState);
+  const [nickname, setNickname] = useState<string>('');
   const [possible, setPossible] = useState<boolean>();
   const [myChatMessages, setMyChatMessages] = useState<string>()
+  const location = useLocation();
+  const roomInfo = { ...location.state };
+
   const closeModal = () => {
     setIsOpen(false);
   };
@@ -48,7 +56,7 @@ const ReadyToGame = () => {
   //   roomId: Number(params.roomId),
   //   nickname: nickname,
   // };
-  const GetNicknamePossible = async () => {
+  const getNicknamePossible = async () => {
     try {
       const response = await axios.get<INicknamePossible>(
         "http://wwwag.co.kr:8080/nickname/possible",
@@ -65,8 +73,14 @@ const ReadyToGame = () => {
       throw error;
     }
   };
-  const NicknamePossibleClick = async () => {
-    const data = await GetNicknamePossible();
+  const nicknamePossibleClick = async () => {
+    if (nickname==='' || nickname.includes(' ')){
+      console.log('error with blank')
+      setPossible(false)
+      return ;
+    }
+    
+    const data = await getNicknamePossible();
     setPossible(data.possible);
     localStorage.setItem('nickName', data.nickName);
   };
@@ -251,7 +265,7 @@ const ReadyToGame = () => {
             placeholder={"닉네임을 입력해주세요"}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                NicknamePossibleClick();
+                nicknamePossibleClick();
               }
             }}
             onChange={(e) => {
@@ -267,13 +281,15 @@ const ReadyToGame = () => {
             )}
           </div>
 
-          <Button size="md" disabled={false} onClick={NicknamePossibleClick}>
+          <Button size="md" disabled={false} onClick={nicknamePossibleClick}>
             닉네임 확인
           </Button>
 
           <div className="m-auto flex justify-end items-end">
             {possible ? (
+
               <Button disabled={false} size="lg" onClick={handleGoIn}>
+
                 드가자
               </Button>
             ) : (
