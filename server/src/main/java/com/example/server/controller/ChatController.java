@@ -85,6 +85,7 @@ public class ChatController {
         String sender = chatMessage.getSender();
         headerAccessor.getSessionAttributes().put("username", sender);
         headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
+        messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getRoomId(), chatMessage);
 
         return chatMessage;
     }
