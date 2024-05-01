@@ -1,7 +1,7 @@
 import React from "react";
 import ReactModal from "react-modal";
 import { useRecoilState } from "recoil";
-import { modalState } from "../../recoil/modal";
+import { readyToGameModalState } from "../../recoil/modal";
 
 const customModalStyles: ReactModal.Styles = {
   overlay: {
@@ -36,8 +36,11 @@ interface ModalProps {
   onRequestClose: () => void;
 }
 
-const Modal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
-  const [isOpen] = useRecoilState(modalState);
+const ReadyToGameModal: React.FC<ModalProps> = ({
+  children,
+  onRequestClose,
+}) => {
+  const [isOpen] = useRecoilState(readyToGameModalState);
   console.log("모달 컴포넌트 : " + isOpen);
 
   // 모달을 닫을 때 onRequestClose 함수 호출
@@ -57,4 +60,4 @@ const Modal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
   );
 };
 
-export default Modal;
+export default ReadyToGameModal;

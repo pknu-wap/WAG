@@ -4,10 +4,64 @@ import { faUser } from "@fortawesome/free-regular-svg-icons";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import FullLayout from "../components/layout/FullLayout";
 import { useParams } from "react-router-dom";
+import { useRecoilState } from "recoil";
+import { readyToGameModalState } from "../recoil/modal";
+import { useEffect, useState } from "react";
+import ReadyToGameModal from "../components/modal/ReadyModal";
+import Button from "../components/button/Button";
+import axios from "axios";
+import { INicknamePossible, INicknamePossibleParams } from "../types/dto";
 
 const ReadyToGame = () => {
   const params = useParams(); // params를 상수에 할당
-  console.log(params.roomId);
+  const [isOpen, setIsOpen] = useRecoilState(readyToGameModalState);
+  const [nickname, setNickname] = useState<string>();
+  const [possible, setPossible] = useState<boolean>();
+  const closeModal = () => {
+    setIsOpen(false);
+    console.log("close");
+  };
+  const openModal = () => {
+    setIsOpen(true);
+    console.log(isOpen);
+    console.log("open");
+  };
+  useEffect(() => {
+    openModal();
+  }, []);
+  // useEffect(() => {
+  //   setNickname()
+  // }, [nickname])
+
+  //빠른 입장으로 roomid받기
+  // const nicknameParams = {
+  //   roomId: Number(params.roomId),
+  //   nickname: nickname,
+  // };
+  const GetNicknamePossible = async () => {
+    try {
+      console.log(nickname);
+
+      const response = await axios.get<INicknamePossible>(
+        "http://wwwag.co.kr:8080/nickname/possible",
+        {
+          params: {
+            roomId: Number(params.roomId),
+            nickname: nickname,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("랜덤 입장 요청 중 오류 발생:", error);
+      throw error;
+    }
+  };
+  const NicknamePossibleClick = async () => {
+    const data = await GetNicknamePossible();
+    setPossible(data.possible);
+  };
+
   return (
     <FullLayout>
       <div className="flex flex-row justify-between items-center mt-10 mx-7">
@@ -79,38 +133,38 @@ const ReadyToGame = () => {
         </div>
       </div>
       <div className="m-auto mt-16 flex justify-center items-center relative">
-        <div className="w-1/2 h-16 shadow-lg flex justify-center items-center rounded-lg bg-[#A072BC]">
+        <div className="w-1/2 h-16 shadow-lg text-[#353535] flex justify-center items-center rounded-lg bg-[#FFCCFF] shadow-xl">
           <div>Ready To Game</div>
         </div>
       </div>
-      <div className="m-auto w-3/4 h-96 mt-10 overflow-y-scroll rounded-3xl shadow-xl flex flex-col p-5 tracking-wider bg-[#572991]">
+      <div className="m-auto w-3/4 h-96 mt-10 overflow-y-scroll rounded-3xl shadow-xl flex flex-col p-5 tracking-wider bg-[#A072BC]">
         <div className="mt-1 flex flex-col items-start">
           <span className="text-[#ffffff]">user 2</span>
-          <span className="w-auto h-auto px-4 rounded-lg rounded-tl-none bg-light-btn dark:bg-dark-btn">
+          <span className="w-auto h-auto px-4 rounded-lg rounded-tl-none bg-light-chat dark:bg-dark-btn">
             ㅇㅇ 사람아님
           </span>
         </div>
         <div className="mt-1 flex flex-col items-start">
           <span className="text-[#ffffff]">user 3</span>
-          <span className="w-auto h-auto px-4 rounded-lg rounded-tl-none bg-light-btn dark:bg-dark-btn">
+          <span className="w-auto h-auto px-4 rounded-lg rounded-tl-none bg-light-chat dark:bg-dark-btn">
             근데 너도 사람 아니잖아
           </span>
         </div>
         <div className="mt-1 flex flex-col items-end">
           <span className="text-[#ffffff]">Me</span>
-          <span className="w-auto h-auto px-4 rounded-lg rounded-tr-none bg-light-btn dark:bg-dark-btn">
+          <span className="w-auto h-auto px-4 rounded-lg rounded-tr-none bg-light-chat dark:bg-dark-btn">
             헉
           </span>
         </div>
         <div className="mt-1 flex flex-col items-start">
           <span className="text-[#ffffff]">user 5</span>
-          <span className="w-auto h-auto px-4 rounded-lg rounded-tl-none bg-light-btn dark:bg-dark-btn">
+          <span className="w-auto h-auto px-4 rounded-lg rounded-tl-none bg-light-chat dark:bg-dark-btn">
             ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
           </span>
         </div>
         <div className="mt-1 flex flex-col items-start">
           <span className="text-[#ffffff]">user 6</span>
-          <span className="w-auto h-auto px-4 rounded-lg rounded-tl-none bg-light-btn dark:bg-dark-btn">
+          <span className="w-auto h-auto px-4 rounded-lg rounded-tl-none bg-light-chat dark:bg-dark-btn">
             아니 게임을 하라고
           </span>
         </div>
@@ -125,6 +179,40 @@ const ReadyToGame = () => {
           type="text"
         ></input>
       </div>
+
+      <ReadyToGameModal onRequestClose={closeModal}>
+        <div className="flex flex-col justify-between">
+          <div className="my-5 flex flex-row justify-between items-center">
+            <div className="text-4xl">JOIN</div>
+          </div>
+
+          <input
+            className="w-3/4 h-12 mb-5 rounded shadow-md pl-5 text-[#000000]"
+            type="error"
+            required
+            placeholder={"닉네임을 입력해주세요"}
+            onChange={(e) => {
+              setNickname(e.target.value);
+              setPossible(false);
+            }}
+          ></input>
+          <Button size="md" disabled={false} onClick={NicknamePossibleClick}>
+            닉네임 확인
+          </Button>
+
+          <div className="m-auto flex justify-end items-end">
+            {possible ? (
+              <Button disabled={false} size="lg">
+                드가자
+              </Button>
+            ) : (
+              <Button className="" disabled={true} size="lg">
+                아직 멀었다
+              </Button>
+            )}
+          </div>
+        </div>
+      </ReadyToGameModal>
     </FullLayout>
   );
 };

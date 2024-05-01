@@ -78,7 +78,9 @@ function MainPage({ dark }: ComponentProps) {
   const subscribe = async () => {
     try {
       const roomId = await getRandomRoomId(); // API 호출
-      if (roomId) {
+      console.log(roomId);
+      console.log(typeof roomId);
+      if (Number(roomId)) {
         const connect = () => {
           client.current = new StompJs.Client({
             brokerURL: "ws://wwwag.co.kr:8080/ws",
@@ -102,8 +104,8 @@ function MainPage({ dark }: ComponentProps) {
   };
   //빠른 입장 버튼 클릭 이벤트 핸들러
   const handleRandomEnterClick = async () => {
-    subscribe();
-    console.log("구독 성공22222");
+    //subscribe();
+    navigate(`/ReadyToGame/2`);
   };
 
   const buttonCheckHandler = () => {
@@ -150,6 +152,7 @@ function MainPage({ dark }: ComponentProps) {
           입장코드 입력
         </Button>
       </div>
+
       <Modal onRequestClose={closeModal}>
         <div className="flex flex-col justify-between">
           <div className="my-5 flex flex-row justify-between items-center">
