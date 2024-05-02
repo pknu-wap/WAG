@@ -56,7 +56,7 @@ public class WebSocketEventListener {
             room.setUserCount(room.getUserCount() - 1);  // 유저 수 -1
 
             ChatRoomInfoMessage chatRoomInfoMessage = new ChatRoomInfoMessage();
-            chatRoomInfoMessage.setContent(username + " 이 방을 떠났습니다. ");
+            chatRoomInfoMessage.setContent(username + " 님이 방을 떠났습니다. ");
 
             if(room.getUserCount() == 0){  // 나간 사람이 마지막 사람이라면 방 삭제
                 roomRepository.delete(room);
