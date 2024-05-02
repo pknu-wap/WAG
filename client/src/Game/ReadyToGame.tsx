@@ -23,7 +23,7 @@ const ReadyToGame = () => {
   const [, setIsOpen] = useRecoilState(readyToGameModalState);
   const [nickname, setNickname] = useState<string>("");
   const [possible, setPossible] = useState<boolean>();
-  const [myChatMessages, setMyChatMessages] = useState<string>();
+  const [myChatMessages, setMyChatMessages] = useState<string>("");
   const location = useLocation();
   const roomInfo = { ...location.state };
 
@@ -123,6 +123,7 @@ const ReadyToGame = () => {
       })
     );
     console.log(myChatMessages);
+    setMyChatMessages("");
   }
 
   function onMessageReceived(payload: any) {
@@ -234,8 +235,10 @@ const ReadyToGame = () => {
         <input
           className="w-3/4 rounded-2xl shadow-md pl-5 text-[#000000]"
           type="text"
+          value={myChatMessages}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
+              sendMessage();
             }
           }}
           onChange={(e) => {
