@@ -9,11 +9,15 @@ import Header from "./components/layout/Header";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { RecoilRoot } from "recoil";
+import ReactModal from 'react-modal'; 
 
 const queryClient = new QueryClient();
-const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
-);
+const rootElement = document.getElementById("root") as HTMLElement; // id가 'root'인 엘리먼트를 찾는 코드를 변수에 할당
+const root = ReactDOM.createRoot(rootElement);
+ReactModal.setAppElement(rootElement); //rootElement를 ReactModal의 app 엘리먼트로 설정
+
+
+
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
