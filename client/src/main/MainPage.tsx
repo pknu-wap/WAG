@@ -15,8 +15,6 @@ type Props = {
   children?: React.ReactNode;
 };
 
-var stompClient: any = null; //웹소켓 변수 선언
-
 type PropsFromRedux = ConnectedProps<typeof connector>;
 type ComponentProps = Props & PropsFromRedux;
 const connector = connect(

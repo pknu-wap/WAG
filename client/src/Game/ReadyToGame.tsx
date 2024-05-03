@@ -26,7 +26,6 @@ const ReadyToGame = () => {
   const [myChatMessages, setMyChatMessages] = useState<string>("");
   const location = useLocation();
   const roomInfo = { ...location.state };
-  const [isCaptin, setIsCaptin] = useState(roomInfo.isCaptin);
 
   const closeModal = () => {
     setIsOpen(false);
@@ -39,14 +38,13 @@ const ReadyToGame = () => {
 
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
   useEffect(() => {
-    if ('isCaptin' in roomInfo){
-      if(roomInfo.isCaptin ===true){
-        console.log('Captain is in')
+    if ("isCaptin" in roomInfo) {
+      if (roomInfo.isCaptin === true) {
+        console.log("Captain is in");
         captinSocket();
         roomInfo.isCaptin = false;
       }
-    }
-    else {
+    } else {
       if (roomInfo.userCount === 1) {
       } else {
         openModal();
@@ -98,7 +96,7 @@ const ReadyToGame = () => {
 
   //방장 웹소켓 만들기
   const socketCaptinConnect = () => {
-    console.log("방장 구독")
+    console.log("방장 구독");
     const socket = new SockJS("http://wwwag.co.kr:8080/ws");
     stompClient = Stomp.over(socket);
     stompClient.connect({}, onCaptinConnected);
@@ -141,10 +139,10 @@ const ReadyToGame = () => {
   };
 
   function sendMessage() {
-    if (myChatMessages.trim() === '') {
-      alert('채팅 메시지를 입력해주세요.');
+    if (myChatMessages.trim() === "") {
+      alert("채팅 메시지를 입력해주세요.");
       return;
-  }
+    }
     const roomId = localStorage.getItem("roomId");
     const nickName = localStorage.getItem("nickName");
     console.log(nickName);
@@ -276,10 +274,10 @@ const ReadyToGame = () => {
           placeholder="채팅 메세지를 입력해주세요"
           value={myChatMessages}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && myChatMessages.trim() !== '') {
+            if (e.key === "Enter" && myChatMessages.trim() !== "") {
               sendMessage();
-            } else if (e.key === "Enter" && myChatMessages.trim() === '') {
-              alert('채팅 메시지를 입력해주세요');
+            } else if (e.key === "Enter" && myChatMessages.trim() === "") {
+              alert("채팅 메시지를 입력해주세요");
             }
           }}
           onChange={(e) => {
