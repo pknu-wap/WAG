@@ -11,8 +11,11 @@ import SockJS from "sockjs-client";
 var stompClient: any = null; //웹소켓 변수 선언
 
 function CreateRoom() {
-  const [isPrivate, setIsPrivate] = useState<boolean | null>(false); //일단은 공개방을 default로
-  const [nickName, setNickname] = useState<string>('');
+
+  const [isPrivate, setIsPrivate] = useState<string | null>("false"); //일단은 공개방을 default로
+  const [nickName, setNickname] = useState<string>();
+  const [isCaptin, setIsCaptin] = useState<string | null>("true");
+
   const navigate = useNavigate();
 
   const radioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,35 +36,41 @@ function CreateRoom() {
       const roomId = response.data.roomId;
       localStorage.setItem("nickName", nickName ?? "");
       localStorage.setItem("roomId", roomId.toString());
-      socketConnect();
+      // socketConnect();
+      const newResponse = {
+        isPrivateRoom: response.data.privateRoom,
+        userNickName: nickName,
+        isCaptin: true,
+        roomId: roomId,
+      };
 
-      navigate(`/ReadyToGame/${roomId}`, { state: response.data });
+      navigate(`/ReadyToGame/${roomId}`, { state: newResponse });
     } catch (error) {
       console.error("랜덤 입장 요청 중 오류 발생:", error);
       throw error;
     }
   };
 
-  //웹소켓 만들기
-  const socketConnect = () => {
-    const socket = new SockJS("http://wwwag.co.kr:8080/ws");
-    stompClient = Stomp.over(socket);
-    stompClient.connect({}, onConnected);
-  };
+  // //웹소켓 만들기
+  // const socketConnect = () => {
+  //   const socket = new SockJS("http://wwwag.co.kr:8080/ws");
+  //   stompClient = Stomp.over(socket);
+  //   stompClient.connect({}, onConnected);
+  // };
 
-  //STOMP 소켓 구독
-  async function onConnected() {
-    const roomId = localStorage.getItem("roomId");
-    const nickName = localStorage.getItem("nickName");
-    console.log(nickName);
-    console.log(roomId);
-    stompClient.subscribe(`/topic/public/${roomId}`);
-    stompClient.send(
-      "/app/chat.addCaptinUser",
-      {},
-      JSON.stringify({ sender: nickName, type: "JOIN", roomId: roomId })
-    );
-  }
+  // //STOMP 소켓 구독
+  // async function onConnected() {
+  //   const roomId = localStorage.getItem("roomId");
+  //   const nickName = localStorage.getItem("nickName");
+  //   console.log(nickName);
+  //   console.log(roomId);
+  //   stompClient.subscribe(`/topic/public/${roomId}`);
+  //   stompClient.send(
+  //     "/app/chat.addCaptinUser",
+  //     {},
+  //     JSON.stringify({ sender: nickName, type: "JOIN", roomId: roomId })
+  //   );
+  // }
 
   const renderButton = () => {
     if (isPrivate === null) {
