@@ -131,9 +131,10 @@ const ReadyToGame = () => {
 
     console.log(message);
     if (message.messageType === "JOIN") {
+      receiveChatMessage(message);
       console.log(message.sender + " joined!");
-    } else if (message.type === "LEAVE") {
-      message.content = message.sender + " LEAVE!";
+    } else if (message.messageType === "LEAVE") {
+      receiveChatMessage(message);
       console.log(message);
     } else if (message.messageType === "CHAT") {
       receiveChatMessage(message);

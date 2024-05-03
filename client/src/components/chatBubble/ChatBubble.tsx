@@ -21,11 +21,23 @@ const ChatBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
     return (
         <div id="chat-container" className="mt-1 overflow-auto h-64 flex flex-col">
             {chatMessages.map((msg, index) => (
-                <div key={index} className={`flex flex-col items-${msg.sender === myName ? 'end' : 'start'}`}>
-                    <span className="text-white">{msg.sender}</span>
-                    <span className={`w-auto h-auto px-4 rounded-lg rounded-tl-none bg-light-chat dark:bg-dark-btn`}>
-                        {msg.content}
-                    </span>
+                <div key={index} className={`flex flex-col items-${msg.sender === myName ? 'end' : msg.messageType === 'JOIN' || msg.messageType === 'LEAVE' ? 'middle' : 'start'}`}>
+                     {msg.messageType === 'JOIN' || msg.messageType === 'LEAVE' ? (
+                        <>
+                            {msg.sender !== myName ? (
+                                <>
+                                <span className="text-white">{msg.content}</span>
+                                </>
+                            ) :(<></>)}
+                        </>
+                    ) : (
+                        <>
+                            <span className="text-white">{msg.sender}</span>
+                            <span className={`w-auto h-auto px-4 rounded-lg rounded-tl-none bg-light-chat dark:bg-dark-btn`}>
+                                {msg.content}
+                            </span>
+                        </>
+                    )}
                 </div>
             ))}
         </div>
