@@ -66,7 +66,7 @@ public class WebSocketEventListener {
                 RoomUser nextCaption = roomUserRepository.findNextCaptinByRandom(roomId).get();
                 nextCaption.setCaptain(true);
                 roomUserRepository.save(nextCaption);
-                chatRoomInfoMessage.setContent(username + " 이 방을 떠나 " + nextCaption.getRoomNickname() + " 이 방장이 되었습니다.");
+                chatRoomInfoMessage.setContent(username + " 님이 방을 떠나 " + nextCaption.getRoomNickname() + " 님이 방장이 되었습니다.");
             }
 
             roomRepository.save(room);  // 룸 정보 저장.
