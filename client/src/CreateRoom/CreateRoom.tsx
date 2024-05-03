@@ -12,7 +12,7 @@ var stompClient: any = null; //웹소켓 변수 선언
 
 function CreateRoom() {
 
-  const [isPrivate, setIsPrivate] = useState<string | null>("false"); //일단은 공개방을 default로
+  const [isPrivate, setIsPrivate] = useState<boolean | null>(false); //일단은 공개방을 default로
   const [nickName, setNickname] = useState<string>();
   const [isCaptin, setIsCaptin] = useState<string | null>("true");
 
