@@ -141,6 +141,10 @@ const ReadyToGame = () => {
   };
 
   function sendMessage() {
+    if (myChatMessages.trim() === '') {
+      alert('채팅 메시지를 입력해주세요.');
+      return;
+  }
     const roomId = localStorage.getItem("roomId");
     const nickName = localStorage.getItem("nickName");
     console.log(nickName);
@@ -251,7 +255,7 @@ const ReadyToGame = () => {
           <div className="w-0 h-6 mt-1 rounded-md bg-[#9FDDFF]"></div>
         </div>
       </div>
-      <div className="m-auto mt-16 flex justify-center items-center relative">
+      <div className="m-auto mt-8 flex justify-center items-center relative">
         <div className="w-1/2 h-16 shadow-lg text-[#353535] flex justify-center items-center rounded-lg bg-[#FFCCFF] shadow-xl">
           <div>Ready To Game</div>
         </div>
@@ -267,12 +271,15 @@ const ReadyToGame = () => {
           <FontAwesomeIcon icon={faGear} />
         </IconButton>
         <input
-          className="w-3/4 rounded-2xl shadow-md pl-5 text-[#000000]"
+          className="w-auto rounded-2xl shadow-md pl-5 text-[#000000]"
           type="text"
+          placeholder="채팅 메세지를 입력해주세요"
           value={myChatMessages}
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
+            if (e.key === "Enter" && myChatMessages.trim() !== '') {
               sendMessage();
+            } else if (e.key === "Enter" && myChatMessages.trim() === '') {
+              alert('채팅 메시지를 입력해주세요');
             }
           }}
           onChange={(e) => {
@@ -291,7 +298,7 @@ const ReadyToGame = () => {
           </div>
 
           <input
-            className="w-3/4 h-12 mb-5 rounded shadow-md pl-5 text-[#000000]"
+            className="w-full h-12 mb-2 rounded shadow-md pl-5 text-[#000000]"
             type="error"
             required
             placeholder={"닉네임을 입력해주세요"}
@@ -313,17 +320,17 @@ const ReadyToGame = () => {
             )}
           </div>
 
-          <Button size="md" disabled={false} onClick={nicknamePossibleClick}>
+          <Button size="sm" disabled={false} onClick={nicknamePossibleClick}>
             닉네임 확인
           </Button>
 
-          <div className="m-auto flex justify-end items-end">
+          <div className="mt-3 m-auto flex justify-end items-end">
             {possible ? (
-              <Button disabled={false} size="lg" onClick={handleGoIn}>
+              <Button disabled={false} size="md" onClick={handleGoIn}>
                 드가자
               </Button>
             ) : (
-              <Button className="" disabled={true} size="lg">
+              <Button className="" disabled={true} size="md">
                 아직 멀었다
               </Button>
             )}
