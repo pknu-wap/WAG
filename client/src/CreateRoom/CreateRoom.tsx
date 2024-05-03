@@ -11,20 +11,21 @@ import SockJS from "sockjs-client";
 var stompClient: any = null; //웹소켓 변수 선언
 
 function CreateRoom() {
-  const [isPrivate, setIsPrivate] = useState<string | null>("false"); //일단은 공개방을 default로
-  const [nickName, setNickname] = useState<string>();
+  const [isPrivate, setIsPrivate] = useState<boolean | null>(false); //일단은 공개방을 default로
+  const [nickName, setNickname] = useState<string>('');
   const navigate = useNavigate();
 
   const radioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setIsPrivate(event.target.value);
+    console.log(event.target.value)
   };
 
   const createRoom = async () => {
     try {
+      console.log("11",isPrivate)
       const response = await axios.post<IRoomResponseInfo>(
         "http://wwwag.co.kr:8080/room/create",
         {
-          isPrivateRoom: Boolean(isPrivate),
+          privateRoom: isPrivate,
           userNickName: nickName,
         }
       );
@@ -65,7 +66,7 @@ function CreateRoom() {
   const renderButton = () => {
     if (isPrivate === null) {
       return <p>방 공개 / 비공개 여부를 선택해주십시오</p>; //체크가 안된 상태를 defult로 만들 수도 있음
-    } else if (isPrivate === "false") {
+    } else if (isPrivate === false) {
       return (
         <Button size="lg" onClick={createRoom}>
           공개방 생성
@@ -93,15 +94,15 @@ function CreateRoom() {
             label="공개"
             value="false"
             name="roomType"
-            onChange={radioChange}
-            checked={isPrivate === "false"}
+            onChange={() => setIsPrivate(false)}
+            checked={isPrivate === false}
           />
           <RadioButton
             id="private"
             label="비공개"
             value="true"
             name="roomType"
-            onChange={radioChange}
+            onChange={() => setIsPrivate(true)}
           />
         </div>
         <input
