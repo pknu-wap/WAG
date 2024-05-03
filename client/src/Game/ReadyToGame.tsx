@@ -26,6 +26,7 @@ const ReadyToGame = () => {
   const [myChatMessages, setMyChatMessages] = useState<string>("");
   const location = useLocation();
   const roomInfo = { ...location.state };
+  const [isCaptin, setIsCaptin] = useState(roomInfo.isCaptin);
 
   const closeModal = () => {
     setIsOpen(false);
@@ -38,9 +39,18 @@ const ReadyToGame = () => {
 
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
   useEffect(() => {
-    if (roomInfo.userCount === 1) {
-    } else {
-      openModal();
+    if ('isCaptin' in roomInfo){
+      if(roomInfo.isCaptin ===true){
+        console.log('Captain is in')
+        captinSocket();
+        roomInfo.isCaptin = false;
+      }
+    }
+    else {
+      if (roomInfo.userCount === 1) {
+      } else {
+        openModal();
+      }
     }
   }, []);
 
@@ -81,6 +91,29 @@ const ReadyToGame = () => {
     setPossible(data.possible);
     localStorage.setItem("nickName", data.nickName);
   };
+
+  async function captinSocket() {
+    socketCaptinConnect();
+  }
+
+  //방장 웹소켓 만들기
+  const socketCaptinConnect = () => {
+    console.log("방장 구독")
+    const socket = new SockJS("http://wwwag.co.kr:8080/ws");
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, onCaptinConnected);
+  };
+
+  async function onCaptinConnected() {
+    const roomId = roomInfo.roomId;
+    const nickName = roomInfo.userNickName;
+    stompClient.subscribe(`/topic/public/${roomId}`, onMessageReceived);
+    stompClient.send(
+      "/app/chat.addCaptinUser",
+      {},
+      JSON.stringify({ sender: nickName, type: "JOIN", roomId: roomId })
+    );
+  }
 
   //웹소켓 만들기
   const socketConnect = () => {
