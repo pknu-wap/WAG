@@ -13,8 +13,9 @@ import axios from "axios";
 import { ChatMessage, INicknamePossible } from "../types/dto";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import ChatBubble from "../components/chatBubble/ChatBubble";
+import ChatBubble from "../components/ingameComponents/ChatBubble";
 import { useLocation } from "react-router-dom";
+import JoinUser from "../components/ingameComponents/JoinUser";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -35,6 +36,7 @@ const ReadyToGame = () => {
   };
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
+  const [joinUsers, setJoinUsers] = useState<string[]>([]) // 입장 유저
 
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
   useEffect(() => {
@@ -61,6 +63,8 @@ const ReadyToGame = () => {
   //   roomId: Number(params.roomId),
   //   nickname: nickname,
   // };
+
+  // 닉네임 유효한지 api get
   const getNicknamePossible = async () => {
     try {
       const response = await axios.get<INicknamePossible>(
@@ -167,6 +171,7 @@ const ReadyToGame = () => {
     console.log(message);
     if (message.messageType === "JOIN") {
       receiveChatMessage(message);
+      addJoinUser(message)
       console.log(message.sender + " joined!");
     } else if (message.messageType === "LEAVE") {
       receiveChatMessage(message);
@@ -179,79 +184,23 @@ const ReadyToGame = () => {
     }
   }
 
+  const addJoinUser = (message: ChatMessage) => {
+    if (message.messageType === "JOIN") {
+      setJoinUsers([...joinUsers, message.sender])
+    }
+  }
+
   const receiveChatMessage = (message: ChatMessage) => {
     setChatMessages([...chatMessages, message]); // 채팅 데이터 상태 업데이트
   };
 
   return (
     <FullLayout>
-      <div className="flex flex-row justify-between items-center mt-10 mx-7">
-        <div className="flex flex-col items-center relative">
-          <IconButton
-            size="lg"
-            className="items-center bg-light-btn dark:bg-dark-btn relative"
-          >
-            <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-12 absolute"></div>
-            <FontAwesomeIcon icon={faUser} size="xl" />
-          </IconButton>
-          <div className="mt-2">user 1</div>
-          <div className="w-0 h-6 mt-1 rounded-md bg-[#9FDDFF]"></div>
-        </div>
-        <div className="flex flex-col items-center relative">
-          <IconButton
-            size="lg"
-            className="items-center bg-light-btn dark:bg-dark-btn relative"
-          >
-            <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-12 absolute"></div>
-            <FontAwesomeIcon icon={faUser} size="xl" />
-          </IconButton>
-          <div className="mt-2">user 2</div>
-          <div className="w-0 h-6 mt-1 rounded-md bg-[#9FDDFF]"></div>
-        </div>
-        <div className="flex flex-col items-center relative">
-          <IconButton
-            size="lg"
-            className="items-center bg-light-btn dark:bg-dark-btn relative"
-          >
-            <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-12 absolute"></div>
-            <FontAwesomeIcon icon={faUser} size="xl" />
-          </IconButton>
-          <div className="mt-2">user 3</div>
-          <div className="w-0 h-6 mt-1 rounded-md bg-[#9FDDFF]"></div>
-        </div>
-        <div className="flex flex-col items-center relative">
-          <IconButton
-            size="lg"
-            className="items-center bg-light-btn dark:bg-dark-btn relative"
-          >
-            <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-12 absolute"></div>
-            <FontAwesomeIcon icon={faUser} size="xl" />
-          </IconButton>
-          <div className="mt-2">{"Me"}</div>
-          <div className="w-0 h-6 mt-1 rounded-md bg-[#9FDDFF]"></div>
-        </div>
-        <div className="flex flex-col items-center relative">
-          <IconButton
-            size="lg"
-            className="items-center bg-light-btn dark:bg-dark-btn relative"
-          >
-            <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-12 absolute"></div>
-            <FontAwesomeIcon icon={faUser} size="xl" />
-          </IconButton>
-          <div className="mt-2">user 5</div>
-          <div className="w-0 h-6 mt-1 rounded-md bg-[#9FDDFF]"></div>
-        </div>
-        <div className="flex flex-col items-center relative">
-          <IconButton
-            size="lg"
-            className="items-center bg-light-btn dark:bg-dark-btn relative"
-          >
-            <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-12 absolute"></div>
-            <FontAwesomeIcon icon={faUser} size="xl" />
-          </IconButton>
-          <div className="mt-2">user 6</div>
-          <div className="w-0 h-6 mt-1 rounded-md bg-[#9FDDFF]"></div>
-        </div>
+      <div className="flex flex-row justify-center items-center mt-10 mx-7">
+        {joinUsers.map((name) => (
+          <JoinUser Nickname={name} />
+        ))}
+
       </div>
       <div className="m-auto mt-8 flex justify-center items-center relative">
         <div className="w-1/2 h-16 shadow-lg text-[#353535] flex justify-center items-center rounded-lg bg-[#FFCCFF] shadow-xl">

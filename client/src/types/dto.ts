@@ -32,9 +32,14 @@ export interface IRoomResponseInfo {
 
 //소켓으로 주고받는 채팅 객체
 export interface ChatMessage {
-  messageType : string
+  messageType: string
   sender: string; // 사용자 이름
   content: string; // 메시지 텍스트
-  roomId : number;
-  isPrivateRoom : boolean;
+  roomId: number;
+  isPrivateRoom: boolean;
+}
+
+export interface JoinUser {
+  userNickName: string;
+  userProfile: string;
 }
