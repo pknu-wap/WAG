@@ -196,9 +196,9 @@ const ReadyToGame = () => {
 
   return (
     <FullLayout>
-      <div className="flex flex-row justify-center items-center mt-10 mx-7">
-        {joinUsers.map((name) => (
-          <JoinUser Nickname={name} />
+      <div className="flex flex-row justify-around items-center mt-10 mx-7">
+        {joinUsers.map((name, index) => (
+          <JoinUser key={index} Nickname={name} />
         ))}
 
       </div>
@@ -208,8 +208,8 @@ const ReadyToGame = () => {
         </div>
       </div>
       <div className="m-auto w-3/4 h-96 mt-10 overflow-y-scroll rounded-3xl shadow-xl flex flex-col p-5 tracking-wider bg-[#A072BC]">
-        {chatMessages.map((m) => (
-          <ChatBubble message={m} />
+        {chatMessages.map((m, index) => (
+          <ChatBubble key={index} message={m} />
         ))}
       </div>
 
