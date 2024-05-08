@@ -4,32 +4,23 @@ import com.example.server.domain.*;
 import com.example.server.dto.*;
 import com.example.server.payload.response.AnswerListResponse;
 import com.example.server.payload.response.ResultResponse;
-import com.example.server.repository.AnswerListRepository;
-import com.example.server.repository.GameOrderRepository;
-import com.example.server.repository.RoomRepository;
-import com.example.server.repository.RoomUserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.server.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ChatService {
     private final RoomRepository roomRepository;
     private final RoomUserRepository roomUserRepository;
     private final GameOrderRepository gameOrderRepository;
     private final AnswerListRepository answerListRepository;
-    @Autowired
-    public ChatService(RoomRepository roomRepository,
-                       RoomUserRepository roomUserRepository, GameOrderRepository gameOrderRepository,
-                       AnswerListRepository answerListRepository){
-        this.roomRepository = roomRepository;
-        this.roomUserRepository = roomUserRepository;
-        this.gameOrderRepository = gameOrderRepository;
-        this.answerListRepository = answerListRepository;
-    }
+    private final GameRecordRepository gameRecordRepository;
 
     public ChatGameMessage setGame(ChatMessage chatMessage){
         if(chatMessage.getMessageType()==ChatMessage.MessageType.START){
@@ -56,6 +47,12 @@ public class ChatService {
         room.setCurrentOrder(1);
         room.setCorrectMemberCnt(0);
         roomRepository.save(room);
+
+        GameRecord gameRecord = new GameRecord();
+        List<User> userRanking = new ArrayList<>();
+        gameRecord.setUserRanking(userRanking);
+        gameRecord.setRoomId(room.getId());
+        gameRecordRepository.save(gameRecord);
 
         ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
         chatGameMessage.setMessageType(ChatMessage.MessageType.START);
@@ -109,11 +106,15 @@ public class ChatService {
         RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender()).get();
         GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(roomUser.getId()).get();
         Room room = roomRepository.findById(chatMessage.getRoomId()).get();
+        GameRecord gameRecord = gameRecordRepository.findByRoomId(room.getId())
+                .orElseThrow(() -> new NoSuchElementException("No GameRecord found for roomId: "
+                        + room.getId()));
 
         if(gameOrder.getAnswerName().equals(chatMessage.getContent())){ // 정답
             room.setCorrectMemberCnt(room.getCorrectMemberCnt()+1);
             gameOrder.setRanking(room.getCorrectMemberCnt());
             gameOrder.setHaveAnswerChance(false);
+//            gameRecord.getUserRanking().add(); TODO 회원가입한 유저와 가입하지 않은 유저를 구분하여 User를 add해야함
         }
         else{ // 오답
             gameOrder.setHaveAnswerChance(false); // 정답기회 없애기
@@ -130,8 +131,6 @@ public class ChatService {
         }
         return chatGameMessage;
     }
-
-
 
 
     public void makeGameOrder(Long roomId){  // 게임 순서 & 정답어 설정

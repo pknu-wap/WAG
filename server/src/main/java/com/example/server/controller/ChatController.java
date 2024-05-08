@@ -1,5 +1,6 @@
 package com.example.server.controller;
 
+import com.example.server.domain.User;
 import com.example.server.dto.ChatGameMessage;
 import com.example.server.dto.ChatMessage;
 import com.example.server.dto.ChatRoomInfoMessage;
