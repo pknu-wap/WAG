@@ -22,6 +22,9 @@ public class RoomUser {
 
     private String profileImage;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    private User user;
+
     @OneToOne(fetch = FetchType.LAZY , cascade = CascadeType.ALL)
     private GameOrder gameOrder;
 }

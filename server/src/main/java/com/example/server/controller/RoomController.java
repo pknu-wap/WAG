@@ -3,6 +3,8 @@ package com.example.server.controller;
 import com.example.server.payload.request.RoomCreateRequest;
 import com.example.server.payload.response.RoomEnterResponse;
 import com.example.server.payload.response.RoomResponse;
+import com.example.server.security.CurrentUser;
+import com.example.server.security.UserPrincipal;
 import com.example.server.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +31,8 @@ public class RoomController {
     }
 
     @PostMapping("/room/enter/random")
-    public ResponseEntity<RoomEnterResponse> enterRandomChatRoom(@RequestParam String nickName){// 랜덤으로 방 입장
-        RoomEnterResponse roomEnterResponse = roomService.enterRandomRoom(nickName);
+    public ResponseEntity<RoomEnterResponse> enterRandomChatRoom(@RequestParam String nickName, @CurrentUser UserPrincipal userPrincipal){// 랜덤으로 방 입장
+        RoomEnterResponse roomEnterResponse = roomService.enterRandomRoom(nickName, userPrincipal);
         return new ResponseEntity<>(roomEnterResponse, HttpStatus.OK);
     }
 

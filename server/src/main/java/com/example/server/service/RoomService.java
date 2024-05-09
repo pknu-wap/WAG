@@ -9,23 +9,24 @@ import com.example.server.payload.response.RoomEnterResponse;
 import com.example.server.payload.response.RoomResponse;
 import com.example.server.repository.RoomRepository;
 import com.example.server.repository.RoomUserRepository;
+import com.example.server.repository.UserRepository;
+import com.example.server.security.UserPrincipal;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomUserRepository roomUserRepository;
-
-    @Autowired
-    public RoomService(RoomRepository roomRepository,RoomUserRepository roomUserRepository ){
-        this.roomRepository = roomRepository;
-        this.roomUserRepository = roomUserRepository;
-    }
+    private final UserRepository userRepository;
 
     public RoomResponse create(RoomCreateRequest roomCreateRequest){ // 게임 방 생성
         Room room = new Room();
@@ -68,21 +69,21 @@ public class RoomService {
         return RoomResponse.create(room.get(), userDtos);
     }
 
-    public RoomEnterResponse enterRandomRoom(String nickName){ // 랜덤으로 방 입장
+    public RoomEnterResponse enterRandomRoom(String nickName, UserPrincipal userPrincipal){ // 랜덤으로 방 입장
         Optional<Room> optionalRoom = roomRepository.findByRandom();
         if(optionalRoom.isEmpty()){
             return RoomEnterResponse.cantCreate(1);
         }
         else{
             Room room = optionalRoom.get();
-            addUser(room, nickName);
+            addUser(room, nickName, userPrincipal);
 
             List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
             return RoomEnterResponse.create(room, userDtos);
         }
     }
 
-    public RoomEnterResponse enterRoom(String nickName, int enterCode){ // 코드로 방 입장
+    public RoomEnterResponse enterRoom(String nickName, int enterCode, UserPrincipal userPrincipal){ // 코드로 방 입장
         Optional<Room> optionalRoom = roomRepository.findRoomByCode(enterCode);
         if(optionalRoom.isEmpty()){  // 해당 방이 존재 안함
             return RoomEnterResponse.cantCreate(3);
@@ -95,28 +96,31 @@ public class RoomService {
                 return RoomEnterResponse.cantCreate(3);  // 사설방이 아니라 입장 불가
             }
             Room room = optionalRoom.get();
-            addUser(room, nickName);
+            addUser(room, nickName, userPrincipal);
 
             List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
             return RoomEnterResponse.create(room, userDtos);
         }
     }
 
-    public RoomResponse enterRoomByRoomId(String nickName, Long roomId){ // 소켓 + roomId로 방 입장.
+    public RoomResponse enterRoomByRoomId(String nickName, Long roomId, UserPrincipal userPrincipal){ // 소켓 + roomId로 방 입장.
         Room room = roomRepository.findById(roomId).get();
         if (room.getUserCount() >= 6) {
             throw new MaxUserCountExceededException();  // 최대 인원 예외 처리.
         }
-        addUser(room, nickName);
+        addUser(room, nickName, userPrincipal);
         List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
         return RoomResponse.create(room, userDtos);
     }
 
-    public void addUser(Room room, String nickName){  // 방에 유저 추가 로직
+    public void addUser(Room room, String nickName, UserPrincipal userPrincipal){  // 방에 유저 추가 로직
         RoomUser roomUser = new RoomUser();
         roomUser.setCaptain(false);
         roomUser.setRoom(room);
         roomUser.setRoomNickname(nickName);
+        if (userPrincipal != null) {
+            roomUser.setUser(userRepository.findById(userPrincipal.getId()).get());
+        }
         roomUserRepository.save(roomUser);
 
         room.setUserCount(room.getUserCount()+1);

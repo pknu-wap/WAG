@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -22,7 +23,16 @@ public class GameRecord {
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> userRanking;
 
+    private String rankingNicknameSet = "";
+
     @Column(unique = true)
     private Long roomId;
+
+    private LocalDateTime date;
+
+    @PrePersist
+    protected void onCreate() {
+        date = LocalDateTime.now();
+    }
 
 }

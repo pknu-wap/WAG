@@ -5,8 +5,12 @@ import com.example.server.dto.*;
 import com.example.server.payload.response.AnswerListResponse;
 import com.example.server.payload.response.ResultResponse;
 import com.example.server.repository.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +18,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ChatService {
     private final RoomRepository roomRepository;
@@ -22,7 +27,7 @@ public class ChatService {
     private final AnswerListRepository answerListRepository;
     private final GameRecordRepository gameRecordRepository;
 
-    public ChatGameMessage setGame(ChatMessage chatMessage){
+    public ChatGameMessage setGame(ChatMessage chatMessage) {
         if(chatMessage.getMessageType()==ChatMessage.MessageType.START){
             return startGame(chatMessage);
         }
@@ -114,7 +119,15 @@ public class ChatService {
             room.setCorrectMemberCnt(room.getCorrectMemberCnt()+1);
             gameOrder.setRanking(room.getCorrectMemberCnt());
             gameOrder.setHaveAnswerChance(false);
-//            gameRecord.getUserRanking().add(); TODO 회원가입한 유저와 가입하지 않은 유저를 구분하여 User를 add해야함
+            if (roomUser.getUser() != null) {
+                gameRecord.getUserRanking().add(roomUser.getUser());
+            }
+
+            String rankingNicknameSet = gameRecord.getRankingNicknameSet()
+                    + roomUser.getRoomNickname();
+            gameRecord.setRankingNicknameSet(rankingNicknameSet);
+
+            gameRecordRepository.save(gameRecord);
         }
         else{ // 오답
             gameOrder.setHaveAnswerChance(false); // 정답기회 없애기

@@ -26,9 +26,6 @@ public class User {
 
     private String imageUrl;
 
-    @Column(nullable = false)
-    private Boolean emailVerified = false;
-
     @JsonIgnore
     private String password;
 
@@ -36,7 +33,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private AuthProvider provider;
 
-    private String providerId;
 
     @ManyToMany
     @JoinTable(name = "user_game_record",

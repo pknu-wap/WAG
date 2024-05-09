@@ -8,6 +8,7 @@ import com.example.server.dto.UserDto;
 import com.example.server.payload.response.RoomResponse;
 import com.example.server.repository.RoomRepository;
 import com.example.server.repository.RoomUserRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,19 +22,13 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class WebSocketEventListener {
     private static final Logger logger = LoggerFactory.getLogger(WebSocketEventListener.class);
 
     private final SimpMessageSendingOperations messagingTemplate;
     private final RoomUserRepository roomUserRepository;
     private final RoomRepository roomRepository;
-    @Autowired
-    public WebSocketEventListener(RoomUserRepository roomUserRepository, SimpMessageSendingOperations messagingTemplate,
-                                  RoomRepository roomRepository){
-        this.roomUserRepository = roomUserRepository;
-        this.messagingTemplate = messagingTemplate;
-        this.roomRepository = roomRepository;
-    }
 
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {

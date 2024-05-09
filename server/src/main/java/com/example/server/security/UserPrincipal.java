@@ -1,6 +1,7 @@
 package com.example.server.security;
 
 import com.example.server.domain.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,19 +12,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+@RequiredArgsConstructor
 public class UserPrincipal implements OAuth2User, UserDetails {
-    private Long id;
-    private String email;
-    private String password;
-    private Collection<? extends GrantedAuthority> authorities;
+    private final Long id;
+    private final String email;
+    private final String password;
+    private final Collection<? extends GrantedAuthority> authorities;
     private Map<String, Object> attributes;
-
-    public UserPrincipal(Long id, String email, String password, Collection<? extends GrantedAuthority> authorities) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.authorities = authorities;
-    }
 
     public static UserPrincipal create(User user) {
         List<GrantedAuthority> authorities = Collections.
