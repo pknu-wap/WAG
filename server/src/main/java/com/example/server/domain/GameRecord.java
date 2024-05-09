@@ -23,8 +23,7 @@ public class GameRecord {
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> userRanking;
 
-    @Column(columnDefinition = "JSON")
-    private String rankingNickname;
+    private String rankingNicknameSet = "";
 
     @Column(unique = true)
     private Long roomId;

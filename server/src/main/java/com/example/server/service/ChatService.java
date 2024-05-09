@@ -20,7 +20,6 @@ import java.util.Optional;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Slf4j
 public class ChatService {
     private final RoomRepository roomRepository;
     private final RoomUserRepository roomUserRepository;
@@ -120,22 +119,14 @@ public class ChatService {
             room.setCorrectMemberCnt(room.getCorrectMemberCnt()+1);
             gameOrder.setRanking(room.getCorrectMemberCnt());
             gameOrder.setHaveAnswerChance(false);
-            gameRecord.getUserRanking().add(roomUser.getUser());
-            ObjectMapper objectMapper = new ObjectMapper();
-            try {
-                if (gameRecord.getRankingNickname() == null) {
-                    List<String> rankingNickname = new ArrayList<>();
-                    rankingNickname.add(roomUser.getRoomNickname());
-                        gameRecord.setRankingNickname(objectMapper.writeValueAsString(rankingNickname));
-
-                } else {
-                    List<String> rankingNickname = objectMapper.readValue(gameRecord.getRankingNickname(), List.class);
-                    rankingNickname.add(roomUser.getRoomNickname());
-                    gameRecord.setRankingNickname(objectMapper.writeValueAsString(rankingNickname));
-                }
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+            if (roomUser.getUser() != null) {
+                gameRecord.getUserRanking().add(roomUser.getUser());
             }
+
+            String rankingNicknameSet = gameRecord.getRankingNicknameSet()
+                    + roomUser.getRoomNickname();
+            gameRecord.setRankingNicknameSet(rankingNicknameSet);
+
             gameRecordRepository.save(gameRecord);
         }
         else{ // 오답
