@@ -7,8 +7,11 @@ import com.example.server.dto.ChatRoomInfoMessage;
 import com.example.server.dto.ChatRoomModeMessage;
 import com.example.server.payload.response.AnswerListResponse;
 import com.example.server.payload.response.RoomResponse;
+import com.example.server.security.CurrentUser;
+import com.example.server.security.UserPrincipal;
 import com.example.server.service.ChatService;
 import com.example.server.service.RoomService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +46,7 @@ public class ChatController {
     }
 
     @MessageMapping("/chat.sendGameMessage")
-    public ChatGameMessage sendGameMessage(@Payload ChatMessage chatMessage) {
+    public ChatGameMessage sendGameMessage(@Payload ChatMessage chatMessage) throws JsonProcessingException {
         String destination = "/topic/public/"+chatMessage.getRoomId();
         ChatGameMessage chatGameMessage = chatService.setGame(chatMessage);
         messagingTemplate.convertAndSend(destination, chatGameMessage);
@@ -60,13 +63,14 @@ public class ChatController {
 
     @MessageMapping("/chat.addUser")
     public ChatRoomInfoMessage addUser(@Payload ChatMessage chatMessage,
-                               SimpMessageHeaderAccessor headerAccessor) {   // 방장 아닌 유저 소켓 연결
+                                       SimpMessageHeaderAccessor headerAccessor,
+                                       @CurrentUser UserPrincipal userPrincipal) {   // 방장 아닌 유저 소켓 연결
         headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
         String sender = chatMessage.getSender();
         headerAccessor.getSessionAttributes().put("username", sender);
         headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
 
-        RoomResponse roomResponse = roomService.enterRoomByRoomId(chatMessage.getSender(),chatMessage.getRoomId());  // 해당 방에 입장하는 로직
+        RoomResponse roomResponse = roomService.enterRoomByRoomId(chatMessage.getSender(),chatMessage.getRoomId(), userPrincipal);  // 해당 방에 입장하는 로직
 
         ChatRoomInfoMessage chatRoomInfoMessage = new ChatRoomInfoMessage();
         chatRoomInfoMessage.setMessageType(ChatMessage.MessageType.JOIN);

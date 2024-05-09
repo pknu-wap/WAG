@@ -5,8 +5,12 @@ import com.example.server.dto.*;
 import com.example.server.payload.response.AnswerListResponse;
 import com.example.server.payload.response.ResultResponse;
 import com.example.server.repository.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +18,9 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class ChatService {
     private final RoomRepository roomRepository;
     private final RoomUserRepository roomUserRepository;
@@ -22,7 +28,7 @@ public class ChatService {
     private final AnswerListRepository answerListRepository;
     private final GameRecordRepository gameRecordRepository;
 
-    public ChatGameMessage setGame(ChatMessage chatMessage){
+    public ChatGameMessage setGame(ChatMessage chatMessage) {
         if(chatMessage.getMessageType()==ChatMessage.MessageType.START){
             return startGame(chatMessage);
         }
@@ -114,7 +120,23 @@ public class ChatService {
             room.setCorrectMemberCnt(room.getCorrectMemberCnt()+1);
             gameOrder.setRanking(room.getCorrectMemberCnt());
             gameOrder.setHaveAnswerChance(false);
-//            gameRecord.getUserRanking().add(); TODO 회원가입한 유저와 가입하지 않은 유저를 구분하여 User를 add해야함
+            gameRecord.getUserRanking().add(roomUser.getUser());
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                if (gameRecord.getRankingNickname() == null) {
+                    List<String> rankingNickname = new ArrayList<>();
+                    rankingNickname.add(roomUser.getRoomNickname());
+                        gameRecord.setRankingNickname(objectMapper.writeValueAsString(rankingNickname));
+
+                } else {
+                    List<String> rankingNickname = objectMapper.readValue(gameRecord.getRankingNickname(), List.class);
+                    rankingNickname.add(roomUser.getRoomNickname());
+                    gameRecord.setRankingNickname(objectMapper.writeValueAsString(rankingNickname));
+                }
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            gameRecordRepository.save(gameRecord);
         }
         else{ // 오답
             gameOrder.setHaveAnswerChance(false); // 정답기회 없애기
