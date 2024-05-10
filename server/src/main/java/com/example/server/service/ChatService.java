@@ -12,10 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
@@ -111,19 +108,17 @@ public class ChatService {
         RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender()).get();
         GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(roomUser.getId()).get();
         Room room = roomRepository.findById(chatMessage.getRoomId()).get();
-        GameRecord gameRecord = gameRecordRepository.findByRoomId(room.getId())
-                .orElseThrow(() -> new NoSuchElementException("No GameRecord found for roomId: "
-                        + room.getId()));
+        GameRecord gameRecord = gameRecordRepository.findByRoomId(room.getId()).get();
 
         if(gameOrder.getAnswerName().equals(chatMessage.getContent())){ // 정답
             room.setCorrectMemberCnt(room.getCorrectMemberCnt()+1);
             gameOrder.setRanking(room.getCorrectMemberCnt());
             gameOrder.setHaveAnswerChance(false);
+
             if (roomUser.getUser() != null) {
                 gameRecord.getUserRanking().add(roomUser.getUser());
             }
-
-            String rankingNicknameSet = gameRecord.getRankingNicknameSet()
+            String rankingNicknameSet = gameRecord.getRankingNicknameSet() + " "
                     + roomUser.getRoomNickname();
             gameRecord.setRankingNicknameSet(rankingNicknameSet);
 
@@ -137,6 +132,16 @@ public class ChatService {
         makeChatGameMessage(chatMessage, room);
 
         if(room.getCorrectMemberCnt() >= 3 || room.getUserCount()-1 <= room.getCorrectMemberCnt()){ // 게임 끝나는 경우
+
+            // 기존 저장되어 있던 순위권 닉네임 리스트에 순위권에 들지 못한 나머지 닉네임 추가
+            String rankingNicknameSet = gameRecord.getRankingNicknameSet();
+            List<String> allNicknames = roomUserRepository.findNickNameByRoomId(room.getId());
+            for (String nickname : allNicknames) {
+                if(!rankingNicknameSet.contains(nickname)) rankingNicknameSet += " " + nickname;
+            }
+            gameRecord.setRankingNicknameSet(rankingNicknameSet);
+            gameRecordRepository.save(gameRecord);
+
             chatGameMessage.setMessageType(ChatMessage.MessageType.END);
         }
         else{
