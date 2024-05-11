@@ -75,6 +75,7 @@ function MainPage({ dark }: ComponentProps) {
   const buttonCheckHandler = async () => {
     const roomId = await getRoomIdCode();
     if (roomId !== "invalid enterCode") {
+      localStorage.setItem("roomId", roomId);
       navigate(`/ReadyToGame/${roomId}`);
     } else alert("입장 가능한 방이 없습니다.");
   };
