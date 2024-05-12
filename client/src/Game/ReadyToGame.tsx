@@ -138,19 +138,13 @@ const ReadyToGame = () => {
     setChangeIsPrivate(roomInfo.privateRoom)
     let userDtos = roomInfo.userDtos
     userDtos.map((dto) => {
-      console.log(dto.captain)
       const nickName = localStorage.getItem("nickName");
       if (dto.roomNickname === nickName)
         setIsMeCaptain(dto.captain)
-      console.log(isMeCaptain)
     })
   }
   const captainRoomInfoClick = async () => {
     captainOpenModal()
-    const roomInfo = await getRoomInfo()
-    const userDtos = roomInfo.userDtos
-    console.log(userDtos)
-    console.log(isMeCaptain)
   }
 
   async function captinSocket() {
@@ -261,6 +255,7 @@ const ReadyToGame = () => {
     setChatMessages([...chatMessages, message]); // 채팅 데이터 상태 업데이트
   };
 
+  // 대기방 방장 모달 공개/비공개 바꾸는 소켓
   const privateModeOnclick = () => {
     stompClient.send(
       "/app/chat.changeMode",
@@ -272,23 +267,39 @@ const ReadyToGame = () => {
         roomId: localStorage.getItem("roomId"),
       })
     );
+    // 바꾸기 전 비공개 방일 때
+    if (isPrivateRoom) {
+      // 공개 방으로 변경
+      setChangeIsPrivate(false)
+    }
+    // 바꾸기 전 공개 방일 때
+    else {
+      // 비공개 방으로 변경
+      setChangeIsPrivate(true)
+    }
     setIsPrivateRoom(changeIsPrivate)
-    console.log(isPrivateRoom);
+    console.log("changeIsPrivate : ", changeIsPrivate)
+    console.log("isPrivateRoom : ", isPrivateRoom)
+    console.log("방 설정 바꾸기 완료, isPrivate : ", isPrivateRoom);
   }
+
 
   // 대기방 방장 모달 공개/비공개 바꾸는 버튼
   const renderButton = () => {
     if (isPrivateRoom === false) {
       // 공개방일 때
+      console.log("현재 공개방")
       return (
-        <Button size="lg" onClick={privateModeOnclick} disabled={changeIsPrivate === true}>
+        <Button size="lg" onClick={privateModeOnclick} disabled={changeIsPrivate === false}>
           비공개방으로 변경
         </Button>
       );
     } else {
       // 비공개방일 때
+      console.log("현재 비공개방")
       return (
-        <Button size="lg" onClick={privateModeOnclick} disabled={changeIsPrivate === false}>
+        // 바꾸고자 하는 값(changeIsPrivate) = false(공개로 변경하고 싶음) 일 때 활성화
+        <Button size="lg" onClick={privateModeOnclick} disabled={changeIsPrivate === true}>
           공개방으로 변경
         </Button>
       );
@@ -399,11 +410,26 @@ const ReadyToGame = () => {
           <div>
 
             <div>나는 방장이야</div>
-
+            <div className="grid grid-cols-1 md:grid-cols-2 mt-5 gap-2">
+              <RadioButton
+                id="public"
+                label="공개"
+                value="false"
+                name="roomType"
+                onChange={() => setChangeIsPrivate(false)}
+              />
+              <RadioButton
+                id="private"
+                label="비공개"
+                value="true"
+                name="roomType"
+                onChange={() => setChangeIsPrivate(true)}
+              />
+            </div>
             <div>
               {renderButton()}
             </div>
-            <Button size="lg" disabled={false}>GAME START</Button>
+            <Button className="mt-2" size="lg" disabled={false}>GAME START</Button>
           </div>
         ) : (
           <div>
