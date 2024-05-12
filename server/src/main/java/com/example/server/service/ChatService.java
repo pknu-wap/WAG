@@ -135,6 +135,7 @@ public class ChatService {
 
             // 기존 저장되어 있던 순위권 닉네임 리스트에 순위권에 들지 못한 나머지 닉네임 추가
             String rankingNicknameSet = gameRecord.getRankingNicknameSet();
+            rankingNicknameSet += " / ";
             List<String> allNicknames = roomUserRepository.findNickNameByRoomId(room.getId());
             for (String nickname : allNicknames) {
                 if(!rankingNicknameSet.contains(nickname)) rankingNicknameSet += " " + nickname;
