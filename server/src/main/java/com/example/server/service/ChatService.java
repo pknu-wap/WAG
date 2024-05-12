@@ -214,10 +214,8 @@ public class ChatService {
         return new ChatRoomModeMessage(chatMessage,room);
     }
 
-
     public AnswerListResponse getAnswerList(Long roomId, String nickname){
         return new AnswerListResponse(gameOrderRepository.findAnswerNotMe(nickname, roomId));
     }
-
 
 }
