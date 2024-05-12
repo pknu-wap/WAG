@@ -17,6 +17,7 @@ import { useLocation } from "react-router-dom";
 import JoinUser from "../components/ingameComponents/JoinUser";
 import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
 import RadioButton from "../components/radioButton/RadioButton";
+import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -233,7 +234,7 @@ const ReadyToGame = () => {
       JSON.stringify({
         sender: nickName,
         content: "",
-        messageType: "CHANGE",
+        messageType: "CHAT",
         roomId: roomId,
       })
     );
@@ -338,25 +339,28 @@ const ReadyToGame = () => {
         <IconButton size="md" className="mr-10" onClick={captainRoomInfoClick}>
           <FontAwesomeIcon icon={faGear} />
         </IconButton>
-        <input
-          className="w-auto rounded-2xl shadow-md pl-5 text-[#000000]"
-          type="text"
-          placeholder="채팅 메세지를 입력해주세요"
-          value={myChatMessages}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && myChatMessages.trim() !== "") {
-              sendMessage();
-            } else if (e.key === "Enter" && myChatMessages.trim() === "") {
-              alert("채팅 메시지를 입력해주세요");
-            }
-          }}
-          onChange={(e) => {
-            setMyChatMessages(e.target.value);
-          }}
-        ></input>
-        <Button size="sm" disabled={false} onClick={sendMessage}>
-          보내기
-        </Button>
+        <div className="w-5/12 flex flex-row justify-center algin-center relative">
+          <input
+            className="w-full rounded-2xl shadow-md pl-5 text-[#000000]"
+            type="text"
+            placeholder="채팅 메세지를 입력해주세요"
+            value={myChatMessages}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && myChatMessages.trim() !== "") {
+                sendMessage();
+              } else if (e.key === "Enter" && myChatMessages.trim() === "") {
+                alert("채팅 메시지를 입력해주세요");
+              }
+            }}
+            onChange={(e) => {
+              setMyChatMessages(e.target.value);
+            }}
+          ></input>
+
+          <IconButton className="right-0 absolute" size="sm" onClick={sendMessage}>
+            <FontAwesomeIcon icon={faPaperPlane} />
+          </IconButton>
+        </div>
       </div>
 
       {/* 방장 제외 입장 시 닉네임 설정 모달 */}
