@@ -9,3 +9,8 @@ export const readyToGameModalState = atom<boolean>({
   key: "gameModalState",
   default: false,
 });
+
+export const captainReadyToGameModalState = atom<boolean>({
+  key: 'fromCaptain',
+  default: false
+})

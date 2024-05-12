@@ -20,14 +20,20 @@ export interface IRoomCreate {
   userNickName: string;
 }
 
+interface IUserDto {
+  captain: boolean;
+  roomNickname: string;
+  profileImage: string;
+}
+
 // 방 정보 get response
 export interface IRoomResponseInfo {
-  gameStatus: boolean,
-  privateRoom: boolean,
-  roomEnterCode: Number,
   roomId: Number,
+  privateRoom: boolean,
+  roomEnterCode: number,
+  gameStatus: boolean,
   userCount: Number,
-  userDtos: Array<Object>,
+  userDtos: IUserDto[],
 }
 
 //소켓으로 주고받는 채팅 객체
