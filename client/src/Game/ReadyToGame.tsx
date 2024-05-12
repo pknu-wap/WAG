@@ -144,13 +144,6 @@ const ReadyToGame = () => {
         setIsMeCaptain(dto.captain)
     })
   }
-  const captainRoomInfoClick = async () => {
-    captainOpenModal()
-    const roomInfo = await getRoomInfo()
-    console.log("backendIsPrivate : ", roomInfo.privateRoom)
-    console.log("changeIsPrivate : ", changeIsPrivate)
-    console.log("isPrivateRoom : ", isPrivateRoom)
-  }
 
   async function captinSocket() {
     socketCaptinConnect();
@@ -223,36 +216,7 @@ const ReadyToGame = () => {
     setMyChatMessages("");
   }
 
-  // 대기방 방장 모달 공개/비공개 바꾸는 소켓
-  const privateModeOnclick = () => {
-    const roomId = localStorage.getItem("roomId");
-    const nickName = localStorage.getItem("nickName");
-    console.log(roomId, nickName)
-    stompClient.send(
-      "/app/chat.changeMode",
-      {},
-      JSON.stringify({
-        sender: nickName,
-        content: "",
-        messageType: "CHAT",
-        roomId: roomId,
-      })
-    );
-    // 코드 꼬임 오류 방지(의미는 없음)
-    if (isPrivateRoom) {
-      // 공개 방으로 변경
-      setChangeIsPrivate(false)
-    }
-    // 바꾸기 전 공개 방일 때
-    else {
-      // 비공개 방으로 변경
-      setChangeIsPrivate(true)
-    }
-    setIsPrivateRoom(changeIsPrivate)
-    console.log("changeIsPrivate : ", changeIsPrivate)
-    console.log("isPrivateRoom : ", isPrivateRoom)
-    console.log("방 설정 바꾸기 완료, isPrivate : ", isPrivateRoom);
-  }
+
 
   function onMessageReceived(payload: any) {
     var message = JSON.parse(payload.body);
@@ -291,6 +255,31 @@ const ReadyToGame = () => {
     setChatMessages([...chatMessages, message]); // 채팅 데이터 상태 업데이트
   };
 
+  // 대기방 방장 모달 공개/비공개 바꾸는 소켓
+  const privateModeOnclick = () => {
+    stompClient.send(
+      "/app/chat.changeMode",
+      {},
+      JSON.stringify({
+        sender: localStorage.getItem("nickName"),
+        content: "",
+        messageType: "CHAT",
+        roomId: localStorage.getItem("roomId"),
+      })
+    );
+    // 코드 꼬임 오류 방지(의미는 없음)
+    if (isPrivateRoom) {
+      // 공개 방으로 변경
+      setChangeIsPrivate(false)
+    }
+    // 바꾸기 전 공개 방일 때
+    else {
+      // 비공개 방으로 변경
+      setChangeIsPrivate(true)
+    }
+    setIsPrivateRoom(changeIsPrivate)
+    console.log("방 설정 바꾸기 완료, isPrivate : ", isPrivateRoom);
+  }
 
   // 대기방 방장 모달 공개/비공개 바꾸는 버튼
   const renderButton = () => {
@@ -322,12 +311,16 @@ const ReadyToGame = () => {
 
       </div>
       <div className="m-auto mt-8 flex justify-center items-center relative">
-        <div>
-          {enterCode}
+        <div className="mr-5">
+          <div className="text-xl">
+            {enterCode}
+          </div>
+          <div className="text-sm">입장코드</div>
         </div>
         <div className="w-1/2 h-16 shadow-lg text-[#353535] flex justify-center items-center rounded-lg bg-[#FFCCFF] shadow-xl">
           <div>Ready To Game</div>
         </div>
+        <div></div>
       </div>
       <div className="m-auto w-3/4 h-96 mt-10 overflow-y-scroll rounded-3xl shadow-xl flex flex-col p-5 tracking-wider bg-[#A072BC]">
         {chatMessages.map((m, index) => (
@@ -336,7 +329,7 @@ const ReadyToGame = () => {
       </div>
 
       <div className="mt-10 flex flex-row justify-center algin-center">
-        <IconButton size="md" className="mr-10" onClick={captainRoomInfoClick}>
+        <IconButton size="md" className="mr-10" onClick={captainOpenModal}>
           <FontAwesomeIcon icon={faGear} />
         </IconButton>
         <div className="w-5/12 flex flex-row justify-center algin-center relative">
@@ -357,7 +350,7 @@ const ReadyToGame = () => {
             }}
           ></input>
 
-          <IconButton className="right-0 absolute" size="sm" onClick={sendMessage}>
+          <IconButton className="shadow-none top-1 right-0 absolute" size="sm" onClick={sendMessage}>
             <FontAwesomeIcon icon={faPaperPlane} />
           </IconButton>
         </div>
