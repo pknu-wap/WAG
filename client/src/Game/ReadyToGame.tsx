@@ -1,30 +1,34 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import IconButton from "../components/button/IconButton";
-import { faUser } from "@fortawesome/free-regular-svg-icons";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import FullLayout from "../components/layout/FullLayout";
 import { useParams } from "react-router-dom";
 import { useRecoilState } from "recoil";
-import { readyToGameModalState } from "../recoil/modal";
+import { captainReadyToGameModalState, readyToGameModalState } from "../recoil/modal";
 import { useEffect, useState } from "react";
 import ReadyToGameModal from "../components/modal/ReadyModal";
 import Button from "../components/button/Button";
 import axios from "axios";
-import { ChatMessage, INicknamePossible } from "../types/dto";
+import { ChatMessage, INicknamePossible, IRoomResponseInfo } from "../types/dto";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import ChatBubble from "../components/ingameComponents/ChatBubble";
 import { useLocation } from "react-router-dom";
 import JoinUser from "../components/ingameComponents/JoinUser";
+import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
 const ReadyToGame = () => {
   const params = useParams(); // params를 상수에 할당
   const [, setIsOpen] = useRecoilState(readyToGameModalState);
+  const [, setCaptainIsOpen] = useRecoilState(captainReadyToGameModalState)
   const [nickname, setNickname] = useState<string>("");
   const [possible, setPossible] = useState<boolean>();
   const [myChatMessages, setMyChatMessages] = useState<string>("");
+  const [userCount, setUserCount] = useState(0)
+  const [enterCode, setEnterCode] = useState(0)
+  const [isMeCaptain, setIsMeCaptain] = useState(false)
   const location = useLocation();
   const roomInfo = { ...location.state };
 
@@ -34,6 +38,12 @@ const ReadyToGame = () => {
   const openModal = () => {
     setIsOpen(true);
   };
+  const captainCloseModal = () => {
+    setCaptainIsOpen(false)
+  }
+  const captainOpenModal = () => {
+    setCaptainIsOpen(true)
+  }
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
   const [joinUsers, setJoinUsers] = useState<string[]>([]) // 입장 유저
@@ -93,6 +103,40 @@ const ReadyToGame = () => {
     setPossible(data.possible);
     localStorage.setItem("nickName", data.nickName);
   };
+
+  // 방 정보 get api
+  const getRoomInfo = async () => {
+    try {
+      const response = await axios.get<IRoomResponseInfo>(
+        "http://wwwag.co.kr:8080/room/info",
+        {
+          params: {
+            roomId: Number(params.roomId),
+          },
+        }
+      );
+      setEnterCode(response.data.roomEnterCode)
+      let userDtos = response.data.userDtos
+      userDtos.map((dto) => {
+        console.log(dto.captain)
+        const nickName = localStorage.getItem("nickName");
+        if (dto.roomNickname === nickName)
+          setIsMeCaptain(dto.captain)
+        console.log(isMeCaptain)
+      })
+      return response.data;
+    } catch (error) {
+      console.error("방 정보 get api 오류 발생 : ", error);
+      throw error;
+    }
+  }
+  const captainRoomInfoClick = async () => {
+    captainOpenModal()
+    const roomInfo = await getRoomInfo()
+    const userDtos = roomInfo.userDtos
+    console.log(userDtos)
+    console.log(isMeCaptain)
+  }
 
   async function captinSocket() {
     socketCaptinConnect();
@@ -170,10 +214,12 @@ const ReadyToGame = () => {
 
     console.log(message);
     if (message.messageType === "JOIN") {
+      setUserCount(userCount + 1)
       receiveChatMessage(message);
       addJoinUser(message)
       console.log(message.sender + " joined!");
     } else if (message.messageType === "LEAVE") {
+      setUserCount(userCount - 1)
       receiveChatMessage(message);
       console.log(message);
     } else if (message.messageType === "CHAT") {
@@ -189,6 +235,9 @@ const ReadyToGame = () => {
       setJoinUsers([...joinUsers, message.sender])
     }
   }
+  useEffect(() => {
+
+  })
 
   const receiveChatMessage = (message: ChatMessage) => {
     setChatMessages([...chatMessages, message]); // 채팅 데이터 상태 업데이트
@@ -203,6 +252,9 @@ const ReadyToGame = () => {
 
       </div>
       <div className="m-auto mt-8 flex justify-center items-center relative">
+        <div>
+          {enterCode}
+        </div>
         <div className="w-1/2 h-16 shadow-lg text-[#353535] flex justify-center items-center rounded-lg bg-[#FFCCFF] shadow-xl">
           <div>Ready To Game</div>
         </div>
@@ -214,7 +266,7 @@ const ReadyToGame = () => {
       </div>
 
       <div className="mt-10 flex flex-row justify-center algin-center">
-        <IconButton size="md" className="mr-10">
+        <IconButton size="md" className="mr-10" onClick={captainRoomInfoClick}>
           <FontAwesomeIcon icon={faGear} />
         </IconButton>
         <input
@@ -238,6 +290,7 @@ const ReadyToGame = () => {
         </Button>
       </div>
 
+      {/* 방장 제외 입장 시 닉네임 설정 모달 */}
       <ReadyToGameModal onRequestClose={closeModal}>
         <div className="flex flex-col justify-between">
           <div className="my-5 flex flex-row justify-between items-center">
@@ -284,6 +337,21 @@ const ReadyToGame = () => {
           </div>
         </div>
       </ReadyToGameModal>
+
+      {/* 방장 방 설정 및 시작하기 모달 */}
+      <CaptainReatyToModal onRequestClose={captainCloseModal}>
+        <div>
+          방장 기능
+        </div>
+        {isMeCaptain ? (<div>
+          나는 방장이야
+          <Button size="lg" disabled={false}>GAME START</Button>
+        </div>) : (
+          <div>
+            나는 방장이 아니니깐 할 수 있는게 없어
+          </div>
+        )}
+      </CaptainReatyToModal>
     </FullLayout>
   );
 };
