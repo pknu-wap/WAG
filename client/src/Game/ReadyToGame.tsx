@@ -62,6 +62,7 @@ const ReadyToGame = () => {
         openModal();
       }
     }
+    setRoomInfo()
   }, []);
 
   // useEffect(() => {
@@ -115,20 +116,23 @@ const ReadyToGame = () => {
           },
         }
       );
-      setEnterCode(response.data.roomEnterCode)
-      let userDtos = response.data.userDtos
-      userDtos.map((dto) => {
-        console.log(dto.captain)
-        const nickName = localStorage.getItem("nickName");
-        if (dto.roomNickname === nickName)
-          setIsMeCaptain(dto.captain)
-        console.log(isMeCaptain)
-      })
       return response.data;
     } catch (error) {
       console.error("방 정보 get api 오류 발생 : ", error);
       throw error;
     }
+  }
+  const setRoomInfo = async () => {
+    const roomInfo = await getRoomInfo()
+    setEnterCode(roomInfo.roomEnterCode)
+    let userDtos = roomInfo.userDtos
+    userDtos.map((dto) => {
+      console.log(dto.captain)
+      const nickName = localStorage.getItem("nickName");
+      if (dto.roomNickname === nickName)
+        setIsMeCaptain(dto.captain)
+      console.log(isMeCaptain)
+    })
   }
   const captainRoomInfoClick = async () => {
     captainOpenModal()
