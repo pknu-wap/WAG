@@ -224,14 +224,17 @@ const ReadyToGame = () => {
 
   // 대기방 방장 모달 공개/비공개 바꾸는 소켓
   const privateModeOnclick = () => {
+    const roomId = localStorage.getItem("roomId");
+    const nickName = localStorage.getItem("nickName");
+    console.log(roomId, nickName)
     stompClient.send(
       "/app/chat.changeMode",
       {},
       JSON.stringify({
-        sender: localStorage.getItem("nickName"),
-        content: "change room private mode",
+        sender: nickName,
+        content: "",
         messageType: "CHANGE",
-        roomId: localStorage.getItem("roomId"),
+        roomId: roomId,
       })
     );
     // 코드 꼬임 오류 방지(의미는 없음)
