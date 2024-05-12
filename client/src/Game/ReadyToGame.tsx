@@ -16,6 +16,7 @@ import ChatBubble from "../components/ingameComponents/ChatBubble";
 import { useLocation } from "react-router-dom";
 import JoinUser from "../components/ingameComponents/JoinUser";
 import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
+import RadioButton from "../components/radioButton/RadioButton";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -26,9 +27,14 @@ const ReadyToGame = () => {
   const [nickname, setNickname] = useState<string>("");
   const [possible, setPossible] = useState<boolean>();
   const [myChatMessages, setMyChatMessages] = useState<string>("");
+  const [changeIsPrivate, setChangeIsPrivate] = useState<boolean>()  // 대기방 방장 모달 내 바꾸는 여부
+
+  // 방 정보 관리
   const [userCount, setUserCount] = useState(0)
   const [enterCode, setEnterCode] = useState(0)
+  const [isPrivateRoom, setIsPrivateRoom] = useState<boolean>()
   const [isMeCaptain, setIsMeCaptain] = useState(false)
+
   const location = useLocation();
   const roomInfo = { ...location.state };
 
@@ -116,15 +122,20 @@ const ReadyToGame = () => {
           },
         }
       );
+      console.log(response.data)
       return response.data;
     } catch (error) {
       console.error("방 정보 get api 오류 발생 : ", error);
       throw error;
     }
   }
+
+  // 방 정보 업데이트
   const setRoomInfo = async () => {
     const roomInfo = await getRoomInfo()
     setEnterCode(roomInfo.roomEnterCode)
+    setIsPrivateRoom(roomInfo.privateRoom)
+    setChangeIsPrivate(roomInfo.privateRoom)
     let userDtos = roomInfo.userDtos
     userDtos.map((dto) => {
       console.log(dto.captain)
@@ -229,7 +240,10 @@ const ReadyToGame = () => {
     } else if (message.messageType === "CHAT") {
       receiveChatMessage(message);
       console.log("보내기");
-    } else {
+    } else if (message.messageType === "CHANGE") {
+      console.log("비공개? : ", message.isPrivateRoom)
+    }
+    else {
       console.log(message);
     }
   }
@@ -245,6 +259,40 @@ const ReadyToGame = () => {
 
   const receiveChatMessage = (message: ChatMessage) => {
     setChatMessages([...chatMessages, message]); // 채팅 데이터 상태 업데이트
+  };
+
+  const privateModeOnclick = () => {
+    stompClient.send(
+      "/app/chat.changeMode",
+      {},
+      JSON.stringify({
+        sender: localStorage.getItem("nickName"),
+        content: "change room private mode",
+        messageType: "CHANGE",
+        roomId: localStorage.getItem("roomId"),
+      })
+    );
+    setIsPrivateRoom(changeIsPrivate)
+    console.log(isPrivateRoom);
+  }
+
+  // 대기방 방장 모달 공개/비공개 바꾸는 버튼
+  const renderButton = () => {
+    if (isPrivateRoom === false) {
+      // 공개방일 때
+      return (
+        <Button size="lg" onClick={privateModeOnclick} disabled={changeIsPrivate === true}>
+          비공개방으로 변경
+        </Button>
+      );
+    } else {
+      // 비공개방일 때
+      return (
+        <Button size="lg" onClick={privateModeOnclick} disabled={changeIsPrivate === false}>
+          공개방으로 변경
+        </Button>
+      );
+    }
   };
 
   return (
@@ -347,10 +395,17 @@ const ReadyToGame = () => {
         <div>
           방장 기능
         </div>
-        {isMeCaptain ? (<div>
-          나는 방장이야
-          <Button size="lg" disabled={false}>GAME START</Button>
-        </div>) : (
+        {isMeCaptain ? (
+          <div>
+
+            <div>나는 방장이야</div>
+
+            <div>
+              {renderButton()}
+            </div>
+            <Button size="lg" disabled={false}>GAME START</Button>
+          </div>
+        ) : (
           <div>
             나는 방장이 아니니깐 할 수 있는게 없어
           </div>
