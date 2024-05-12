@@ -145,6 +145,10 @@ const ReadyToGame = () => {
   }
   const captainRoomInfoClick = async () => {
     captainOpenModal()
+    const roomInfo = await getRoomInfo()
+    console.log("backendIsPrivate : ", roomInfo.privateRoom)
+    console.log("changeIsPrivate : ", changeIsPrivate)
+    console.log("isPrivateRoom : ", isPrivateRoom)
   }
 
   async function captinSocket() {
@@ -218,6 +222,34 @@ const ReadyToGame = () => {
     setMyChatMessages("");
   }
 
+  // 대기방 방장 모달 공개/비공개 바꾸는 소켓
+  const privateModeOnclick = () => {
+    stompClient.send(
+      "/app/chat.changeMode",
+      {},
+      JSON.stringify({
+        sender: localStorage.getItem("nickName"),
+        content: "change room private mode",
+        messageType: "CHANGE",
+        roomId: localStorage.getItem("roomId"),
+      })
+    );
+    // 코드 꼬임 오류 방지(의미는 없음)
+    if (isPrivateRoom) {
+      // 공개 방으로 변경
+      setChangeIsPrivate(false)
+    }
+    // 바꾸기 전 공개 방일 때
+    else {
+      // 비공개 방으로 변경
+      setChangeIsPrivate(true)
+    }
+    setIsPrivateRoom(changeIsPrivate)
+    console.log("changeIsPrivate : ", changeIsPrivate)
+    console.log("isPrivateRoom : ", isPrivateRoom)
+    console.log("방 설정 바꾸기 완료, isPrivate : ", isPrivateRoom);
+  }
+
   function onMessageReceived(payload: any) {
     var message = JSON.parse(payload.body);
 
@@ -255,48 +287,19 @@ const ReadyToGame = () => {
     setChatMessages([...chatMessages, message]); // 채팅 데이터 상태 업데이트
   };
 
-  // 대기방 방장 모달 공개/비공개 바꾸는 소켓
-  const privateModeOnclick = () => {
-    stompClient.send(
-      "/app/chat.changeMode",
-      {},
-      JSON.stringify({
-        sender: localStorage.getItem("nickName"),
-        content: "change room private mode",
-        messageType: "CHANGE",
-        roomId: localStorage.getItem("roomId"),
-      })
-    );
-    // 바꾸기 전 비공개 방일 때
-    if (isPrivateRoom) {
-      // 공개 방으로 변경
-      setChangeIsPrivate(false)
-    }
-    // 바꾸기 전 공개 방일 때
-    else {
-      // 비공개 방으로 변경
-      setChangeIsPrivate(true)
-    }
-    setIsPrivateRoom(changeIsPrivate)
-    console.log("changeIsPrivate : ", changeIsPrivate)
-    console.log("isPrivateRoom : ", isPrivateRoom)
-    console.log("방 설정 바꾸기 완료, isPrivate : ", isPrivateRoom);
-  }
-
 
   // 대기방 방장 모달 공개/비공개 바꾸는 버튼
   const renderButton = () => {
     if (isPrivateRoom === false) {
       // 공개방일 때
-      console.log("현재 공개방")
       return (
+        // 바꾸고자 하는 값(changeIsPrivate) = true(공개로 변경하고 싶음) 일 때 활성화
         <Button size="lg" onClick={privateModeOnclick} disabled={changeIsPrivate === false}>
           비공개방으로 변경
         </Button>
       );
     } else {
       // 비공개방일 때
-      console.log("현재 비공개방")
       return (
         // 바꾸고자 하는 값(changeIsPrivate) = false(공개로 변경하고 싶음) 일 때 활성화
         <Button size="lg" onClick={privateModeOnclick} disabled={changeIsPrivate === true}>
