@@ -47,7 +47,7 @@ function CreateRoom() {
 
   // //웹소켓 만들기
   // const socketConnect = () => {
-  //   const socket = new SockJS("http://wwwag.co.kr:8080/ws");
+  //   const socket = new SockJS("http://wwwag-backend.co.kr/ws");
   //   stompClient = Stomp.over(socket);
   //   stompClient.connect({}, onConnected);
   // };
