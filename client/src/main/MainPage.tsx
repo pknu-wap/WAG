@@ -39,7 +39,7 @@ function MainPage({ dark }: ComponentProps) {
   //입장코드로 입력으로 roomid받기
   const getRoomIdCode = async () => {
     try {
-      const response = await axios.get("http://wwwag.co.kr:8080/roomId/code", {
+      const response = await axios.get("http://wwwag-backend.co.kr/roomId/code", {
         params: {
           enterCode: enterCode,
         },
@@ -54,7 +54,7 @@ function MainPage({ dark }: ComponentProps) {
   //빠른 입장으로 roomid받기
   const getRandomRoomId = async () => {
     try {
-      const response = await axios.get("http://wwwag.co.kr:8080/roomId");
+      const response = await axios.get("http://wwwag-backend.co.kr/roomId");
       return response.data;
     } catch (error) {
       console.error("랜덤 입장 요청 중 오류 발생:", error);
