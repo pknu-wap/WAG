@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import ReadyToGameModal from "../components/modal/ReadyModal";
 import Button from "../components/button/Button";
 import axios from "axios";
-import { ChatMessage, ChatMessageCaptainJoin, ChatMessageJoin, INicknamePossible, IRoomResponseInfo } from "../types/dto";
+import { ChatMessage, ChatMessageCaptainJoin, ChatMessageJoin, INicknamePossible, IRoomResponseInfo, IUserDto } from "../types/dto";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import ChatBubble from "../components/ingameComponents/ChatBubble";
@@ -50,11 +50,10 @@ const ReadyToGame = () => {
   }
   const captainOpenModal = () => {
     setCaptainIsOpen(true)
-    console.log(joinUsers)
   }
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
-  const [joinUsers, setJoinUsers] = useState<string[]>([]) // 입장 유저
+  const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]) // 입장 유저
 
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
   useEffect(() => {
@@ -63,16 +62,15 @@ const ReadyToGame = () => {
         console.log("Captain is in");
         captinSocket();
         roomInfo.isCaptin = false;
+        setUserCount(prev => (prev + 1))
       }
     } else {
       if (roomInfo.userCount === 1) {
-        console.log(roomInfo.userCount)
       } else {
         openModal();
       }
     }
     setRoomInfo()
-    console.log("룸 정보 get 완료")
   }, []);
 
   // useEffect(() => {
@@ -137,7 +135,6 @@ const ReadyToGame = () => {
   // 방 정보 업데이트
   const setRoomInfo = async () => {
     const roomInfo = await getRoomInfo()
-    setUserCount(roomInfo.userCount)
     setEnterCode(roomInfo.roomEnterCode)
     setIsPrivateRoom(roomInfo.privateRoom)
     setChangeIsPrivate(roomInfo.privateRoom)
@@ -224,20 +221,15 @@ const ReadyToGame = () => {
 
   function onMessageReceived(payload: any) {
     var message = JSON.parse(payload.body);
-    console.log(userCount)
 
     console.log(message);
     if (message.messageType === "JOIN") {
       receiveChatMessage(message);
-      if (userCount === 0) {
-        addCaptain(message)
-      } else {
-        addJoinUser(message)
-      }
+      addJoinUser()
       console.log(message.sender + " joined!");
     } else if (message.messageType === "LEAVE") {
       receiveChatMessage(message);
-      deleteLeavtUser(message)
+      addJoinUser()
       console.log(message);
     } else if (message.messageType === "CHAT") {
       receiveChatMessage(message);
@@ -252,29 +244,19 @@ const ReadyToGame = () => {
 
 
   // 유저 입장 시 상단에 프로필 추가
-  const addJoinUser = (message: ChatMessageJoin) => {
-    console.log(userCount)
-    let users = message.roomResponse.userDtos
-    users.map((user) => {
-      setJoinUsers(prevUsers => [...prevUsers, user.roomNickname]);
-    })
-  }
-  const addCaptain = (message: ChatMessageCaptainJoin) => {
-    setJoinUsers(prevUsers => [...prevUsers, message.sender]);
+  const addJoinUser = async () => {
+    const roomInfo = await getRoomInfo()
+    setJoinUsers(roomInfo.userDtos)
   }
 
   // 유저 퇴장 시 상단에 프로필 삭제
-  const deleteLeavtUser = (message: ChatMessageJoin) => {
-    console.log(userCount)
-    if (message.messageType === "LEAVE") {
-      let leaveUser = message.sender
-      let updateUsers = joinUsers.filter(item => item !== leaveUser);
-      setJoinUsers(updateUsers)
-    }
-  }
-  // useEffect(() => {
-  //   addJoinUser(recieveMessage)
-  // })
+  // const deleteLeavtUser = () => {
+  //   console.log(userCount)
+  //   if (message.messageType === "LEAVE") {
+  //     setJoinUsers(message.roomResponse.userDtos)
+  //   }
+  //   setUserCount(joinUsers.length)
+  // }
 
   const receiveChatMessage = (message: ChatMessage) => {
     setChatMessages([...chatMessages, message]); // 채팅 데이터 상태 업데이트
@@ -331,7 +313,7 @@ const ReadyToGame = () => {
     <FullLayout>
       <div className="flex flex-row justify-around items-center mt-10 mx-7">
         {joinUsers.map((name, index) => (
-          <JoinUser key={index} Nickname={name} />
+          <JoinUser key={index} Nickname={name.roomNickname} />
         ))}
 
       </div>
@@ -377,7 +359,7 @@ const ReadyToGame = () => {
             }}
           ></input>
 
-          <IconButton className="shadow-none top-1 right-0 absolute" size="sm" onClick={sendMessage}>
+          <IconButton className="light:shadow-none dark:shadow-none dark:text-dark-bg top-1 right-0 absolute" size="sm" onClick={sendMessage}>
             <FontAwesomeIcon icon={faPaperPlane} />
           </IconButton>
         </div>

@@ -24,7 +24,7 @@ export interface IRoomCreate {
   userNickName: string;
 }
 
-interface IUserDto {
+export interface IUserDto {
   captain: boolean;
   roomNickname: string;
   profileImage: string;
