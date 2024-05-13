@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 
 @Entity
 @Getter @Setter
@@ -22,11 +24,7 @@ public class User {
     @Column(nullable = false)
     private String email;
 
-
     private String imageUrl;
-
-    @Column(nullable = false)
-    private Boolean emailVerified = false;
 
     @JsonIgnore
     private String password;
@@ -35,5 +33,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     private AuthProvider provider;
 
-    private String providerId;
+
+    @ManyToMany
+    @JoinTable(name = "user_game_record",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "game_record_id"))
+    private List<GameRecord> gameRecords;
 }

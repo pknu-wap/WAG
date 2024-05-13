@@ -1,3 +1,7 @@
+// 규칙!!!!!!
+// API type : type 이름 앞에 "I" 붙이기
+// 소켓 객체 type : 그냥 이름만
+
 // 닉네임 중복확인 get response
 export interface INicknamePossible {
   possible: boolean;
@@ -20,21 +24,49 @@ export interface IRoomCreate {
   userNickName: string;
 }
 
+export interface IUserDto {
+  captain: boolean;
+  roomNickname: string;
+  profileImage: string;
+}
+
 // 방 정보 get response
 export interface IRoomResponseInfo {
-  gameStatus: boolean,
+  roomId: number,
   privateRoom: boolean,
-  roomEnterCode: Number,
-  roomId: Number,
-  userCount: Number,
-  userDtos: Array<Object>,
+  roomEnterCode: number,
+  gameStatus: boolean,
+  userCount: number,
+  userDtos: IUserDto[],
+}
+
+// 방장 외 유저 JOIN 시 받는 값
+export interface ChatMessageJoin {
+  messageType: string;
+  content: string;
+  sender: string;
+  roomId: number;
+  roomResponse: IRoomResponseInfo;
+}
+
+// 방장 JOIN 시 받는 값
+export interface ChatMessageCaptainJoin {
+  content: string | null;
+  messageType: string;
+  roomId: number;
+  sender: string;
 }
 
 //소켓으로 주고받는 채팅 객체
 export interface ChatMessage {
-  messageType : string
+  messageType: string
   sender: string; // 사용자 이름
   content: string; // 메시지 텍스트
-  roomId : number;
-  isPrivateRoom : boolean;
+  roomId: number;
+  isPrivateRoom: boolean;
+}
+
+export interface JoinUser {
+  userNickName: string;
+  userProfile: string;
 }

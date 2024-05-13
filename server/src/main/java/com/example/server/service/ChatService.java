@@ -1,37 +1,32 @@
 package com.example.server.service;
 
 import com.example.server.domain.*;
-import com.example.server.dto.*;
+import com.example.server.dto.ChatGameMessage;
+import com.example.server.dto.ChatMessage;
+import com.example.server.dto.ChatRoomModeMessage;
+import com.example.server.dto.GameUserDto;
 import com.example.server.payload.response.AnswerListResponse;
 import com.example.server.payload.response.ResultResponse;
-import com.example.server.repository.AnswerListRepository;
-import com.example.server.repository.GameOrderRepository;
-import com.example.server.repository.RoomRepository;
-import com.example.server.repository.RoomUserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.server.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class ChatService {
     private final RoomRepository roomRepository;
     private final RoomUserRepository roomUserRepository;
     private final GameOrderRepository gameOrderRepository;
     private final AnswerListRepository answerListRepository;
-    @Autowired
-    public ChatService(RoomRepository roomRepository,
-                       RoomUserRepository roomUserRepository, GameOrderRepository gameOrderRepository,
-                       AnswerListRepository answerListRepository){
-        this.roomRepository = roomRepository;
-        this.roomUserRepository = roomUserRepository;
-        this.gameOrderRepository = gameOrderRepository;
-        this.answerListRepository = answerListRepository;
-    }
+    private final GameRecordRepository gameRecordRepository;
 
-    public ChatGameMessage setGame(ChatMessage chatMessage){
+    public ChatGameMessage setGame(ChatMessage chatMessage) {
         if(chatMessage.getMessageType()==ChatMessage.MessageType.START){
             return startGame(chatMessage);
         }
@@ -56,6 +51,12 @@ public class ChatService {
         room.setCurrentOrder(1);
         room.setCorrectMemberCnt(0);
         roomRepository.save(room);
+
+        GameRecord gameRecord = new GameRecord();
+        List<User> userRanking = new ArrayList<>();
+        gameRecord.setUserRanking(userRanking);
+        gameRecord.setRoomId(room.getId());
+        gameRecordRepository.save(gameRecord);
 
         ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
         chatGameMessage.setMessageType(ChatMessage.MessageType.START);
@@ -109,11 +110,21 @@ public class ChatService {
         RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender()).get();
         GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(roomUser.getId()).get();
         Room room = roomRepository.findById(chatMessage.getRoomId()).get();
+        GameRecord gameRecord = gameRecordRepository.findByRoomId(room.getId()).get();
 
         if(gameOrder.getAnswerName().equals(chatMessage.getContent())){ // 정답
             room.setCorrectMemberCnt(room.getCorrectMemberCnt()+1);
             gameOrder.setRanking(room.getCorrectMemberCnt());
             gameOrder.setHaveAnswerChance(false);
+
+            if (roomUser.getUser() != null) {
+                gameRecord.getUserRanking().add(roomUser.getUser());
+            }
+            String rankingNicknameSet = gameRecord.getRankingNicknameSet() + " "
+                    + roomUser.getRoomNickname();
+            gameRecord.setRankingNicknameSet(rankingNicknameSet);
+
+            gameRecordRepository.save(gameRecord);
         }
         else{ // 오답
             gameOrder.setHaveAnswerChance(false); // 정답기회 없애기
@@ -123,6 +134,17 @@ public class ChatService {
         makeChatGameMessage(chatMessage, room);
 
         if(room.getCorrectMemberCnt() >= 3 || room.getUserCount()-1 <= room.getCorrectMemberCnt()){ // 게임 끝나는 경우
+
+            // 기존 저장되어 있던 순위권 닉네임 리스트에 순위권에 들지 못한 나머지 닉네임 추가
+            String rankingNicknameSet = gameRecord.getRankingNicknameSet();
+            rankingNicknameSet += " / ";
+            List<String> allNicknames = roomUserRepository.findNickNameByRoomId(room.getId());
+            for (String nickname : allNicknames) {
+                if(!rankingNicknameSet.contains(nickname)) rankingNicknameSet += " " + nickname;
+            }
+            gameRecord.setRankingNicknameSet(rankingNicknameSet);
+            gameRecordRepository.save(gameRecord);
+
             chatGameMessage.setMessageType(ChatMessage.MessageType.END);
         }
         else{
@@ -130,8 +152,6 @@ public class ChatService {
         }
         return chatGameMessage;
     }
-
-
 
 
     public void makeGameOrder(Long roomId){  // 게임 순서 & 정답어 설정
@@ -197,10 +217,8 @@ public class ChatService {
         return new ChatRoomModeMessage(chatMessage,room);
     }
 
-
     public AnswerListResponse getAnswerList(Long roomId, String nickname){
         return new AnswerListResponse(gameOrderRepository.findAnswerNotMe(nickname, roomId));
     }
-
 
 }

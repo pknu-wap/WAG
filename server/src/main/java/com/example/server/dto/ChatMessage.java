@@ -18,6 +18,6 @@ public class ChatMessage {
         CORRECT,
         START,
         END,
-        CHAGE,
+        CHANGE,
     }
 }

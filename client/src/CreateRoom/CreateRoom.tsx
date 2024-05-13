@@ -5,28 +5,22 @@ import FullLayout from "../components/layout/FullLayout";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { IRoomResponseInfo } from "../types/dto";
-import { Stomp } from "@stomp/stompjs";
-import SockJS from "sockjs-client";
-
-var stompClient: any = null; //웹소켓 변수 선언
 
 function CreateRoom() {
-
   const [isPrivate, setIsPrivate] = useState<boolean | null>(false); //일단은 공개방을 default로
   const [nickName, setNickname] = useState<string>();
-  const [isCaptin, setIsCaptin] = useState<string | null>("true");
 
   const navigate = useNavigate();
 
   const radioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(event.target.value)
+    console.log(event.target.value);
   };
 
   const createRoom = async () => {
     try {
-      console.log("11",isPrivate)
+      console.log("11", isPrivate);
       const response = await axios.post<IRoomResponseInfo>(
-        "http://wwwag.co.kr:8080/room/create",
+        "http://wwwag-backend.co.kr/room/create",
         {
           privateRoom: isPrivate,
           userNickName: nickName,

@@ -3,9 +3,10 @@ package com.example.server.controller;
 import com.example.server.payload.request.RoomCreateRequest;
 import com.example.server.payload.response.RoomEnterResponse;
 import com.example.server.payload.response.RoomResponse;
+import com.example.server.security.CurrentUser;
+import com.example.server.security.UserPrincipal;
 import com.example.server.service.RoomService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,9 @@ public class RoomController {
     @GetMapping("/room/info")
     public ResponseEntity<RoomResponse> returnRoomInfo(@RequestParam Long roomId){// roomId로 게임 방 정보주기
         RoomResponse roomResponse = roomService.getRoomInfo(roomId);
+        if (roomResponse == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         return new ResponseEntity<>(roomResponse, HttpStatus.OK);
     }
 
@@ -29,8 +33,8 @@ public class RoomController {
     }
 
     @PostMapping("/room/enter/random")
-    public ResponseEntity<RoomEnterResponse> enterRandomChatRoom(@RequestParam String nickName){// 랜덤으로 방 입장
-        RoomEnterResponse roomEnterResponse = roomService.enterRandomRoom(nickName);
+    public ResponseEntity<RoomEnterResponse> enterRandomChatRoom(@RequestParam String nickName, @CurrentUser UserPrincipal userPrincipal){// 랜덤으로 방 입장
+        RoomEnterResponse roomEnterResponse = roomService.enterRandomRoom(nickName, userPrincipal);
         return new ResponseEntity<>(roomEnterResponse, HttpStatus.OK);
     }
 

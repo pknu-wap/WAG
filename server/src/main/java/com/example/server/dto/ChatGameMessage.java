@@ -1,6 +1,5 @@
 package com.example.server.dto;
 
-import com.example.server.dto.GameUserDto;
 import lombok.Getter;
 import lombok.Setter;
 

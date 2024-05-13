@@ -1,6 +1,5 @@
 package com.example.server.dto;
 
-import com.example.server.domain.Room;
 import com.example.server.payload.response.RoomResponse;
 import lombok.Getter;
 import lombok.Setter;

@@ -15,8 +15,6 @@ type Props = {
   children?: React.ReactNode;
 };
 
-var stompClient: any = null; //웹소켓 변수 선언
-
 type PropsFromRedux = ConnectedProps<typeof connector>;
 type ComponentProps = Props & PropsFromRedux;
 const connector = connect(
@@ -41,7 +39,7 @@ function MainPage({ dark }: ComponentProps) {
   //입장코드로 입력으로 roomid받기
   const getRoomIdCode = async () => {
     try {
-      const response = await axios.get("http://wwwag.co.kr:8080/roomId/code", {
+      const response = await axios.get("http://wwwag-backend.co.kr/roomId/code", {
         params: {
           enterCode: enterCode,
         },
@@ -56,7 +54,7 @@ function MainPage({ dark }: ComponentProps) {
   //빠른 입장으로 roomid받기
   const getRandomRoomId = async () => {
     try {
-      const response = await axios.get("http://wwwag.co.kr:8080/roomId");
+      const response = await axios.get("http://wwwag-backend.co.kr/roomId");
       return response.data;
     } catch (error) {
       console.error("랜덤 입장 요청 중 오류 발생:", error);
@@ -77,6 +75,7 @@ function MainPage({ dark }: ComponentProps) {
   const buttonCheckHandler = async () => {
     const roomId = await getRoomIdCode();
     if (roomId !== "invalid enterCode") {
+      localStorage.setItem("roomId", roomId);
       navigate(`/ReadyToGame/${roomId}`);
     } else alert("입장 가능한 방이 없습니다.");
   };

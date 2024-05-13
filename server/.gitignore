@@ -38,3 +38,5 @@ out/
 ### VS Code ###
 .vscode/
 **/data.sql
+
+src/main/resources/.DS_Store
