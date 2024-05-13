@@ -117,7 +117,7 @@ const ReadyToGame = () => {
   const getRoomInfo = async () => {
     try {
       const response = await axios.get<IRoomResponseInfo>(
-        "http://wwwag.co.kr:8080/room/info",
+        "http://wwwag-backend.co.kr/room/info",
         {
           params: {
             roomId: Number(params.roomId),
@@ -153,7 +153,7 @@ const ReadyToGame = () => {
   //방장 웹소켓 만들기
   const socketCaptinConnect = () => {
     console.log("방장 구독");
-    const socket = new SockJS("http://wwwag.co.kr:8080/ws");
+    const socket = new SockJS("http://wwwag-backend.co.kr/ws");
     stompClient = Stomp.over(socket);
     stompClient.connect({}, onCaptinConnected);
   };
@@ -171,7 +171,7 @@ const ReadyToGame = () => {
 
   //웹소켓 만들기
   const socketConnect = () => {
-    const socket = new SockJS("http://wwwag.co.kr:8080/ws");
+    const socket = new SockJS("http://wwwag-backend.co.kr/ws");
     stompClient = Stomp.over(socket);
     stompClient.connect({}, onConnected);
   };
