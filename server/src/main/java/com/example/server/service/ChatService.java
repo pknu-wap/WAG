@@ -1,18 +1,20 @@
 package com.example.server.service;
 
 import com.example.server.domain.*;
-import com.example.server.dto.*;
+import com.example.server.dto.ChatGameMessage;
+import com.example.server.dto.ChatMessage;
+import com.example.server.dto.ChatRoomModeMessage;
+import com.example.server.dto.GameUserDto;
 import com.example.server.payload.response.AnswerListResponse;
 import com.example.server.payload.response.ResultResponse;
 import com.example.server.repository.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional

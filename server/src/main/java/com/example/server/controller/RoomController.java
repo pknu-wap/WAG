@@ -20,6 +20,9 @@ public class RoomController {
     @GetMapping("/room/info")
     public ResponseEntity<RoomResponse> returnRoomInfo(@RequestParam Long roomId){// roomId로 게임 방 정보주기
         RoomResponse roomResponse = roomService.getRoomInfo(roomId);
+        if (roomResponse == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         return new ResponseEntity<>(roomResponse, HttpStatus.OK);
     }
 

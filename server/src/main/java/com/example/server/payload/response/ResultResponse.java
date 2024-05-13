@@ -3,7 +3,6 @@ package com.example.server.payload.response;
 import com.example.server.domain.Room;
 import com.example.server.domain.RoomUser;
 import com.example.server.dto.ResultUserDto;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 

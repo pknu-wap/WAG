@@ -12,7 +12,6 @@ import com.example.server.repository.RoomUserRepository;
 import com.example.server.repository.UserRepository;
 import com.example.server.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,11 +61,8 @@ public class RoomService {
         Optional<Room> room = roomRepository.findById(roomId);
         List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(roomId));
 
-        if (room.isEmpty()) {
-            return new RoomResponse();
-        }
+        return room.map(value -> RoomResponse.create(value, userDtos)).orElse(null);
 
-        return RoomResponse.create(room.get(), userDtos);
     }
 
     public RoomEnterResponse enterRandomRoom(String nickName, UserPrincipal userPrincipal){ // 랜덤으로 방 입장

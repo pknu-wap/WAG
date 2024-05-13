@@ -1,6 +1,5 @@
 package com.example.server.service;
 
-import com.example.server.config.AppProperties;
 import com.example.server.config.ChatGptConfig;
 import com.example.server.dto.gptDto.ChatGptRequestDto;
 import com.example.server.dto.gptDto.ChatGptResponseDto;
