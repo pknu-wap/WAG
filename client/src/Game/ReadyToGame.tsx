@@ -17,7 +17,7 @@ import { useLocation } from "react-router-dom";
 import JoinUser from "../components/ingameComponents/JoinUser";
 import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
 import RadioButton from "../components/radioButton/RadioButton";
-import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
+import { faClock, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -230,6 +230,7 @@ const ReadyToGame = () => {
     } else if (message.messageType === "LEAVE") {
       setUserCount(userCount - 1)
       receiveChatMessage(message);
+      deleteLeavtUser(message)
       console.log(message);
     } else if (message.messageType === "CHAT") {
       receiveChatMessage(message);
@@ -242,14 +243,24 @@ const ReadyToGame = () => {
     }
   }
 
+  // 유저 입장 시 상단에 프로필 추가
   const addJoinUser = (message: ChatMessage) => {
     if (message.messageType === "JOIN") {
       setJoinUsers([...joinUsers, message.sender])
     }
   }
-  useEffect(() => {
 
-  })
+  // 유저 퇴장 시 상단에 프로필 삭제
+  const deleteLeavtUser = (message: ChatMessage) => {
+    if (message.messageType === "LEAVE") {
+      const leaveUser = message.sender
+      const updateUsers = joinUsers.filter(item => item !== leaveUser);
+      setJoinUsers(updateUsers)
+    }
+  }
+  // useEffect(() => {
+
+  // }, [userCount])
 
   const receiveChatMessage = (message: ChatMessage) => {
     setChatMessages([...chatMessages, message]); // 채팅 데이터 상태 업데이트
@@ -320,7 +331,9 @@ const ReadyToGame = () => {
         <div className="w-1/2 h-16 shadow-lg text-[#353535] flex justify-center items-center rounded-lg bg-[#FFCCFF] shadow-xl">
           <div>Ready To Game</div>
         </div>
-        <div></div>
+        <div className="ml-5">
+          <FontAwesomeIcon className="" size="2xl" icon={faClock} />
+        </div>
       </div>
       <div className="m-auto w-3/4 h-96 mt-10 overflow-y-scroll rounded-3xl shadow-xl flex flex-col p-5 tracking-wider bg-[#A072BC]">
         {chatMessages.map((m, index) => (
