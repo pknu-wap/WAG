@@ -87,7 +87,7 @@ const ReadyToGame = () => {
   const getNicknamePossible = async () => {
     try {
       const response = await axios.get<INicknamePossible>(
-        "http://wwwag.co.kr:8080/nickname/possible",
+        "http://wwwag-backend.co.kr/nickname/possible",
         {
           params: {
             roomId: Number(params.roomId),
