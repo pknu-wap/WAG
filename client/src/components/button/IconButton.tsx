@@ -32,7 +32,7 @@ const IconButton = ({
   return (
     <button
       type={type ? type : "button"}
-      className={`${combinedClassName} ${className}`}
+      className={`${className} ${combinedClassName}`}
       onClick={onClick}
     >
       {children}
