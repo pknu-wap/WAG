@@ -1,18 +1,52 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-  <title>Hello</title>
+  <title>환영합니다</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      width: 80%;
+      margin: 50px auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+    }
+    .link-list {
+      text-align: center;
+    }
+    .link-list a {
+      display: inline-block;
+      margin: 10px;
+      padding: 10px 20px;
+      text-decoration: none;
+      color: #fff;
+      background-color: #007bff;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    .link-list a:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
 <body>
-Hello
-
-<a href="/hello">hello</a><br/>
-  
-<a href="/oauth2/authorization/kakao">kakao</a> <br/>
-  
-<a href="/oauth2/authorization/google"> google login </a> <br/>
-
+<div class="container">
+  <img src="./WAG01.png" alt="환영합니다 이미지" style="display: block; margin: 0 auto; width: 300px; height: auto;">
+  <div class="link-list">
+    <a href="/hello">Hello 페이지로 이동</a>
+    <a href="/oauth2/authorization/kakao">카카오로 로그인</a>
+    <a href="/oauth2/authorization/google">구글로 로그인</a>
+  </div>
+</div>
 </body>
-
 </html>

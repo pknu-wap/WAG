@@ -39,7 +39,6 @@ public class ChatController {
     @MessageMapping("/chat.sendMessage")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
         String destination = "/topic/public/"+chatMessage.getRoomId();
-
         messagingTemplate.convertAndSend(destination, chatMessage);
         return chatMessage;
     }
