@@ -15,6 +15,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
@@ -22,6 +23,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class WebSocketEventListener {
     private static final Logger logger = LoggerFactory.getLogger(WebSocketEventListener.class);
 
@@ -46,7 +48,6 @@ public class WebSocketEventListener {
 
             RoomUser roomUser = roomUserRepository.hasNickName(username).get();
             Room room = roomRepository.findById(roomId).get();
-            roomUserRepository.delete(roomUser);
             room.setUserCount(room.getUserCount() - 1);  // 유저 수 -1
 
             ChatRoomInfoMessage chatRoomInfoMessage = new ChatRoomInfoMessage();
@@ -62,6 +63,8 @@ public class WebSocketEventListener {
                 roomUserRepository.save(nextCaption);
                 chatRoomInfoMessage.setContent(username + " 님이 방을 떠나 " + nextCaption.getRoomNickname() + " 님이 방장이 되었습니다.");
             }
+
+            roomUserRepository.delete(roomUser);
 
             roomRepository.save(room);  // 룸 정보 저장.
             List <RoomUser> roomUsers = roomUserRepository.findByRoomId(roomId);

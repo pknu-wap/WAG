@@ -2,10 +2,10 @@ package com.example.server.service;
 
 import com.example.server.domain.Room;
 import com.example.server.domain.RoomUser;
+import com.example.server.domain.User;
 import com.example.server.dto.UserDto;
 import com.example.server.exception.MaxUserCountExceededException;
 import com.example.server.payload.request.RoomCreateRequest;
-import com.example.server.payload.response.RoomEnterResponse;
 import com.example.server.payload.response.RoomResponse;
 import com.example.server.repository.RoomRepository;
 import com.example.server.repository.RoomUserRepository;
@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,19 +41,20 @@ public class RoomService {
 
         room.setPrivateRoom(roomCreateRequest.isPrivateRoom());
         room.setGameStatus(false);
-        room.setUserCount(1);
+        room.setUserCount(0);
         room = roomRepository.save(room);  // 방 생성
 
-        RoomUser roomUser = new RoomUser();
-        roomUser.setRoom(room);
-        roomUser.setCaptain(true);
-        roomUser.setRoomNickname(roomCreateRequest.getUserNickName());
-        roomUser = roomUserRepository.save(roomUser);   // 방장 추가
+//        RoomUser roomUser = new RoomUser();
+//        roomUser.setRoom(room);
+//        roomUser.setCaptain(true);
+//        roomUser.setRoomNickname(roomCreateRequest.getUserNickName());
+//        roomUser = roomUserRepository.save(roomUser);   // 방장 추가
+//
+//        List<UserDto> userDtos = new ArrayList<>();
+//        userDtos.add(new UserDto(roomUser.isCaptain(), roomUser.getRoomNickname(), roomUser.getProfileImage()));
 
-        List<UserDto> userDtos = new ArrayList<>();
-        userDtos.add(new UserDto(roomUser.isCaptain(), roomUser.getRoomNickname(), roomUser.getProfileImage()));
-
-        return RoomResponse.create(room, userDtos);
+//        return RoomResponse.create(room, userDtos);
+        return RoomResponse.create(room);
     }
 
     public RoomResponse getRoomInfo(Long roomId){ // 닉네임으로 게임방 정보 주기
@@ -65,57 +65,29 @@ public class RoomService {
 
     }
 
-    public RoomEnterResponse enterRandomRoom(String nickName, UserPrincipal userPrincipal){ // 랜덤으로 방 입장
-        Optional<Room> optionalRoom = roomRepository.findByRandom();
-        if(optionalRoom.isEmpty()){
-            return RoomEnterResponse.cantCreate(1);
-        }
-        else{
-            Room room = optionalRoom.get();
-            addUser(room, nickName, userPrincipal);
-
-            List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
-            return RoomEnterResponse.create(room, userDtos);
-        }
-    }
-
-    public RoomEnterResponse enterRoom(String nickName, int enterCode, UserPrincipal userPrincipal){ // 코드로 방 입장
-        Optional<Room> optionalRoom = roomRepository.findRoomByCode(enterCode);
-        if(optionalRoom.isEmpty()){  // 해당 방이 존재 안함
-            return RoomEnterResponse.cantCreate(3);
-        }
-        else{
-            if(optionalRoom.get().isGameStatus()){  // 해당 방이 게임 진행 중임.
-                return RoomEnterResponse.cantCreate(2);
-            }
-            if (!optionalRoom.get().isPrivateRoom()){
-                return RoomEnterResponse.cantCreate(3);  // 사설방이 아니라 입장 불가
-            }
-            Room room = optionalRoom.get();
-            addUser(room, nickName, userPrincipal);
-
-            List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
-            return RoomEnterResponse.create(room, userDtos);
-        }
-    }
 
     public RoomResponse enterRoomByRoomId(String nickName, Long roomId, UserPrincipal userPrincipal){ // 소켓 + roomId로 방 입장.
         Room room = roomRepository.findById(roomId).get();
+        boolean isCaptain = false;
         if (room.getUserCount() >= 6) {
             throw new MaxUserCountExceededException();  // 최대 인원 예외 처리.
+        } else if (room.getUserCount() == 0) {
+            isCaptain = true;
         }
-        addUser(room, nickName, userPrincipal);
+        addUser(room, nickName, isCaptain, userPrincipal);
         List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
         return RoomResponse.create(room, userDtos);
     }
 
-    public void addUser(Room room, String nickName, UserPrincipal userPrincipal){  // 방에 유저 추가 로직
+    public void addUser(Room room, String nickName,Boolean isCaptain, UserPrincipal userPrincipal){  // 방에 유저 추가 로직
         RoomUser roomUser = new RoomUser();
-        roomUser.setCaptain(false);
+        roomUser.setCaptain(isCaptain);
         roomUser.setRoom(room);
         roomUser.setRoomNickname(nickName);
-        if (userPrincipal != null) {
-            roomUser.setUser(userRepository.findById(userPrincipal.getId()).get());
+
+        if (userPrincipal != null && userPrincipal.getId() != null) {
+            Optional<User> userOptional = userRepository.findById((userPrincipal.getId()));
+            userOptional.ifPresent(roomUser::setUser);
         }
         roomUserRepository.save(roomUser);
 
@@ -145,4 +117,42 @@ public class RoomService {
         }
 
     }
+
+
+//    public RoomEnterResponse enterRandomRoom(String nickName, UserPrincipal userPrincipal){ // 랜덤으로 방 입장
+//        Optional<Room> optionalRoom = roomRepository.findByRandom();
+//        if(optionalRoom.isEmpty()){
+//            return RoomEnterResponse.cantCreate(1);
+//        }
+//        else{
+//            Room room = optionalRoom.get();
+//            addUser(room, nickName, userPrincipal);
+//
+//            List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
+//            return RoomEnterResponse.create(room, userDtos);
+//        }
+//    }
+//
+//
+//    public RoomEnterResponse enterRoom(String nickName, int enterCode, UserPrincipal userPrincipal){ // 코드로 방 입장
+//        Optional<Room> optionalRoom = roomRepository.findRoomByCode(enterCode);
+//        if(optionalRoom.isEmpty()){  // 해당 방이 존재 안함
+//            return RoomEnterResponse.cantCreate(3);
+//        }
+//        else{
+//            if(optionalRoom.get().isGameStatus()){  // 해당 방이 게임 진행 중임.
+//                return RoomEnterResponse.cantCreate(2);
+//            }
+//            if (!optionalRoom.get().isPrivateRoom()){
+//                return RoomEnterResponse.cantCreate(3);  // 사설방이 아니라 입장 불가
+//            }
+//            Room room = optionalRoom.get();
+//            addUser(room, nickName, userPrincipal);
+//
+//            List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
+//            return RoomEnterResponse.create(room, userDtos);
+//        }
+//    }
+
+
 }

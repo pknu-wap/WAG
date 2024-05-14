@@ -15,8 +15,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 //                .setAllowedOrigins("http://wwwag.co.kr:8080 ")
 //                .setAllowedOrigins("http://wwwag.co.kr ")
 //                .setAllowedOrigins("http://localhost:3000 ")
-                .setAllowedOriginPatterns("*")
-                .withSockJS();
+                .setAllowedOriginPatterns("*");
+//                .setAllowedOriginPatterns("*"),
+//                .withSockJS();
     }
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
