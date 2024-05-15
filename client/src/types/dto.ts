@@ -2,6 +2,8 @@
 // API type : type 이름 앞에 "I" 붙이기
 // 소켓 객체 type : 그냥 이름만
 
+export const URL = "http://wwwag-backend.co.kr/ws";
+
 // 닉네임 중복확인 get response
 export interface INicknamePossible {
   possible: boolean;
@@ -32,12 +34,12 @@ export interface IUserDto {
 
 // 방 정보 get response
 export interface IRoomResponseInfo {
-  roomId: number,
-  privateRoom: boolean,
-  roomEnterCode: number,
-  gameStatus: boolean,
-  userCount: number,
-  userDtos: IUserDto[],
+  roomId: number;
+  privateRoom: boolean;
+  roomEnterCode: number;
+  gameStatus: boolean;
+  userCount: number;
+  userDtos: IUserDto[];
 }
 
 // 방장 외 유저 JOIN 시 받는 값
@@ -59,7 +61,7 @@ export interface ChatMessageCaptainJoin {
 
 //소켓으로 주고받는 채팅 객체
 export interface ChatMessage {
-  messageType: string
+  messageType: string;
   sender: string; // 사용자 이름
   content: string; // 메시지 텍스트
   roomId: number;

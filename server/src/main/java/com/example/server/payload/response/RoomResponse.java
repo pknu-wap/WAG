@@ -21,6 +21,15 @@ public class RoomResponse {
     private int userCount;
     private List<UserDto> UserDtos;
 
+
+    public RoomResponse(Long roomId, boolean isPrivateRoom, int roomEnterCode, boolean gameStatus, int userCount) {
+        this.roomId = roomId;
+        this.isPrivateRoom = isPrivateRoom;
+        this.roomEnterCode = roomEnterCode;
+        this.gameStatus = gameStatus;
+        this.userCount = userCount;
+    }
+
     public static RoomResponse create(Room room, List<UserDto> userDtos){
         return new RoomResponse(
                 room.getId(),
@@ -29,6 +38,16 @@ public class RoomResponse {
                 room.isGameStatus(),
                 room.getUserCount(),
                 userDtos
+        );
+    }
+
+    public static RoomResponse create(Room room){
+        return new RoomResponse(
+                room.getId(),
+                room.isPrivateRoom(),
+                room.getRoomEnterCode(),
+                room.isGameStatus(),
+                room.getUserCount()
         );
     }
 }
