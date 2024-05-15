@@ -17,6 +17,7 @@ import {
   INicknamePossible,
   IRoomResponseInfo,
   IUserDto,
+  URL,
 } from "../types/dto";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
@@ -67,7 +68,7 @@ const ReadyToGame = () => {
     if ("isCaptin" in roomInfo) {
       if (roomInfo.isCaptin === true) {
         console.log("Captain is in");
-        captinSocket();
+        socketConnect();
         roomInfo.isCaptin = false;
       }
     } else {
@@ -151,32 +152,32 @@ const ReadyToGame = () => {
     });
   };
 
-  async function captinSocket() {
-    socketCaptinConnect();
-  }
+  // async function captinSocket() {
+  //   socketCaptinConnect();
+  // }
 
-  //방장 웹소켓 만들기
-  const socketCaptinConnect = () => {
-    console.log("방장 구독");
-    const socket = new SockJS("http://wwwag-backend.co.kr/ws");
-    stompClient = Stomp.over(socket);
-    stompClient.connect({}, onCaptinConnected);
-  };
+  // //방장 웹소켓 만들기
+  // const socketCaptinConnect = () => {
+  //   console.log("방장 구독");
+  //   const socket = new SockJS(URL);
+  //   stompClient = Stomp.over(socket);
+  //   stompClient.connect({}, onCaptinConnected);
+  // };
 
-  async function onCaptinConnected() {
-    const roomId = roomInfo.roomId;
-    const nickName = roomInfo.userNickName;
-    stompClient.subscribe(`/topic/public/${roomId}`, onMessageReceived);
-    stompClient.send(
-      "/app/chat.addCaptinUser",
-      {},
-      JSON.stringify({ sender: nickName, type: "JOIN", roomId: roomId })
-    );
-  }
+  // async function onCaptinConnected() {
+  //   const roomId = roomInfo.roomId;
+  //   const nickName = roomInfo.userNickName;
+  //   stompClient.subscribe(`/topic/public/${roomId}`, onMessageReceived);
+  //   stompClient.send(
+  //     "/app/chat.addUser",
+  //     {},
+  //     JSON.stringify({ sender: nickName, type: "JOIN", roomId: roomId })
+  //   );
+  // }
 
   //웹소켓 만들기
   const socketConnect = () => {
-    const socket = new SockJS("http://wwwag-backend.co.kr/ws");
+    const socket = new SockJS(URL);
     stompClient = Stomp.over(socket);
     stompClient.connect({}, onConnected);
   };
@@ -185,6 +186,7 @@ const ReadyToGame = () => {
   async function onConnected() {
     const roomId = localStorage.getItem("roomId");
     const nickName = localStorage.getItem("nickName");
+    console.log("roomId: ", roomId, "nickName: ", nickName);
     stompClient.subscribe(`/topic/public/${roomId}`, onMessageReceived);
     stompClient.send(
       "/app/chat.addUser",
@@ -248,6 +250,7 @@ const ReadyToGame = () => {
   const addJoinUser = async () => {
     const roomInfo = await getRoomInfo();
     setJoinUsers(roomInfo.userDtos);
+    console.log("addJoinUser 실행됨");
   };
 
   // 유저 퇴장 시 상단에 프로필 삭제
