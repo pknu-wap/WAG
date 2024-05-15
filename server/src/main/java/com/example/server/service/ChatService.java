@@ -44,8 +44,7 @@ public class ChatService {
 
     public ChatGameMessage startGame(ChatMessage chatMessage) {
         makeGameOrder(chatMessage.getRoomId());
-        Optional<Room> optionalRoom = roomRepository.findById(chatMessage.getRoomId());
-        Room room = optionalRoom.get();
+        Room room = roomRepository.findById(chatMessage.getRoomId()).get();
         room.setGameStatus(true);
         room.setCycle(1);
         room.setCurrentOrder(1);
@@ -206,12 +205,7 @@ public class ChatService {
     public ChatRoomModeMessage changeRoomMode(ChatMessage chatMessage){
         Room room = roomRepository.findById(chatMessage.getRoomId()).get();
 
-        if(room.isPrivateRoom()){
-            room.setPrivateRoom(false);
-        }
-        else{
-            room.setPrivateRoom(true);
-        }
+        room.setPrivateRoom(!room.isPrivateRoom());
 
         roomRepository.save(room);
         return new ChatRoomModeMessage(chatMessage,room);

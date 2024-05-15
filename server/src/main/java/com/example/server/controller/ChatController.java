@@ -39,13 +39,12 @@ public class ChatController {
     @MessageMapping("/chat.sendMessage")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
         String destination = "/topic/public/"+chatMessage.getRoomId();
-
         messagingTemplate.convertAndSend(destination, chatMessage);
         return chatMessage;
     }
 
     @MessageMapping("/chat.sendGameMessage")
-    public ChatGameMessage sendGameMessage(@Payload ChatMessage chatMessage) throws JsonProcessingException {
+    public ChatGameMessage sendGameMessage(@Payload ChatMessage chatMessage) {
         String destination = "/topic/public/"+chatMessage.getRoomId();
         ChatGameMessage chatGameMessage = chatService.setGame(chatMessage);
         messagingTemplate.convertAndSend(destination, chatGameMessage);
@@ -70,7 +69,6 @@ public class ChatController {
         headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
 
         RoomResponse roomResponse = roomService.enterRoomByRoomId(chatMessage.getSender(),chatMessage.getRoomId(), userPrincipal);  // 해당 방에 입장하는 로직
-
         ChatRoomInfoMessage chatRoomInfoMessage = new ChatRoomInfoMessage();
         chatRoomInfoMessage.setMessageType(ChatMessage.MessageType.JOIN);
         chatRoomInfoMessage.setSender(sender);
@@ -82,18 +80,18 @@ public class ChatController {
         return chatRoomInfoMessage;
     }
 
-    @MessageMapping("/chat.addCaptinUser")   // 방장 소켓 연결
-    public ChatMessage addCaptinUser(@Payload ChatMessage chatMessage,
-                                       SimpMessageHeaderAccessor headerAccessor) {
-        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
-        String sender = chatMessage.getSender();
-        headerAccessor.getSessionAttributes().put("username", sender);
-        headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
-        chatMessage.setMessageType(ChatMessage.MessageType.JOIN);
-        messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getRoomId(), chatMessage);
-
-        return chatMessage;
-    }
+//    @MessageMapping("/chat.addCaptinUser")   // 방장 소켓 연결
+//    public ChatMessage addCaptinUser(@Payload ChatMessage chatMessage,
+//                                       SimpMessageHeaderAccessor headerAccessor) {
+//        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
+//        String sender = chatMessage.getSender();
+//        headerAccessor.getSessionAttributes().put("username", sender);
+//        headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
+//        chatMessage.setMessageType(ChatMessage.MessageType.JOIN);
+//        messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getRoomId(), chatMessage);
+//
+//        return chatMessage;
+//    }
 
 //    @GetMapping("/chat/result")
 //    public ResponseEntity<ResultResponse> returnRoominfo(@RequestParam Long roomId){// 닉네임으로 게임 방 정보주기
