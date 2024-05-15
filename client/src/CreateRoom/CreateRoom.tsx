@@ -12,9 +12,9 @@ function CreateRoom() {
 
   const navigate = useNavigate();
 
-  const radioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(event.target.value);
-  };
+  // const radioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   console.log(event.target.value);
+  // };
 
   const createRoom = async () => {
     try {
