@@ -21,6 +21,7 @@ import { faClock, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
+
 const ReadyToGame = () => {
   const params = useParams(); // params를 상수에 할당
   const [, setIsOpen] = useRecoilState(readyToGameModalState);
@@ -54,7 +55,7 @@ const ReadyToGame = () => {
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
   const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]) // 입장 유저
-
+  const [isAnswerMode, setIsAnswerMode] = useState(false); //정답 입력 <-> 채팅 입력 버튼 클릭 시의 입력창 변경
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
   useEffect(() => {
     if ("isCaptin" in roomInfo) {
@@ -176,7 +177,7 @@ const ReadyToGame = () => {
     stompClient.connect({}, onConnected);
   };
 
-  //STOMP 소켓 구독
+  //STOMP 소켓 구독 및 JOIN으로 입장
   async function onConnected() {
     const roomId = localStorage.getItem("roomId");
     const nickName = localStorage.getItem("nickName");
@@ -194,34 +195,41 @@ const ReadyToGame = () => {
     closeModal();
   };
 
-  function sendMessage() {
+  //게임중 채팅메세지 MessageType에 따라 소켓에 객체를 전달하는 함수
+  function sendMessageToSocket(messageType:string) {
     if (myChatMessages.trim() === "") {
-      alert("채팅 메시지를 입력해주세요.");
+      alert("값을 입력해주세요.");
       return;
     }
+  
     const roomId = localStorage.getItem("roomId");
     const nickName = localStorage.getItem("nickName");
-    console.log(nickName);
-    console.log(roomId);
     stompClient.send(
-      "/app/chat.sendMessage",
+      "/app/chat.sendGameMessage",
       {},
       JSON.stringify({
-        sender: localStorage.getItem("nickName"),
+        sender: nickName,
         content: myChatMessages,
-        messageType: "CHAT",
-        roomId: localStorage.getItem("roomId"),
+        messageType: messageType,
+        roomId: roomId,
       })
     );
     console.log(myChatMessages);
     setMyChatMessages("");
   }
 
-
-
+  //버튼에 따라 소켓에 보낼 객체의 MessageType을 바꾸어주는 함수
+  function sendMessage() {
+    if (isAnswerMode) {
+      stompClient.send(
+        sendMessageToSocket("ANSWER"));
+    } else {
+      sendMessageToSocket("CHAT");
+    }
+  }
+  //구독된 방에서 받아오는 모든 메세지 처리 부분
   function onMessageReceived(payload: any) {
     var message = JSON.parse(payload.body);
-
     console.log(message);
     if (message.messageType === "JOIN") {
       receiveChatMessage(message);
@@ -236,7 +244,9 @@ const ReadyToGame = () => {
       console.log("보내기");
     } else if (message.messageType === "CHANGE") {
       console.log("비공개? : ", message.isPrivateRoom)
-    }
+    } else if (message.messageType === "CHANGE") {
+    console.log("비공개? : ", message.isPrivateRoom)
+  }
     else {
       console.log(message);
     }
@@ -309,6 +319,17 @@ const ReadyToGame = () => {
     }
   };
 
+    // 정답 입력 모드로 전환하는 함수
+    const switchToAnswerMode = () => {
+      setIsAnswerMode(true);
+    };
+  
+    // 채팅 모드로 전환하는 함수
+    const switchToChatMode = () => {
+      setIsAnswerMode(false);
+    };
+
+
   return (
     <FullLayout>
       <div className="flex flex-row justify-around items-center mt-10 mx-7">
@@ -341,11 +362,22 @@ const ReadyToGame = () => {
         <IconButton size="md" className="mr-10" onClick={captainOpenModal}>
           <FontAwesomeIcon icon={faGear} />
         </IconButton>
+        <div>
+          {isAnswerMode ? (
+            <Button size="sm" className="mr-10" onClick={switchToChatMode}>
+              채팅 치기
+            </Button>
+          ) : (
+            <Button size="sm" className="mr-10" onClick={switchToAnswerMode}>
+              정답 입력하기
+            </Button>
+          )}
+        </div>
         <div className="w-5/12 flex flex-row justify-center algin-center relative">
           <input
             className="w-full rounded-2xl shadow-md pl-5 text-[#000000]"
             type="text"
-            placeholder="채팅 메세지를 입력해주세요"
+            placeholder={isAnswerMode ? "정답을 입력하세요" : "채팅 메세지를 입력해주세요"}
             value={myChatMessages}
             onKeyDown={(e) => {
               if (e.key === "Enter" && myChatMessages.trim() !== "") {
