@@ -1,11 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import './Fonts/galmuri.css';
+@import "./Fonts/galmuri.css";
 
 body {
   margin: auto;
-  font-family: 'Galmuri11', sans-serif;
+  font-family: "Galmuri11", sans-serif;
   /* 원하는 폰트로 설정 */
   /* font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",

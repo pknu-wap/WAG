@@ -39,11 +39,14 @@ function MainPage({ dark }: ComponentProps) {
   //입장코드로 입력으로 roomid받기
   const getRoomIdCode = async () => {
     try {
-      const response = await axios.get("http://wwwag-backend.co.kr/roomId/code", {
-        params: {
-          enterCode: enterCode,
-        },
-      });
+      const response = await axios.get(
+        "http://wwwag-backend.co.kr/roomId/code",
+        {
+          params: {
+            enterCode: enterCode,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       console.error(error);
