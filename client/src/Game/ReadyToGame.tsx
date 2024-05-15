@@ -77,7 +77,6 @@ const ReadyToGame = () => {
         openModal();
       }
     }
-    setRoomInfo();
   }, []);
 
   // useEffect(() => {
@@ -146,9 +145,11 @@ const ReadyToGame = () => {
     setIsPrivateRoom(roomInfo.privateRoom);
     setChangeIsPrivate(roomInfo.privateRoom);
     let userDtos = roomInfo.userDtos;
-    userDtos.forEach((dto: IUserDto) => {
+    userDtos.forEach((dto) => {
+      console.log(dto.roomNickname);
       const nickName = localStorage.getItem("nickName");
-      if (dto.roomNickname === nickName) setIsMeCaptain(dto.captain);
+      console.log(nickName);
+      if (dto.captain && dto.roomNickname === nickName) setIsMeCaptain(true);
     });
   };
 
@@ -231,10 +232,12 @@ const ReadyToGame = () => {
     if (message.messageType === "JOIN") {
       receiveChatMessage(message);
       addJoinUser();
+      setRoomInfo();
       console.log(message.sender + " joined!");
     } else if (message.messageType === "LEAVE") {
       receiveChatMessage(message);
       addJoinUser();
+      setRoomInfo();
       console.log(message);
     } else if (message.messageType === "CHAT") {
       receiveChatMessage(message);
