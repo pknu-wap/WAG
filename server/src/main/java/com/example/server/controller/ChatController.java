@@ -10,7 +10,6 @@ import com.example.server.security.CurrentUser;
 import com.example.server.security.UserPrincipal;
 import com.example.server.service.ChatService;
 import com.example.server.service.RoomService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,6 +62,7 @@ public class ChatController {
     public ChatRoomInfoMessage addUser(@Payload ChatMessage chatMessage,
                                        SimpMessageHeaderAccessor headerAccessor,
                                        @CurrentUser UserPrincipal userPrincipal) {   // 방장 아닌 유저 소켓 연결
+
         headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
         String sender = chatMessage.getSender();
         headerAccessor.getSessionAttributes().put("username", sender);
@@ -80,18 +80,18 @@ public class ChatController {
         return chatRoomInfoMessage;
     }
 
-//    @MessageMapping("/chat.addCaptinUser")   // 방장 소켓 연결
-//    public ChatMessage addCaptinUser(@Payload ChatMessage chatMessage,
-//                                       SimpMessageHeaderAccessor headerAccessor) {
-//        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
-//        String sender = chatMessage.getSender();
-//        headerAccessor.getSessionAttributes().put("username", sender);
-//        headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
-//        chatMessage.setMessageType(ChatMessage.MessageType.JOIN);
-//        messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getRoomId(), chatMessage);
-//
-//        return chatMessage;
-//    }
+    @MessageMapping("/chat.addCaptainUser")   // 방장 소켓 연결
+    public ChatMessage addCaptainUser(@Payload ChatMessage chatMessage,
+                                      SimpMessageHeaderAccessor headerAccessor) {
+        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
+        String sender = chatMessage.getSender();
+        headerAccessor.getSessionAttributes().put("username", sender);
+        headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
+        chatMessage.setMessageType(ChatMessage.MessageType.JOIN);
+        messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getRoomId(), chatMessage);
+
+        return chatMessage;
+    }
 
 //    @GetMapping("/chat/result")
 //    public ResponseEntity<ResultResponse> returnRoominfo(@RequestParam Long roomId){// 닉네임으로 게임 방 정보주기

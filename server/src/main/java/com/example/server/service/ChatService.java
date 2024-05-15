@@ -44,7 +44,7 @@ public class ChatService {
 
     public ChatGameMessage startGame(ChatMessage chatMessage) {
         makeGameOrder(chatMessage.getRoomId());
-        Room room = roomRepository.findById(chatMessage.getRoomId()).get();
+        Room room = roomRepository.findByRoomId(chatMessage.getRoomId()).get();
         room.setGameStatus(true);
         room.setCycle(1);
         room.setCurrentOrder(1);
