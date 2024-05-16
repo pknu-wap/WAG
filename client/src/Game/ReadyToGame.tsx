@@ -21,12 +21,13 @@ import {
 } from "../types/dto";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import ChatBubble from "../components/ingameComponents/ChatBubble";
+import ChatRoom from "../components/chatRoom/ChatRoom";
 import { useLocation } from "react-router-dom";
 import JoinUser from "../components/ingameComponents/JoinUser";
 import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
 import RadioButton from "../components/radioButton/RadioButton";
 import { faClock, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
+
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -392,7 +393,7 @@ const ReadyToGame = () => {
       </div>
       <div className="m-auto w-3/4 h-96 mt-10 overflow-y-hidden rounded-3xl shadow-xl flex flex-col tracking-wider bg-[#A072BC]">
         {chatMessages.map((m, index) => (
-          <ChatBubble key={index} message={m} />
+          <ChatRoom key={index} message={m} />
         ))}
       </div>
       
