@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ChatMessage } from "../../types/dto";
-import UserMessage from "./UserMessage"; // 상대 경로에 주의하세요.
-import NotificationMessage from "./NotificationMessage"; // 상대 경로에 주의하세요.
+import UserMessage from "./UserMessage";
+import NotificationMessage from "./NotificationMessage";
 const ChatRoom: React.FC<{ message: ChatMessage }> = ({ message }) => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const myName = localStorage.getItem("nickName");
@@ -32,9 +32,9 @@ const ChatRoom: React.FC<{ message: ChatMessage }> = ({ message }) => {
       return (
         <div key={index} className={containerClass}>
           {isNotification ? (
-            <NotificationMessage message={msg} />
+            <NotificationMessage message={msg} /> //공지채팅 랜더링
           ) : (
-            <UserMessage message={msg} />
+            <UserMessage message={msg} />  //유저채팅 랜더링
           )}
         </div>
       );
