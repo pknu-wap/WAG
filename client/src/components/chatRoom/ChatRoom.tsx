@@ -27,12 +27,12 @@ const ChatRoom: React.FC<{ message: ChatMessage }> = ({ message }) => {
   
       let containerClass = "flex flex-col items-start"; //상대방의 채팅인 경우
       if (isMyMessage) containerClass = "flex flex-col items-end"; //나의 채팅인 경우
-      else if (isNotification) containerClass = "flex flex-col items-middle"; //상대방의 채팅인 경우
+      else if (isNotification) containerClass = "flex flex-col items-middle"; //공지 채팅인 경우
   
       return (
         <div key={index} className={containerClass}>
           {isNotification ? (
-            msg.sender !== myName && <NotificationMessage message={msg} />
+            <NotificationMessage message={msg} />
           ) : (
             <UserMessage message={msg} />
           )}
