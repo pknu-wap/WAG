@@ -243,27 +243,28 @@ const ReadyToGame = () => {
 
   }
   //구독된 방에서 받아오는 모든 메세지 처리 부분
-
   function onMessageReceived(payload: any) {
     var message = JSON.parse(payload.body);
-    console.log(message);
     if (message.messageType === "JOIN") {
       receiveChatMessage(message);
       addJoinUser();
       setRoomInfo();
+      console.log("JOIN으로 온 메세지", message);
       console.log(message.sender + " joined!");
     } else if (message.messageType === "LEAVE") {
       receiveChatMessage(message);
       addJoinUser();
       setRoomInfo();
-      console.log(message);
+      console.log("LEAVE으로 온 메세지", message);
     } 
     else if (message.messageType === "CHAT") {
       receiveChatMessage(message);
-      console.log("보내기");
+      console.log("CHAT으로 온 메세지", message);
+      setRoomInfo();
     } 
     else if (message.messageType === "CHANGE") {
       console.log("비공개? : ", message.isPrivateRoom)
+      setRoomInfo();
     } 
     else if (message.messageType === "ASK") {
       console.log("ASK로 온 메세지", message);
@@ -271,8 +272,11 @@ const ReadyToGame = () => {
     else if (message.messageType === "ANSWER") {
       console.log("ANSWER로 온 메세지", message);
     }
-    else if (message.messageType === "CORRECT ") {
+    else if (message.messageType === "CORRECT") {
       console.log("CORRECT로 온 메세지", message);
+    }
+    else if (message.messageType === "START") {
+      console.log("START로 온 메세지", message);
     }
     else {
       console.log(message);
@@ -366,8 +370,9 @@ const ReadyToGame = () => {
 
     
     const clickGameStart = () => {
+      captainCloseModal(); //모달 닫기
       setgameStart(true);
-      sendMessageToSocket("/app/chat.sendMessage", "START");  //소켓에 START로 보냄
+      sendMessageToSocket("/app/chat.sendGameMessage", "START");  //소켓에 START로 보냄
     };
 
 
@@ -381,14 +386,15 @@ const ReadyToGame = () => {
       </div>
       <div className="m-auto mt-8 flex justify-center items-center relative">
         <div className="mr-5">
+        <div className="text-base">입장코드</div>
           <div className="text-xl">{enterCode}</div>
-          <div className="text-sm">입장코드</div>
         </div>
         <div className="w-1/2 h-16 shadow-lg text-[#353535] flex justify-center items-center rounded-lg bg-[#FFCCFF] shadow-xl">
-          <div>Ready To Game</div>
+          <div className = "text-xl font-semibold">Ready To Game</div>
         </div>
-        <div className="ml-5">
-          <FontAwesomeIcon className="" size="2xl" icon={faClock} />
+        <div className="ml-5 text-base">
+          방 인원
+          <div className="text-lg">{joinUsers.length}/6</div>
         </div>
       </div>
       <div className="m-auto w-3/4 h-96 mt-10 overflow-y-hidden rounded-3xl shadow-xl flex flex-col tracking-wider bg-[#A072BC]">
