@@ -2,8 +2,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import IconButton from "../components/button/IconButton";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import FullLayout from "../components/layout/FullLayout";
-import { useParams } from "react-router-dom";
+import { Navigate, Pathname, useParams } from "react-router-dom";
 import { useRecoilState } from "recoil";
+import { createBrowserHistory } from "history";
 import {
   captainReadyToGameModalState,
   readyToGameModalState,
@@ -27,7 +28,7 @@ import JoinUser from "../components/ingameComponents/JoinUser";
 import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
 import RadioButton from "../components/radioButton/RadioButton";
 import { faClock, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
-
+import { create } from "domain";
 var stompClient: any = null; //웹소켓 변수 선언
 
 const ReadyToGame = () => {
@@ -323,6 +324,38 @@ const ReadyToGame = () => {
       );
     }
   };
+
+  // 새로고침 방지
+  const usePreventRefresh = () => {
+    const preventClose = (e: any) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    // 브라우저에 렌더링 시 한 번만 실행하는 코드
+    useEffect(() => {
+      (() => {
+        window.addEventListener("beforeunload", preventClose);
+      })();
+
+      return () => {
+        window.removeEventListener("beforeunload", preventClose);
+      };
+    });
+  };
+
+  const history = createBrowserHistory();
+  const preventGoBackHandler = () => {
+    console.log(history);
+  };
+  useEffect(() => {
+    window.addEventListener("popstate", preventGoBackHandler);
+    return () => {
+      window.removeEventListener("popstate", preventGoBackHandler);
+    };
+  }, []);
+
+  usePreventRefresh();
 
   return (
     <FullLayout>
