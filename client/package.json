@@ -28,6 +28,7 @@
     "react-redux": "^9.1.0",
     "react-router-dom": "^6.23.0",
     "react-scripts": "5.0.1",
+    "react-toastify": "^10.0.5",
     "recoil": "^0.7.7",
     "socket.io-client": "^4.7.5",
     "sockjs-client": "^1.6.1",
