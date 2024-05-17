@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import IconButton from "../components/button/IconButton";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import FullLayout from "../components/layout/FullLayout";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import {
   captainReadyToGameModalState,
@@ -33,6 +33,7 @@ import { history } from "../util/history";
 var stompClient: any = null; //웹소켓 변수 선언
 
 const ReadyToGame = () => {
+  const navigate = useNavigate();
   const params = useParams(); // params를 상수에 할당
   const [, setIsOpen] = useRecoilState(readyToGameModalState);
   const [, setCaptainIsOpen] = useRecoilState(captainReadyToGameModalState);
@@ -385,6 +386,10 @@ const ReadyToGame = () => {
   usePreventRefresh();
 
   /*====================== 게임 중 ====================== */
+  const exitOnClick = () => {
+    navigate("/");
+  };
+
   const clickGameStart = () => {
     captainCloseModal(); //모달 닫기
     setgameStart(true);
@@ -524,7 +529,6 @@ const ReadyToGame = () => {
         </div>
       </ReadyToGameModal>
 
-      {/* 방장 방 설정 및 시작하기 모달 */}
       <CaptainReatyToModal onRequestClose={captainCloseModal}>
         <div>방장 기능</div>
         {isMeCaptain ? (
@@ -547,17 +551,37 @@ const ReadyToGame = () => {
               />
             </div>
             <div>{renderButton()}</div>
-            <Button
-              className="mt-2"
-              size="lg"
-              disabled={false}
-              onClick={clickGameStart}
-            >
-              GAME START
-            </Button>
+            <div className="flex flex-row justify-center algin-center">
+              <Button
+                className="mt-2"
+                size="sm"
+                disabled={false}
+                onClick={clickGameStart}
+              >
+                GAME START
+              </Button>
+              <Button
+                className="mt-2"
+                size="sm"
+                disabled={false}
+                onClick={exitOnClick}
+              >
+                게임 나가기
+              </Button>
+            </div>
           </div>
         ) : (
-          <div>나는 방장이 아니니깐 할 수 있는게 없어</div>
+          <div className="m-auto">
+            <div>나는 방장이 아니니깐 할 수 있는게 없어</div>
+            <Button
+              className="mt-2"
+              size="sm"
+              disabled={false}
+              onClick={exitOnClick}
+            >
+              게임 나가기
+            </Button>
+          </div>
         )}
       </CaptainReatyToModal>
     </FullLayout>
