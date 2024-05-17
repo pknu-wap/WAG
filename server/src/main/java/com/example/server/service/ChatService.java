@@ -212,7 +212,7 @@ public class ChatService {
     }
 
     public AnswerListResponse getAnswerList(Long roomId, String nickname){
-        return new AnswerListResponse(gameOrderRepository.findAnswerNotMe(nickname, roomId));
+        return new AnswerListResponse(gameOrderRepository.findAnswerNotMe(roomId), nickname);
     }
 
 }

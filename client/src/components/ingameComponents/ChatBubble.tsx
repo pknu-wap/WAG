@@ -1,3 +1,9 @@
+//사용하지 않는 컴포넌트입니다 
+//ChatBubble은 components/chatRoom/ChatRoom 컴포넌트로 변경됨 
+//추후 제거 필요한
+
+
+
 import React, { useState, useEffect } from "react";
 import { ChatMessage } from "../../types/dto";
 
