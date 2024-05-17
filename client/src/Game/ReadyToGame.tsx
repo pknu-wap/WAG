@@ -26,12 +26,11 @@ import { useLocation } from "react-router-dom";
 import JoinUser from "../components/ingameComponents/JoinUser";
 import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
 import RadioButton from "../components/radioButton/RadioButton";
-import { faClock, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
+import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 import Toast from "../components/toast/Toast";
 import { history } from "../util/history";
 
 var stompClient: any = null; //웹소켓 변수 선언
-
 
 const ReadyToGame = () => {
   const params = useParams(); // params를 상수에 할당
@@ -40,11 +39,11 @@ const ReadyToGame = () => {
   const [nickname, setNickname] = useState<string>("");
   const [possible, setPossible] = useState<boolean>();
   const [myChatMessages, setMyChatMessages] = useState<string>("");
-  const [changeIsPrivate, setChangeIsPrivate] = useState<boolean>()  // 대기방 방장 모달 내 바꾸는 여부
+  const [changeIsPrivate, setChangeIsPrivate] = useState<boolean>(); // 대기방 방장 모달 내 바꾸는 여부
   const [gameStart, setgameStart] = useState(false); //방장이 게임시작 눌렀는지
 
   // 방 정보 관리
-  const [enterCode, setEnterCode] = useState(0);
+  const [enterCode, setEnterCode] = useState<number>();
   const [isPrivateRoom, setIsPrivateRoom] = useState<boolean>();
   const [isMeCaptain, setIsMeCaptain] = useState(false);
 
@@ -65,7 +64,7 @@ const ReadyToGame = () => {
   };
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
-  const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]) // 입장 유저
+  const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]); // 입장 유저
   const [isAnswerMode, setIsAnswerMode] = useState(false); //정답 입력 <-> 채팅 입력 버튼 클릭 시의 입력창 변경
 
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
@@ -204,54 +203,49 @@ const ReadyToGame = () => {
   };
 
   //게임중 채팅메세지 MessageType에 따라 소켓에 객체를 전달하는 함수  -- 매개변수 : 소켓 URL, messageType
-  function sendMessageToSocket(socketURL : string, messageType : string) {
+  function sendMessageToSocket(socketURL: string, messageType: string) {
     const roomId = localStorage.getItem("roomId");
     const nickName = localStorage.getItem("nickName");
     let contentToSend = myChatMessages; // 기본적으로 myChatMessages 값을 사용합니다.
-  
+
     // messageType이 'JOIN', 'START', 'CHANGE' 중 하나라면, contentToSend를 빈 문자열로 보냄
-    if (['JOIN', 'START', 'CHANGE'].includes(messageType)) {
+    if (["JOIN", "START", "CHANGE"].includes(messageType)) {
       contentToSend = "";
+    } else {
+      if (contentToSend === "") {
+        Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
+        return;
+      }
     }
-    else{
-      if(contentToSend == "")
-        {
-          Toast({ message: '채팅 메시지를 입력해주세요!', type: 'warn' });
-          return;
-        }
-    }
-  
+
     stompClient.send(
       socketURL,
       {},
       JSON.stringify({
         sender: nickName,
-        content: contentToSend, 
+        content: contentToSend,
         messageType: messageType,
         roomId: roomId,
       })
     );
     setMyChatMessages(""); // 채팅입력필드 초기화를 위해 필요
   }
-  
-  
 
   //대기방 채팅, 게임중 질문, 답변, 정답 입력 4가지를 조건에 따라 전달하는 함수  -> 답변은 나중에 추가해야함
   function sendMessage() {
-    if(gameStart) //게임중
-      {
-        if (isAnswerMode) {
-          stompClient.send(
-            sendMessageToSocket("/app/chat.sendGameMessage", "CORRECT"));
-        } else {
-          sendMessageToSocket("/app/chat.sendGameMessage", "ASK");
-        }
+    if (gameStart) {
+      //게임중
+      if (isAnswerMode) {
+        stompClient.send(
+          sendMessageToSocket("/app/chat.sendGameMessage", "CORRECT")
+        );
+      } else {
+        sendMessageToSocket("/app/chat.sendGameMessage", "ASK");
       }
-    else //대기방
-    {
+    } //대기방
+    else {
       sendMessageToSocket("/app/chat.sendMessage", "CHAT");
     }
-
   }
   //구독된 방에서 받아오는 모든 메세지 처리 부분
   function onMessageReceived(payload: any) {
@@ -267,29 +261,22 @@ const ReadyToGame = () => {
       addJoinUser();
       setRoomInfo();
       console.log("LEAVE으로 온 메세지", message);
-    } 
-    else if (message.messageType === "CHAT") {
+    } else if (message.messageType === "CHAT") {
       receiveChatMessage(message);
       console.log("CHAT으로 온 메세지", message);
       setRoomInfo();
-    } 
-    else if (message.messageType === "CHANGE") {
+    } else if (message.messageType === "CHANGE") {
       console.log("CHANGE로 온 메세지", message);
       setRoomInfo();
-    } 
-    else if (message.messageType === "ASK") {
+    } else if (message.messageType === "ASK") {
       console.log("ASK로 온 메세지", message);
-    }
-    else if (message.messageType === "ANSWER") {
+    } else if (message.messageType === "ANSWER") {
       console.log("ANSWER로 온 메세지", message);
-    }
-    else if (message.messageType === "CORRECT") {
+    } else if (message.messageType === "CORRECT") {
       console.log("CORRECT로 온 메세지", message);
-    }
-    else if (message.messageType === "START") {
+    } else if (message.messageType === "START") {
       console.log("START로 온 메세지", message);
-    }
-    else {
+    } else {
       console.log(message);
     }
   }
@@ -321,14 +308,13 @@ const ReadyToGame = () => {
     if (isPrivateRoom) {
       // 공개 방으로 변경
       setChangeIsPrivate(false);
-      Toast({ message: '방이 공개로 설정되었습니다.', type: 'info' });
-      
+      Toast({ message: "방이 공개로 설정되었습니다.", type: "info" });
     }
     // 바꾸기 전 공개 방일 때
     else {
       // 비공개 방으로 변경
       setChangeIsPrivate(true);
-      Toast({ message: '방이 비공개로 설정되었습니다.', type: 'info' });
+      Toast({ message: "방이 비공개로 설정되었습니다.", type: "info" });
     }
     setIsPrivateRoom(changeIsPrivate);
     console.log("방 설정 바꾸기 완료, isPrivate : ", isPrivateRoom);
@@ -363,9 +349,6 @@ const ReadyToGame = () => {
     }
   };
 
-
-    
-
   // 새로고침 방지
   const usePreventRefresh = () => {
     const preventClose = (e: any) => {
@@ -385,35 +368,38 @@ const ReadyToGame = () => {
     });
   };
 
-  const { pathname } = useLocation()
+  const { pathname } = useLocation();
   useEffect(() => {
-    const unlistenHistoryEvent = history.listen(({ action }) => {
-      if (action !== 'POP') return;
-      history.push(pathname);
-    });
-    return unlistenHistoryEvent;
-  }, [])
-
+    if (enterCode) {
+      const unlistenHistoryEvent = history.listen(({ action }) => {
+        if (action !== "POP") return;
+        history.push(pathname);
+      });
+      console.log("entercode 존재");
+      return unlistenHistoryEvent;
+    } else {
+      console.log("entercode 존재x");
+    }
+  }, [enterCode]);
 
   usePreventRefresh();
 
-/*====================== 게임 중 ====================== */
-    const clickGameStart = () => {
-      captainCloseModal(); //모달 닫기
-      setgameStart(true);
-      sendMessageToSocket("/app/chat.sendGameMessage", "START");  //소켓에 START로 보냄
-    };
+  /*====================== 게임 중 ====================== */
+  const clickGameStart = () => {
+    captainCloseModal(); //모달 닫기
+    setgameStart(true);
+    sendMessageToSocket("/app/chat.sendGameMessage", "START"); //소켓에 START로 보냄
+  };
 
-      // 정답 입력 모드로 전환하는 함수
-      const switchToAnswerMode = () => {
-        setIsAnswerMode(true);
-      };
-    
-      // 채팅 모드로 전환하는 함수
-      const switchToChatMode = () => {
-        setIsAnswerMode(false);
-      };
-  
+  // 정답 입력 모드로 전환하는 함수
+  const switchToAnswerMode = () => {
+    setIsAnswerMode(true);
+  };
+
+  // 채팅 모드로 전환하는 함수
+  const switchToChatMode = () => {
+    setIsAnswerMode(false);
+  };
 
   return (
     <FullLayout>
@@ -424,11 +410,11 @@ const ReadyToGame = () => {
       </div>
       <div className="m-auto mt-8 flex justify-center items-center relative">
         <div className="mr-5">
-        <div className="text-base">입장코드</div>
+          <div className="text-base">입장코드</div>
           <div className="text-xl">{enterCode}</div>
         </div>
         <div className="w-1/2 h-16 shadow-lg text-[#353535] flex justify-center items-center rounded-lg bg-[#FFCCFF] shadow-xl">
-          <div className = "text-xl font-semibold">Ready To Game</div>
+          <div className="text-xl font-semibold">Ready To Game</div>
         </div>
         <div className="ml-5 text-base">
           방 인원
@@ -440,38 +426,39 @@ const ReadyToGame = () => {
           <ChatRoom key={index} message={m} />
         ))}
       </div>
-      
+
       <div className="mt-10 flex flex-row justify-center algin-center">
-        { !gameStart && (
-            <IconButton size="md" className="mr-10" onClick={captainOpenModal}>
+        {!gameStart && (
+          <IconButton size="md" className="mr-10" onClick={captainOpenModal}>
             <FontAwesomeIcon icon={faGear} />
           </IconButton>
         )}
         <div>
-        {gameStart && (
-          isAnswerMode ? (
-            <Button size="sm" className="mr-10" onClick={switchToChatMode}>
-              채팅 치기
-            </Button>
-          ) : (
-            <Button size="sm" className="mr-10" onClick={switchToAnswerMode}>
-              정답 입력하기
-            </Button>
-          )
-        )}
-      </div>
+          {gameStart &&
+            (isAnswerMode ? (
+              <Button size="sm" className="mr-10" onClick={switchToChatMode}>
+                채팅 치기
+              </Button>
+            ) : (
+              <Button size="sm" className="mr-10" onClick={switchToAnswerMode}>
+                정답 입력하기
+              </Button>
+            ))}
+        </div>
 
         <div className="w-5/12 flex flex-row justify-center algin-center relative">
           <input
             className="w-full rounded-2xl shadow-md pl-5 text-[#000000]"
             type="text"
-            placeholder={isAnswerMode ? "정답을 입력하세요" : "채팅 메세지를 입력해주세요"}
+            placeholder={
+              isAnswerMode ? "정답을 입력하세요" : "채팅 메세지를 입력해주세요"
+            }
             value={myChatMessages}
             onKeyDown={(e) => {
               if (e.key === "Enter" && myChatMessages.trim() !== "") {
                 sendMessage();
               } else if (e.key === "Enter" && myChatMessages.trim() === "") {
-                Toast({ message: '채팅 메시지를 입력해주세요!', type: 'warn' });
+                Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
               }
             }}
             onChange={(e) => {
@@ -519,7 +506,7 @@ const ReadyToGame = () => {
             )}
           </div>
 
-          <Button  size="sm" disabled={false} onClick={nicknamePossibleClick}>
+          <Button size="sm" disabled={false} onClick={nicknamePossibleClick}>
             닉네임 확인
           </Button>
 
@@ -559,11 +546,15 @@ const ReadyToGame = () => {
                 onChange={() => setChangeIsPrivate(true)}
               />
             </div>
-            <div>
-              {renderButton()}
-            </div>
-            <Button className="mt-2" size="lg" disabled={false} onClick={clickGameStart}>GAME START</Button>
-
+            <div>{renderButton()}</div>
+            <Button
+              className="mt-2"
+              size="lg"
+              disabled={false}
+              onClick={clickGameStart}
+            >
+              GAME START
+            </Button>
           </div>
         ) : (
           <div>나는 방장이 아니니깐 할 수 있는게 없어</div>
