@@ -406,6 +406,8 @@ const ReadyToGame = () => {
         setgameStart(true); //게임 시작 상태로 바꾸기
         sendMessageToSocket("/app/chat.sendGameMessage", "START");  //소켓에 START로 보냄
         GameLogic();//게임 로직 시작하기
+        const answerlist = getGameAnswer();
+        console.log(answerlist);
       }
       else
       {
@@ -424,13 +426,16 @@ const ReadyToGame = () => {
         setIsAnswerMode(false);
       };
   
+
+
       //게임중 작동 함수를 넣는 함수
       const GameLogic = () => {
         Toast({ message: '게임을 시작합니다!', type: 'success' });
-      };
-      
 
-      // 방 정보 get api
+
+      };
+
+      // 자기자신만 제외하고 정답어를 받아오는 api
       const getGameAnswer = async () => {
         const nickname = localStorage.getItem("nickName");
         try {
