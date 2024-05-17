@@ -72,3 +72,13 @@ export interface JoinUser {
   userNickName: string;
   userProfile: string;
 }
+
+interface AnswerUserDto {
+  nickname: string;
+  answer: string;
+}
+
+// 정답어 get
+export interface IGetAnswerList {
+  answerUserDtos: AnswerUserDto[];
+}
