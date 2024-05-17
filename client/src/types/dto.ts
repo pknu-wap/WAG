@@ -73,6 +73,26 @@ export interface JoinUser {
   userProfile: string;
 }
 
+export interface GameUserDto {
+  Captain: boolean;
+  roomNickname: string;
+  profileImage: string;
+  penalty: number;
+  MyTurn: boolean;
+  haveAnswerChange: boolean;
+  ranking: number;
+}
+
+export interface GameMessage {
+  messageType: string;
+  content: string;
+  sender: string;
+  roomId: number;
+  gameEnd: boolean;
+  cycle: number;
+  GameUserDtos: GameUserDto[];
+}
+
 interface AnswerUserDto {
   nickname: string;
   answer: string;

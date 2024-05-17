@@ -14,6 +14,8 @@ import Button from "../components/button/Button";
 import axios from "axios";
 import {
   ChatMessage,
+  GameMessage,
+  GameUserDto,
   INicknamePossible,
   IRoomResponseInfo,
   IUserDto,
@@ -26,9 +28,10 @@ import { useLocation } from "react-router-dom";
 import JoinUser from "../components/ingameComponents/JoinUser";
 import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
 import RadioButton from "../components/radioButton/RadioButton";
-import { faClock, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
+import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 import Toast from "../components/toast/Toast";
 import { history } from "../util/history";
+import InGameUser from "../components/ingameComponents/InGameUser";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -66,6 +69,7 @@ const ReadyToGame = () => {
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
   const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]); // 입장 유저
+  const [inGameUsers, setInGameUsers] = useState<GameUserDto[]>([]);
   const [isAnswerMode, setIsAnswerMode] = useState(false); //정답 입력 <-> 채팅 입력 버튼 클릭 시의 입력창 변경
 
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
@@ -135,7 +139,6 @@ const ReadyToGame = () => {
           },
         }
       );
-      console.log(response.data);
       return response.data;
     } catch (error) {
       console.error("방 정보 get api 오류 발생 : ", error);
@@ -213,7 +216,7 @@ const ReadyToGame = () => {
     if (["JOIN", "START", "CHANGE"].includes(messageType)) {
       contentToSend = "";
     } else {
-      if (contentToSend == "") {
+      if (contentToSend === "") {
         Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
         return;
       }
@@ -277,6 +280,11 @@ const ReadyToGame = () => {
       console.log("CORRECT로 온 메세지", message);
     } else if (message.messageType === "START") {
       console.log("START로 온 메세지", message);
+      ingameUsersInfo(message);
+      console.log(inGameUsers);
+    } else if (message.messageType === "PENALTY") {
+      console.log("PENALTY로 온 메세지", message);
+      ingameUsersInfo(message);
     } else {
       console.log(message);
     }
@@ -286,7 +294,10 @@ const ReadyToGame = () => {
   const addJoinUser = async () => {
     const roomInfo = await getRoomInfo();
     setJoinUsers(roomInfo.userDtos);
-    //console.log("addJoinUser 실행됨");
+  };
+  const ingameUsersInfo = (message: GameMessage) => {
+    const gameUserDtos = message.GameUserDtos;
+    setInGameUsers(gameUserDtos);
   };
 
   // 유저 퇴장 시 상단에 프로필 삭제
@@ -402,15 +413,25 @@ const ReadyToGame = () => {
 
   return (
     <FullLayout>
-      <div className="flex flex-row justify-around items-center mt-10 mx-7">
-        {joinUsers.map((name, index) => (
-          <JoinUser
-            key={index}
-            Nickname={name.roomNickname}
-            gameStart={gameStart}
-          />
-        ))}
-      </div>
+      {!gameStart ? (
+        <div className="flex flex-row justify-around items-center mt-10 mx-7">
+          {joinUsers.map((name, index) => (
+            <JoinUser key={index} Nickname={name.roomNickname} />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-row justify-around items-center mt-10 mx-7">
+          {inGameUsers.map((info, index) => (
+            <InGameUser
+              key={index}
+              Nickname={info.roomNickname}
+              gameStart={gameStart}
+              penalty={info.penalty}
+            />
+          ))}
+        </div>
+      )}
+
       <div className="m-auto mt-8 flex justify-center items-center relative">
         <div className="mr-5">
           <div className="text-base">입장코드</div>
@@ -550,14 +571,24 @@ const ReadyToGame = () => {
               />
             </div>
             <div>{renderButton()}</div>
-            <Button
-              className="mt-2"
-              size="lg"
-              disabled={false}
-              onClick={clickGameStart}
-            >
-              GAME START
-            </Button>
+            <div className="flex flex-row justify-center algin-center">
+              <Button
+                className="mt-2"
+                size="sm"
+                disabled={false}
+                onClick={clickGameStart}
+              >
+                GAME START
+              </Button>
+              <Button
+                className="mt-2"
+                size="sm"
+                disabled={false}
+                onClick={exitOnClick}
+              >
+                게임 나가기
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="m-auto">
