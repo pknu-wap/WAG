@@ -11,7 +11,7 @@ const JoinUser: React.FC<{ Nickname: string; gameStart: boolean }> = ({
 }) => {
   const roomId = localStorage.getItem("roomId");
   const nickName = localStorage.getItem("nickName");
-  const [answer, setAnswer] = useState("???");
+  const [answer, setAnswer] = useState("가져오기 전");
   const getNicknamePossible = async () => {
     try {
       const response = await axios.get<IGetAnswerList>(
@@ -23,16 +23,26 @@ const JoinUser: React.FC<{ Nickname: string; gameStart: boolean }> = ({
           },
         }
       );
+      console.log("가져오기 성공");
       return response.data;
     } catch (error) {
       console.error("정답어 가져오기 중 오류발생 :", error);
       throw error;
     }
   };
+  const dummyAnswer = {
+    answerUserDto: [
+      {
+        nickname: "jsjs",
+        answer: "WAP",
+      },
+    ],
+  };
   const findUserAnswer = async () => {
-    const answerUser = await getNicknamePossible();
-    answerUser.answerUserDtos.forEach((dto) => {
-      if (Nickname === nickName) {
+    const answerUsers = await getNicknamePossible();
+    console.log(answerUsers);
+    dummyAnswer.answerUserDto.forEach((dto) => {
+      if (Nickname === dto.nickname) {
         setAnswer("???");
       } else {
         setAnswer(dto.answer);
