@@ -28,6 +28,7 @@ import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
 import RadioButton from "../components/radioButton/RadioButton";
 import { faClock, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 import Toast from "../components/toast/Toast";
+import { history } from "../util/history";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -362,7 +363,41 @@ const ReadyToGame = () => {
     }
   };
 
-    /*====================== 게임 중 ====================== */
+
+    
+
+  // 새로고침 방지
+  const usePreventRefresh = () => {
+    const preventClose = (e: any) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    // 브라우저에 렌더링 시 한 번만 실행하는 코드
+    useEffect(() => {
+      (() => {
+        window.addEventListener("beforeunload", preventClose);
+      })();
+
+      return () => {
+        window.removeEventListener("beforeunload", preventClose);
+      };
+    });
+  };
+
+  const { pathname } = useLocation()
+  useEffect(() => {
+    const unlistenHistoryEvent = history.listen(({ action }) => {
+      if (action !== 'POP') return;
+      history.push(pathname);
+    });
+    return unlistenHistoryEvent;
+  }, [])
+
+
+  usePreventRefresh();
+
+/*====================== 게임 중 ====================== */
     const clickGameStart = () => {
       captainCloseModal(); //모달 닫기
       setgameStart(true);
@@ -379,7 +414,6 @@ const ReadyToGame = () => {
         setIsAnswerMode(false);
       };
   
-
 
   return (
     <FullLayout>
