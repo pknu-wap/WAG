@@ -23,7 +23,7 @@ public interface GameOrderRepository extends JpaRepository<GameOrder, Long> {
     @Query("SELECT go FROM GameOrder go WHERE go.userOrder = :userorder ")
     Optional<GameOrder> findByUserOrder(@Param("userorder") long userorder);
 
-    @Query("SELECT go FROM GameOrder go WHERE go.room.id = :roomid AND go.roomUser.roomNickname NOT IN (:nickname)")
-    List<GameOrder> findAnswerNotMe(@Param("nickname") String nickname, @Param("roomid") Long roomid);
+    @Query("SELECT go FROM GameOrder go WHERE go.room.id = :roomid")
+    List<GameOrder> findAnswerNotMe(@Param("roomid") Long roomid);
 
 }
