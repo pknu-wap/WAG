@@ -20,6 +20,6 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     Optional<Room> findByRandom();
     @Query(value = "SELECT r.id FROM Room r WHERE r.gameStatus = false AND r.isPrivateRoom = false AND r.userCount <= 5 ORDER BY RAND() LIMIT 1")
     Optional<Long> findRandomRoomId();
-
-    Optional<Room> findById(Long roomId);
+    @Query("SELECT r FROM Room r WHERE r.id=:roomId")
+    Optional<Room> findByRoomId(Long roomId);
 }
