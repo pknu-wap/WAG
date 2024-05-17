@@ -2,13 +2,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import IconButton from "../components/button/IconButton";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import FullLayout from "../components/layout/FullLayout";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import {
   captainReadyToGameModalState,
   readyToGameModalState,
 } from "../recoil/modal";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import ReadyToGameModal from "../components/modal/ReadyModal";
 import Button from "../components/button/Button";
 import axios from "axios";
@@ -27,10 +27,10 @@ import JoinUser from "../components/ingameComponents/JoinUser";
 import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
 import RadioButton from "../components/radioButton/RadioButton";
 import { faClock, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
-import { usePrompt } from "../hooks/useBlocker";
+import { history } from "../util/history";
 var stompClient: any = null; //웹소켓 변수 선언
 
-const ReadyToGame = ({ history }: any) => {
+const ReadyToGame = () => {
   const params = useParams(); // params를 상수에 할당
   const [, setIsOpen] = useRecoilState(readyToGameModalState);
   const [, setCaptainIsOpen] = useRecoilState(captainReadyToGameModalState);
@@ -343,7 +343,14 @@ const ReadyToGame = ({ history }: any) => {
     });
   };
 
-  usePrompt('Are you sure you want to leave this page?', true);
+  const { pathname } = useLocation()
+  useEffect(() => {
+    const unlistenHistoryEvent = history.listen(({ action }) => {
+      if (action !== 'POP') return;
+      history.push(pathname);
+    });
+    return unlistenHistoryEvent;
+  }, [])
 
 
   usePreventRefresh();
