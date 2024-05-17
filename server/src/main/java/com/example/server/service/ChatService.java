@@ -5,6 +5,7 @@ import com.example.server.dto.ChatGameMessage;
 import com.example.server.dto.ChatMessage;
 import com.example.server.dto.ChatRoomModeMessage;
 import com.example.server.dto.GameUserDto;
+import com.example.server.exception.MaxPenaltyExceededException;
 import com.example.server.payload.response.AnswerListResponse;
 import com.example.server.payload.response.ResultResponse;
 import com.example.server.repository.*;
@@ -30,9 +31,9 @@ public class ChatService {
         if(chatMessage.getMessageType()==ChatMessage.MessageType.START){
             return startGame(chatMessage);
         }
-//        else if (chatMessage.getMessageType()==ChatMessage.MessageType.END) {
-//            return endGame(chatMessage);
-//        }
+        else if (chatMessage.getMessageType()==ChatMessage.MessageType.PENALTY) {
+            return penaltyUser(chatMessage);
+        }
         else if (chatMessage.getMessageType()==ChatMessage.MessageType.CORRECT) {
             return correctAnswer(chatMessage);
         }
@@ -63,18 +64,27 @@ public class ChatService {
         return chatGameMessage;
     }
 
-    public ResultResponse endGame(Long roomId){
-        Room room = roomRepository.findById(roomId).get();
-        List<RoomUser> roomUsers = roomUserRepository.findByRoomId(roomId);
-        room.setGameStatus(false);
-        gameOrderRepository.deleteGameOrderByRoomId(roomId);
+    public ChatGameMessage penaltyUser(ChatMessage chatMessage){
+        GameOrder penaltyUser = gameOrderRepository.findByNickName(chatMessage.getContent()).get();
+        if(penaltyUser.getPenalty() >= 3){
+            throw new MaxPenaltyExceededException();
+        }
+        else{
+            penaltyUser.setPenalty(penaltyUser.getPenalty() + 1);
+        }
+        gameOrderRepository.save(penaltyUser);
 
-        return new ResultResponse(room, roomUsers);
+        Room room = roomRepository.findByRoomId(chatMessage.getRoomId()).get();
+        ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
+        chatGameMessage.setMessageType(ChatMessage.MessageType.PENALTY);
+
+        return chatGameMessage;
+
     }
 
 
     public ChatGameMessage playGame(ChatMessage chatMessage) {
-        ChatGameMessage chatGameMessage = new ChatGameMessage();
+        ChatGameMessage chatGameMessage;
         RoomUser sendRoomUser = roomUserRepository.hasNickName(chatMessage.getSender()).get();
         GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(sendRoomUser.getId()).get();
         Room room = roomRepository.findById(chatMessage.getRoomId()).get();
