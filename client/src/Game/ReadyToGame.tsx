@@ -27,7 +27,7 @@ import JoinUser from "../components/ingameComponents/JoinUser";
 import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
 import RadioButton from "../components/radioButton/RadioButton";
 import { faClock, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
-
+import { history } from "../util/history";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -358,6 +358,37 @@ const ReadyToGame = () => {
     }
   };
 
+  // 새로고침 방지
+  const usePreventRefresh = () => {
+    const preventClose = (e: any) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    // 브라우저에 렌더링 시 한 번만 실행하는 코드
+    useEffect(() => {
+      (() => {
+        window.addEventListener("beforeunload", preventClose);
+      })();
+
+      return () => {
+        window.removeEventListener("beforeunload", preventClose);
+      };
+    });
+  };
+
+  const { pathname } = useLocation()
+  useEffect(() => {
+    const unlistenHistoryEvent = history.listen(({ action }) => {
+      if (action !== 'POP') return;
+      history.push(pathname);
+    });
+    return unlistenHistoryEvent;
+  }, [])
+
+
+  usePreventRefresh();
+
     // 정답 입력 모드로 전환하는 함수
     const switchToAnswerMode = () => {
       setIsAnswerMode(true);
@@ -374,7 +405,6 @@ const ReadyToGame = () => {
       setgameStart(true);
       sendMessageToSocket("/app/chat.sendGameMessage", "START");  //소켓에 START로 보냄
     };
-
 
 
   return (
