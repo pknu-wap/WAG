@@ -341,7 +341,7 @@ const ReadyToGame = () => {
       return (
         // 바꾸고자 하는 값(changeIsPrivate) = true(공개로 변경하고 싶음) 일 때 활성화
         <Button
-          size="lg"
+          size="sm"
           onClick={privateModeOnclick}
           disabled={changeIsPrivate === false}
         >
@@ -353,7 +353,7 @@ const ReadyToGame = () => {
       return (
         // 바꾸고자 하는 값(changeIsPrivate) = false(공개로 변경하고 싶음) 일 때 활성화
         <Button
-          size="lg"
+          size="sm"
           onClick={privateModeOnclick}
           disabled={changeIsPrivate === true}
         >
@@ -398,10 +398,20 @@ const ReadyToGame = () => {
   usePreventRefresh();
 
 /*====================== 게임 중 ====================== */
+    //게임시작 버튼 클릭 이벤트
     const clickGameStart = () => {
-      captainCloseModal(); //모달 닫기
-      setgameStart(true);
-      sendMessageToSocket("/app/chat.sendGameMessage", "START");  //소켓에 START로 보냄
+      if(joinUsers.length > 1)
+      {
+        captainCloseModal(); //모달 닫기
+        setgameStart(true); //게임 시작 상태로 바꾸기
+        sendMessageToSocket("/app/chat.sendGameMessage", "START");  //소켓에 START로 보냄
+        GameLogic();//게임 로직 시작하기
+      }
+      else
+      {
+        Toast({ message: '2명 이상 모여야 게임 시작 가능!', type: 'error' });
+      }
+
     };
 
       // 정답 입력 모드로 전환하는 함수
@@ -414,6 +424,33 @@ const ReadyToGame = () => {
         setIsAnswerMode(false);
       };
   
+      //게임중 작동 함수를 넣는 함수
+      const GameLogic = () => {
+        Toast({ message: '게임을 시작합니다!', type: 'success' });
+      };
+      
+
+      // 방 정보 get api
+      const getGameAnswer = async () => {
+        const nickname = localStorage.getItem("nickName");
+        try {
+          const response = await axios.get<IRoomResponseInfo>(
+            "http://wwwag-backend.co.kr/answer/list",
+            {
+              params: {
+                roomId: Number(params.roomId),
+                nickname
+              },
+            }
+          );
+          console.log(response.data);
+          return response.data;
+        } catch (error) {
+          console.error("정답 리스트 get api 오류 발생 : ", error);
+          throw error;
+        }
+      };
+
 
   return (
     <FullLayout>
@@ -539,10 +576,22 @@ const ReadyToGame = () => {
 
       {/* 방장 방 설정 및 시작하기 모달 */}
       <CaptainReatyToModal onRequestClose={captainCloseModal}>
-        <div>방장 기능</div>
+      <div> 
+      <div className="text-xl font-bold mb-4">방장 기능</div>
+      <div className="text-md">
+        <span>현재 방 상태 : </span>
+          {isPrivateRoom ? (
+            <span className="text-[#FF0000]">
+             비공개방
+          </span>
+        ): (
+          <span className="text-[#33B3FF]">
+           공개방
+        </span>
+        )}
+      </div>
         {isMeCaptain ? (
           <div>
-            <div>나는 방장이야</div>
             <div className="grid grid-cols-1 md:grid-cols-2 mt-5 gap-2">
               <RadioButton
                 id="public"
@@ -559,15 +608,20 @@ const ReadyToGame = () => {
                 onChange={() => setChangeIsPrivate(true)}
               />
             </div>
-            <div>
-              {renderButton()}
-            </div>
-            <Button className="mt-2" size="lg" disabled={false} onClick={clickGameStart}>GAME START</Button>
 
-          </div>
+            <div className="flex flex-col justify-center items-center">
+                <div className="mt-5">
+                  {renderButton()}
+                </div>
+                <div>
+                  <Button className="mt-2" size="md" disabled={false} onClick={clickGameStart}>GAME START</Button>
+                </div>
+              </div>
+            </div>
         ) : (
-          <div>나는 방장이 아니니깐 할 수 있는게 없어</div>
+          <div className="text-md mt-5">나는 방장이 아니니깐 할 수 있는게 없어</div>
         )}
+        </div>
       </CaptainReatyToModal>
     </FullLayout>
   );
