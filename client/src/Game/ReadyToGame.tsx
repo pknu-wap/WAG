@@ -648,17 +648,16 @@ const ReadyToGame = () => {
                 onChange={() => setChangeIsPrivate(true)}
               />
             </div>
-            
-            <div className="flex flex-row justify-center algin-center">
+            <div className="flex flex-col justify-center items-center">
               <div className="mt-5">{renderButton()}</div>
               <div><Button className="mt-2" size="md" disabled={false} onClick={clickGameStart}>GAME START</Button></div>
               <div><Button className="mt-2" size="sm" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>
             </div>
           </div>
         ) : (
-          <div className="m-auto">
+          <div className="m-auto flex flex-col justify-center items-center">
             <div className="text-md mt-5">나는 방장이 아니니깐 할 수 있는게 없어</div>
-            <div><Button className="mt-2" size="sm" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>
+            <div><Button className="mt-5" size="sm" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>
           </div>
         )}
         </div>
