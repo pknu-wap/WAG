@@ -82,7 +82,7 @@ export interface GameUserDto {
   haveAnswerChange: boolean;
   ranking: number;
 }
-
+// 게임 중 채팅 객체
 export interface GameMessage {
   messageType: string;
   content: string;

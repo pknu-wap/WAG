@@ -14,24 +14,28 @@ import Button from "../components/button/Button";
 import axios from "axios";
 import {
   ChatMessage,
+  ChatMessageJoin,
   GameMessage,
-  GameUserDto,
   INicknamePossible,
   IRoomResponseInfo,
-  IUserDto,
   URL,
 } from "../types/dto";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import ChatRoom from "../components/chatRoom/ChatRoom";
 import { useLocation } from "react-router-dom";
-import JoinUser from "../components/ingameComponents/JoinUser";
 import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
 import RadioButton from "../components/radioButton/RadioButton";
 import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 import Toast from "../components/toast/Toast";
 import { history } from "../util/history";
-import InGameUser from "../components/ingameComponents/InGameUser";
+import {
+  Popover,
+  PopoverHandler,
+  PopoverContent,
+} from "@material-tailwind/react";
+import JoinUser from "../components/ingameComponents/JoinUser";
+import CustomPopoverContent from "../components/ingameComponents/PopoverContent";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -68,8 +72,7 @@ const ReadyToGame = () => {
   };
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
-  const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]); // 입장 유저
-  const [inGameUsers, setInGameUsers] = useState<GameUserDto[]>([]);
+  const [joinUsers, setJoinUsers] = useState<any[]>([]); // 입장 유저
   const [isAnswerMode, setIsAnswerMode] = useState(false); //정답 입력 <-> 채팅 입력 버튼 클릭 시의 입력창 변경
 
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
@@ -256,13 +259,13 @@ const ReadyToGame = () => {
     var message = JSON.parse(payload.body);
     if (message.messageType === "JOIN") {
       receiveChatMessage(message);
-      addJoinUser();
+      addJoinUser(message);
       setRoomInfo();
       console.log("JOIN으로 온 메세지", message);
       console.log(message.sender + " joined!");
     } else if (message.messageType === "LEAVE") {
       receiveChatMessage(message);
-      addJoinUser();
+      addJoinUser(message);
       setRoomInfo();
       console.log("LEAVE으로 온 메세지", message);
     } else if (message.messageType === "CHAT") {
@@ -281,7 +284,7 @@ const ReadyToGame = () => {
     } else if (message.messageType === "START") {
       console.log("START로 온 메세지", message);
       ingameUsersInfo(message);
-      console.log(inGameUsers);
+      console.log(joinUsers);
     } else if (message.messageType === "PENALTY") {
       console.log("PENALTY로 온 메세지", message);
       ingameUsersInfo(message);
@@ -291,13 +294,11 @@ const ReadyToGame = () => {
   }
 
   // 유저 입장 시 상단에 프로필 추가
-  const addJoinUser = async () => {
-    const roomInfo = await getRoomInfo();
-    setJoinUsers(roomInfo.userDtos);
+  const addJoinUser = (message: ChatMessageJoin) => {
+    setJoinUsers(message.roomResponse.userDtos);
   };
   const ingameUsersInfo = (message: GameMessage) => {
-    const gameUserDtos = message.GameUserDtos;
-    setInGameUsers(gameUserDtos);
+    setJoinUsers(message.GameUserDtos);
   };
 
   // 유저 퇴장 시 상단에 프로필 삭제
@@ -413,24 +414,29 @@ const ReadyToGame = () => {
 
   return (
     <FullLayout>
-      {!gameStart ? (
-        <div className="flex flex-row justify-around items-center mt-10 mx-7">
-          {joinUsers.map((name, index) => (
-            <JoinUser key={index} Nickname={name.roomNickname} />
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-row justify-around items-center mt-10 mx-7">
-          {inGameUsers.map((info, index) => (
-            <InGameUser
-              key={index}
-              Nickname={info.roomNickname}
-              gameStart={gameStart}
-              penalty={info.penalty}
-            />
-          ))}
-        </div>
-      )}
+      <div className="flex flex-row justify-around items-center mt-10 mx-7">
+        {joinUsers.map((info, index) => (
+          <Popover
+            key={index}
+            placement="bottom"
+            animate={{
+              mount: { scale: 1, y: 0 },
+              unmount: { scale: 0, y: 25 },
+            }}
+          >
+            <PopoverHandler>
+              <JoinUser
+                Nickname={info.roomNickname}
+                gameStart={gameStart}
+                penalty={info.penalty}
+              />
+            </PopoverHandler>
+            <PopoverContent>
+              This is a very beautiful popover, show some love.
+            </PopoverContent>{" "}
+          </Popover>
+        ))}
+      </div>
 
       <div className="m-auto mt-8 flex justify-center items-center relative">
         <div className="mr-5">
