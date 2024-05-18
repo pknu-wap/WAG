@@ -546,7 +546,10 @@ const ReadyToGame = () => {
             }
             value={myChatMessages}
             onKeyDown={(e) => {
+              if (e.nativeEvent.isComposing) return; 
+
               if (e.key === "Enter" && myChatMessages.trim() !== "") {
+                console.log('!!!!' + myChatMessages.trim())
                 sendMessage();
               } else if (e.key === "Enter" && myChatMessages.trim() === "") {
                 Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
