@@ -18,6 +18,7 @@ import {
   IRoomResponseInfo,
   IUserDto,
   URL,
+  UserAnswers,
 } from "../types/dto";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
@@ -29,8 +30,11 @@ import RadioButton from "../components/radioButton/RadioButton";
 import { faClock, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 import Toast from "../components/toast/Toast";
 import { history } from "../util/history";
+import Timer from "./timer/Timer";
+import useTimer, { TimerHookProps } from './timer/useTimer';
 
 var stompClient: any = null; //웹소켓 변수 선언
+
 
 
 const ReadyToGame = () => {
@@ -50,7 +54,7 @@ const ReadyToGame = () => {
 
   const location = useLocation();
   const roomInfo = { ...location.state };
-
+  
   const closeModal = () => {
     setIsOpen(false);
   };
@@ -66,8 +70,13 @@ const ReadyToGame = () => {
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
   const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]) // 입장 유저
-  const [isAnswerMode, setIsAnswerMode] = useState(false); //정답 입력 <-> 채팅 입력 버튼 클릭 시의 입력창 변경
+  
 
+  //게임중 useState
+  const [myTurn, setMyTurn] = useState(false);
+  const [isAnswerMode, setIsAnswerMode] = useState(false); //정답 입력 <-> 채팅 입력 버튼 클릭 시의 입력창 변경
+  const [answerList, setAnswerList] = useState([]); //정답어 리스트가 도착하면 상태를 바꾸어줌
+  
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
   useEffect(() => {
     if ("isCaptin" in roomInfo) {
@@ -276,9 +285,16 @@ const ReadyToGame = () => {
     else if (message.messageType === "CHANGE") {
       console.log("CHANGE로 온 메세지", message);
       setRoomInfo();
+      if (message.privateRoom === true) {
+        Toast({ message: '방이 비공개로 설정되었습니다.', type: 'info' });
+    } else {
+        Toast({ message: '방이 공개로 설정되었습니다.', type: 'info' });
+    }
     } 
     else if (message.messageType === "ASK") {
       console.log("ASK로 온 메세지", message);
+      getNextTurnInfo(message);
+      
     }
     else if (message.messageType === "ANSWER") {
       console.log("ANSWER로 온 메세지", message);
@@ -288,6 +304,9 @@ const ReadyToGame = () => {
     }
     else if (message.messageType === "START") {
       console.log("START로 온 메세지", message);
+      getNextTurnInfo(message);
+      setgameStart(true);
+      GameLogic();
     }
     else {
       console.log(message);
@@ -317,18 +336,15 @@ const ReadyToGame = () => {
   // 대기방 방장 모달 공개/비공개 바꾸는 소켓
   const privateModeOnclick = () => {
     sendMessageToSocket("/app/chat.changeMode", "CHANGE");
-    // 코드 꼬임 오류 방지(의미는 없음)
     if (isPrivateRoom) {
       // 공개 방으로 변경
       setChangeIsPrivate(false);
-      Toast({ message: '방이 공개로 설정되었습니다.', type: 'info' });
       
     }
     // 바꾸기 전 공개 방일 때
     else {
       // 비공개 방으로 변경
       setChangeIsPrivate(true);
-      Toast({ message: '방이 비공개로 설정되었습니다.', type: 'info' });
     }
     setIsPrivateRoom(changeIsPrivate);
     console.log("방 설정 바꾸기 완료, isPrivate : ", isPrivateRoom);
@@ -397,23 +413,37 @@ const ReadyToGame = () => {
 
   usePreventRefresh();
 
-/*====================== 게임 중 ====================== */
+  /*====================== 게임 중 코드 ====================== */
+    
+    
+      const {
+        time,
+        startTimer,
+        stopTimer,
+        resetTimer,
+      }: TimerHookProps = useTimer();
+
+      useEffect(() => {
+        if (time < 0) {
+          stopTimer();
+          resetTimer();
+          handleTimerEnd();
+        }
+      }, [stopTimer, resetTimer, time]);
+
+      //타이머 종료 후 로직
+      const handleTimerEnd = () => {
+        startTimer();
+      };
+
     //게임시작 버튼 클릭 이벤트
     const clickGameStart = () => {
       if(joinUsers.length > 1)
       {
         captainCloseModal(); //모달 닫기
-        setgameStart(true); //게임 시작 상태로 바꾸기
         sendMessageToSocket("/app/chat.sendGameMessage", "START");  //소켓에 START로 보냄
-        GameLogic();//게임 로직 시작하기
-        const answerlist = getGameAnswer();
-        console.log(answerlist);
       }
-      else
-      {
-        Toast({ message: '2명 이상 모여야 게임 시작 가능!', type: 'error' });
-      }
-
+      else Toast({ message: '2명 이상 모여야 게임 시작 가능!', type: 'error' });
     };
 
       // 정답 입력 모드로 전환하는 함수
@@ -425,21 +455,37 @@ const ReadyToGame = () => {
       const switchToChatMode = () => {
         setIsAnswerMode(false);
       };
-  
 
 
       //게임중 작동 함수를 넣는 함수
       const GameLogic = () => {
         Toast({ message: '게임을 시작합니다!', type: 'success' });
+        const answerlist = getGameAnswer(); //정답어 받아오기
+        console.log(answerlist);
+        startTimer();
+        
+      };
 
-
+      
+      // 다음 턴의 정보를 받아오는 함수입니다.
+      const getNextTurnInfo = (socketMessage: any) => {
+        // socketMessage에서 다음 턴 정보를 추출합니다.
+        const nextTurnUser = socketMessage.gameUserDtos.find((user: any) => user.nextTurn === true);
+      
+        // 다음 턴 정보가 없거나 유효하지 않다면 null을 반환합니다.
+        if (!nextTurnUser) {
+          console.log()
+          return null;
+        }
+        // 다음 턴의 사용자 정보를 반환합니다.
+        return nextTurnUser;
       };
 
       // 자기자신만 제외하고 정답어를 받아오는 api
       const getGameAnswer = async () => {
         const nickname = localStorage.getItem("nickName");
         try {
-          const response = await axios.get<IRoomResponseInfo>(
+          const response = await axios.get<UserAnswers>(
             "http://wwwag-backend.co.kr/answer/list",
             {
               params: {
@@ -459,11 +505,16 @@ const ReadyToGame = () => {
 
   return (
     <FullLayout>
-      <div className="flex flex-row justify-around items-center mt-10 mx-7">
+        <div className="flex flex-row justify-around items-center mt-10 mx-7">
         {joinUsers.map((name, index) => (
           <JoinUser key={index} Nickname={name.roomNickname} />
         ))}
       </div>
+      {gameStart&&(
+      <div className="flex justify-center items-center">
+        <Timer time={time} />
+      </div>)
+      }
       <div className="m-auto mt-8 flex justify-center items-center relative">
         <div className="mr-5">
         <div className="text-base">입장코드</div>

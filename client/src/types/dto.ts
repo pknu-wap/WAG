@@ -72,3 +72,10 @@ export interface JoinUser {
   userNickName: string;
   userProfile: string;
 }
+
+
+
+// 정답어 리스트 get response
+export interface UserAnswers {
+  answerUserDtos: string[];
+}
