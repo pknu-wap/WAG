@@ -20,3 +20,8 @@ export interface ButtonProps {
     children: ReactNode; // children 속성에는 string 뿐만 아니라 <svg> 요소가 포함될 수도 있어서 ReactNode 타입을 사용했다.
     disabled?: boolean | undefined;
 }
+
+//Timer
+export interface TimerProps {
+    time: number;
+    }

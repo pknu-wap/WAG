@@ -18,6 +18,7 @@ import {
   IRoomResponseInfo,
   IUserDto,
   URL,
+  UserAnswers,
 } from "../types/dto";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
@@ -29,6 +30,8 @@ import RadioButton from "../components/radioButton/RadioButton";
 import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 import Toast from "../components/toast/Toast";
 import { history } from "../util/history";
+import Timer from "./timer/Timer";
+import useTimer, { TimerHookProps } from './timer/useTimer';
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -50,7 +53,7 @@ const ReadyToGame = () => {
 
   const location = useLocation();
   const roomInfo = { ...location.state };
-
+  
   const closeModal = () => {
     setIsOpen(false);
   };
@@ -65,9 +68,14 @@ const ReadyToGame = () => {
   };
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
-  const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]); // 입장 유저
-  const [isAnswerMode, setIsAnswerMode] = useState(false); //정답 입력 <-> 채팅 입력 버튼 클릭 시의 입력창 변경
+  const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]) // 입장 유저
 
+
+  //게임중 useState
+  const [myTurn, setMyTurn] = useState(false);
+  const [isAnswerMode, setIsAnswerMode] = useState(false); //정답 입력 <-> 채팅 입력 버튼 클릭 시의 입력창 변경
+  const [answerList, setAnswerList] = useState([]); //정답어 리스트가 도착하면 상태를 바꾸어줌
+  
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
   useEffect(() => {
     if ("isCaptin" in roomInfo) {
@@ -269,14 +277,19 @@ const ReadyToGame = () => {
     } else if (message.messageType === "CHANGE") {
       console.log("CHANGE로 온 메세지", message);
       setRoomInfo();
+      Toast({ message: message.privateRoom ? '방이 비공개로 설정되었습니다.' : '방이 공개로 설정되었습니다.', type: 'info' });
     } else if (message.messageType === "ASK") {
       console.log("ASK로 온 메세지", message);
+      getNextTurnInfo(message); 
     } else if (message.messageType === "ANSWER") {
       console.log("ANSWER로 온 메세지", message);
     } else if (message.messageType === "CORRECT") {
       console.log("CORRECT로 온 메세지", message);
     } else if (message.messageType === "START") {
       console.log("START로 온 메세지", message);
+      getNextTurnInfo(message);
+      setgameStart(true);
+      GameLogic();
     } else {
       console.log(message);
     }
@@ -305,17 +318,14 @@ const ReadyToGame = () => {
   // 대기방 방장 모달 공개/비공개 바꾸는 소켓
   const privateModeOnclick = () => {
     sendMessageToSocket("/app/chat.changeMode", "CHANGE");
-    // 코드 꼬임 오류 방지(의미는 없음)
     if (isPrivateRoom) {
       // 공개 방으로 변경
       setChangeIsPrivate(false);
-      Toast({ message: "방이 공개로 설정되었습니다.", type: "info" });
     }
     // 바꾸기 전 공개 방일 때
     else {
       // 비공개 방으로 변경
       setChangeIsPrivate(true);
-      Toast({ message: "방이 비공개로 설정되었습니다.", type: "info" });
     }
     setIsPrivateRoom(changeIsPrivate);
     console.log("방 설정 바꾸기 완료, isPrivate : ", isPrivateRoom);
@@ -328,7 +338,7 @@ const ReadyToGame = () => {
       return (
         // 바꾸고자 하는 값(changeIsPrivate) = true(공개로 변경하고 싶음) 일 때 활성화
         <Button
-          size="lg"
+          size="sm"
           onClick={privateModeOnclick}
           disabled={changeIsPrivate === false}
         >
@@ -340,7 +350,7 @@ const ReadyToGame = () => {
       return (
         // 바꾸고자 하는 값(changeIsPrivate) = false(공개로 변경하고 싶음) 일 때 활성화
         <Button
-          size="lg"
+          size="sm"
           onClick={privateModeOnclick}
           disabled={changeIsPrivate === true}
         >
@@ -385,34 +395,110 @@ const ReadyToGame = () => {
 
   usePreventRefresh();
 
-  /*====================== 게임 중 ====================== */
-  const exitOnClick = () => {
-    navigate("/");
-  };
+  /*====================== 게임 중 코드 ====================== */
+      const exitOnClick = () => {
+        navigate("/");
+      };
+    
+      const {
+        time,
+        startTimer,
+        stopTimer,
+        resetTimer,
+      }: TimerHookProps = useTimer();
 
-  const clickGameStart = () => {
-    captainCloseModal(); //모달 닫기
-    setgameStart(true);
-    sendMessageToSocket("/app/chat.sendGameMessage", "START"); //소켓에 START로 보냄
-  };
+      useEffect(() => {
+        if (time < 0) {
+          stopTimer();
+          resetTimer();
+          handleTimerEnd();
+        }
+      }, [stopTimer, resetTimer, time]);
 
-  // 정답 입력 모드로 전환하는 함수
-  const switchToAnswerMode = () => {
-    setIsAnswerMode(true);
-  };
+      //타이머 종료 후 로직
+      const handleTimerEnd = () => {
+        startTimer();
+      };
 
-  // 채팅 모드로 전환하는 함수
-  const switchToChatMode = () => {
-    setIsAnswerMode(false);
-  };
+    //게임시작 버튼 클릭 이벤트
+    const clickGameStart = () => {
+      if(joinUsers.length > 1)
+      {
+        captainCloseModal(); //모달 닫기
+        sendMessageToSocket("/app/chat.sendGameMessage", "START");  //소켓에 START로 보냄
+      }
+      else Toast({ message: '2명 이상 모여야 게임 시작 가능!', type: 'error' });
+    };
+
+      // 정답 입력 모드로 전환하는 함수
+      const switchToAnswerMode = () => {
+        setIsAnswerMode(true);
+      };
+    
+      // 채팅 모드로 전환하는 함수
+      const switchToChatMode = () => {
+        setIsAnswerMode(false);
+      };
+
+
+      //게임중 작동 함수를 넣는 함수
+      const GameLogic = () => {
+        Toast({ message: '게임을 시작합니다!', type: 'success' });
+        const answerlist = getGameAnswer(); //정답어 받아오기
+        console.log(answerlist);
+        startTimer();
+        
+      };
+
+      
+      // 다음 턴의 정보를 받아오는 함수입니다.
+      const getNextTurnInfo = (socketMessage: any) => {
+        // socketMessage에서 다음 턴 정보를 추출합니다.
+        const nextTurnUser = socketMessage.gameUserDtos.find((user: any) => user.nextTurn === true);
+      
+        // 다음 턴 정보가 없거나 유효하지 않다면 null을 반환합니다.
+        if (!nextTurnUser) {
+          console.log()
+          return null;
+        }
+        // 다음 턴의 사용자 정보를 반환합니다.
+        return nextTurnUser;
+      };
+
+      // 자기자신만 제외하고 정답어를 받아오는 api
+      const getGameAnswer = async () => {
+        const nickname = localStorage.getItem("nickName");
+        try {
+          const response = await axios.get<UserAnswers>(
+            "http://wwwag-backend.co.kr/answer/list",
+            {
+              params: {
+                roomId: Number(params.roomId),
+                nickname
+              },
+            }
+          );
+          console.log(response.data);
+          return response.data;
+        } catch (error) {
+          console.error("정답 리스트 get api 오류 발생 : ", error);
+          throw error;
+        }
+      };
+
 
   return (
     <FullLayout>
-      <div className="flex flex-row justify-around items-center mt-10 mx-7">
+        <div className="flex flex-row justify-around items-center mt-10 mx-7">
         {joinUsers.map((name, index) => (
           <JoinUser key={index} Nickname={name.roomNickname} />
         ))}
       </div>
+      {gameStart&&(
+      <div className="flex justify-center items-center">
+        <Timer time={time} />
+      </div>)
+      }
       <div className="m-auto mt-8 flex justify-center items-center relative">
         <div className="mr-5">
           <div className="text-base">입장코드</div>
@@ -530,10 +616,22 @@ const ReadyToGame = () => {
       </ReadyToGameModal>
 
       <CaptainReatyToModal onRequestClose={captainCloseModal}>
-        <div>방장 기능</div>
+      <div> 
+      <div className="text-xl font-bold mb-4">방장 기능</div>
+      <div className="text-md">
+        <span>현재 방 상태 : </span>
+          {isPrivateRoom ? (
+            <span className="text-[#FF0000]">
+             비공개방
+          </span>
+        ): (
+          <span className="text-[#33B3FF]">
+           공개방
+        </span>
+        )}
+      </div>
         {isMeCaptain ? (
           <div>
-            <div>나는 방장이야</div>
             <div className="grid grid-cols-1 md:grid-cols-2 mt-5 gap-2">
               <RadioButton
                 id="public"
@@ -550,39 +648,19 @@ const ReadyToGame = () => {
                 onChange={() => setChangeIsPrivate(true)}
               />
             </div>
-            <div>{renderButton()}</div>
-            <div className="flex flex-row justify-center algin-center">
-              <Button
-                className="mt-2"
-                size="sm"
-                disabled={false}
-                onClick={clickGameStart}
-              >
-                GAME START
-              </Button>
-              <Button
-                className="mt-2"
-                size="sm"
-                disabled={false}
-                onClick={exitOnClick}
-              >
-                게임 나가기
-              </Button>
+            <div className="flex flex-col justify-center items-center">
+              <div className="mt-5">{renderButton()}</div>
+              <div><Button className="mt-2" size="md" disabled={false} onClick={clickGameStart}>GAME START</Button></div>
+              <div><Button className="mt-2" size="sm" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>
             </div>
           </div>
         ) : (
-          <div className="m-auto">
-            <div>나는 방장이 아니니깐 할 수 있는게 없어</div>
-            <Button
-              className="mt-2"
-              size="sm"
-              disabled={false}
-              onClick={exitOnClick}
-            >
-              게임 나가기
-            </Button>
+          <div className="m-auto flex flex-col justify-center items-center">
+            <div className="text-md mt-5">나는 방장이 아니니깐 할 수 있는게 없어</div>
+            <div><Button className="mt-5" size="sm" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>
           </div>
         )}
+        </div>
       </CaptainReatyToModal>
     </FullLayout>
   );
