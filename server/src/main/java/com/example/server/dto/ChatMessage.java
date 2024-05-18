@@ -18,6 +18,7 @@ public class ChatMessage {
         CORRECT,
         START,
         END,
+        PENALTY,
         CHANGE,
     }
 }
