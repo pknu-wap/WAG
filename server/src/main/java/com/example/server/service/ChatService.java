@@ -110,7 +110,6 @@ public class ChatService {
         else{
             chatGameMessage = makeChatGameMessage(chatMessage, room);
         }
-
         return chatGameMessage;
     }
 
@@ -198,6 +197,7 @@ public class ChatService {
         chatGameMessage.setGameEnd(room.isGameStatus());
         chatGameMessage.setCycle(room.getCycle());
         chatGameMessage.setGameUserDtos(makeGameUserDtos(chatMessage.getRoomId()));
+        chatGameMessage.setMessageType(chatMessage.getMessageType());
         return chatGameMessage;
     }
 
