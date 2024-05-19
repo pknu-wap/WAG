@@ -634,22 +634,10 @@ const ReadyToGame = () => {
         )}
       </div>
         {isMeCaptain ? (
-          <div>
+          <div className = "flex justify-center">
             <div className="grid grid-cols-1 md:grid-cols-2 mt-5 gap-2">
-              <RadioButton
-                id="public"
-                label="공개"
-                value="false"
-                name="roomType"
-                onChange={() => setChangeIsPrivate(false)}
-              />
-              <RadioButton
-                id="private"
-                label="비공개"
-                value="true"
-                name="roomType"
-                onChange={() => setChangeIsPrivate(true)}
-              />
+              <RadioButton id="public" label="공개" value="false" name="roomType" onChange={() => setChangeIsPrivate(false)}/>
+              <RadioButton id="private" label="비공개" value="true" name="roomType" onChange={() => setChangeIsPrivate(true)}/>
             </div>
             <div className="flex flex-col justify-center items-center">
               <div className="mt-5">{renderButton()}</div>

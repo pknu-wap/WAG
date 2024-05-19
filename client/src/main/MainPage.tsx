@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+import Toast from "../components/toast/Toast";
 type Props = {
   children?: React.ReactNode;
 };
@@ -71,7 +71,10 @@ function MainPage({ dark }: ComponentProps) {
     if (roomId !== "no available room") {
       localStorage.setItem("roomId", roomId);
       navigate(`/ReadyToGame/${roomId}`);
-    } else alert("입장가능한 방이 없습니다.");
+    } else{ 
+      Toast({ message: "입장 가능한 방이 없습니다.", type: "error" });
+      Toast({ message: "방을 생성하여 주시길 바랍니다.", type: "error" });
+    }
   };
 
   //코드입장시 버튼 클릭
@@ -80,7 +83,7 @@ function MainPage({ dark }: ComponentProps) {
     if (roomId !== "invalid enterCode") {
       localStorage.setItem("roomId", roomId);
       navigate(`/ReadyToGame/${roomId}`);
-    } else alert("입장 가능한 방이 없습니다.");
+    } else Toast({ message: "존재하지 않는 입장코드 입니다!", type: "error" });
   };
 
   const handleCreateRoomClick = () => {
