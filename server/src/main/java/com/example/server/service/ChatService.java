@@ -90,7 +90,7 @@ public class ChatService {
         Room room = roomRepository.findById(chatMessage.getRoomId()).get();
 
         if(chatMessage.getMessageType()==ChatMessage.MessageType.ASK){  // 질문일 경우 다음 턴으로 넘어감.
-            int currentOrder = sendRoomUser.getGameOrder().getUserOrder();
+            int currentOrder = gameOrder.getUserOrder();
             int nextOrder = (currentOrder + 1) / room.getUserCount();
             gameOrder.setNowTurn(true);
             gameOrder.setNextTurn(false);
@@ -102,7 +102,7 @@ public class ChatService {
             gameOrderRepository.save(nextGameOrder);
             chatGameMessage = makeChatGameMessage(chatMessage, room);
 
-            if(sendRoomUser.getGameOrder().getUserOrder() == room.getUserCount()){ // 질문자가 마지막 사람이면 사이클 추가
+            if(gameOrder.getUserOrder() == room.getUserCount()){ // 질문자가 마지막 사람이면 사이클 추가
                 room.setCycle(room.getCycle()+1);
             }
             roomRepository.save(room);  // 게임 메시지를 만든 후 저장한다.   TODO 사이클 추가 부분 생각해봐야할 듯!
