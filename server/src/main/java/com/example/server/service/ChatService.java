@@ -93,15 +93,23 @@ public class ChatService {
         if(chatMessage.getMessageType()==ChatMessage.MessageType.ASK){  // 질문일 경우 다음 턴으로 넘어감.
             int currentOrder = gameOrder.getUserOrder();
             int nextOrder = currentOrder + 1;
+            int nowOrder = currentOrder - 1;
+            if(nowOrder < 1){
+                nextOrder = room.getUserCount();
+            }
             if(nextOrder > room.getUserCount()){
                 nextOrder = 1;
             }
+            GameOrder nowGameOrder = gameOrderRepository.findByUserOrder(nowOrder, room.getId()).get();
+            nowGameOrder.setNowTurn(false);
+            nowGameOrder.setNextTurn(false);
             gameOrder.setNowTurn(true);
             gameOrder.setNextTurn(false);
             GameOrder nextGameOrder = gameOrderRepository.findByUserOrder(nextOrder, room.getId()).get();
             nextGameOrder.setNowTurn(false);
             nextGameOrder.setNextTurn(true);
             room.setCurrentOrder(nextOrder);
+            gameOrderRepository.save(nowGameOrder);
             gameOrderRepository.save(gameOrder);
             gameOrderRepository.save(nextGameOrder);
             chatGameMessage = makeChatGameMessage(chatMessage, room);
