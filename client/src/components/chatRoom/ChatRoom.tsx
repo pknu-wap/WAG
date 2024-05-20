@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ChatMessage } from "../../types/dto";
 import UserMessage from "./UserMessage";
 import NotificationMessage from "./NotificationMessage";
+
 const ChatRoom: React.FC<{ message: ChatMessage }> = ({ message }) => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const myName = localStorage.getItem("nickName");

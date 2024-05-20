@@ -5,6 +5,7 @@ import com.example.server.dto.ChatGameMessage;
 import com.example.server.dto.ChatMessage;
 import com.example.server.dto.ChatRoomModeMessage;
 import com.example.server.dto.GameUserDto;
+import com.example.server.exception.MaxPenaltyExceededException;
 import com.example.server.payload.response.AnswerListResponse;
 import com.example.server.payload.response.ResultResponse;
 import com.example.server.repository.*;
@@ -30,9 +31,9 @@ public class ChatService {
         if(chatMessage.getMessageType()==ChatMessage.MessageType.START){
             return startGame(chatMessage);
         }
-//        else if (chatMessage.getMessageType()==ChatMessage.MessageType.END) {
-//            return endGame(chatMessage);
-//        }
+        else if (chatMessage.getMessageType()==ChatMessage.MessageType.PENALTY) {
+            return penaltyUser(chatMessage);
+        }
         else if (chatMessage.getMessageType()==ChatMessage.MessageType.CORRECT) {
             return correctAnswer(chatMessage);
         }
@@ -63,36 +64,57 @@ public class ChatService {
         return chatGameMessage;
     }
 
-    public ResultResponse endGame(Long roomId){
-        Room room = roomRepository.findById(roomId).get();
-        List<RoomUser> roomUsers = roomUserRepository.findByRoomId(roomId);
-        room.setGameStatus(false);
-        gameOrderRepository.deleteGameOrderByRoomId(roomId);
+    public ChatGameMessage penaltyUser(ChatMessage chatMessage){
+        GameOrder penaltyUser = gameOrderRepository.findByNickName(chatMessage.getContent(), chatMessage.getRoomId()).get();
+        if(penaltyUser.getPenalty() >= 3){
+            throw new MaxPenaltyExceededException();
+        }
+        else{
+            penaltyUser.setPenalty(penaltyUser.getPenalty() + 1);
+        }
+        gameOrderRepository.save(penaltyUser);
 
-        return new ResultResponse(room, roomUsers);
+        Room room = roomRepository.findByRoomId(chatMessage.getRoomId()).get();
+        ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
+        chatGameMessage.setMessageType(ChatMessage.MessageType.PENALTY);
+
+        return chatGameMessage;
+
     }
 
 
     public ChatGameMessage playGame(ChatMessage chatMessage) {
-        ChatGameMessage chatGameMessage = new ChatGameMessage();
-        RoomUser sendRoomUser = roomUserRepository.hasNickName(chatMessage.getSender()).get();
-        GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(sendRoomUser.getId()).get();
+        ChatGameMessage chatGameMessage;
         Room room = roomRepository.findById(chatMessage.getRoomId()).get();
+        RoomUser sendRoomUser = roomUserRepository.hasNickName(chatMessage.getSender(), room.getId()).get();
+        GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(sendRoomUser.getId()).get();
+
 
         if(chatMessage.getMessageType()==ChatMessage.MessageType.ASK){  // 질문일 경우 다음 턴으로 넘어감.
-            int currentOrder = sendRoomUser.getGameOrder().getUserOrder();
-            int nextOrder = (currentOrder + 1) / room.getUserCount();
+            int currentOrder = gameOrder.getUserOrder();
+            int nextOrder = currentOrder + 1;
+            int nowOrder = currentOrder - 1;
+            if(nowOrder < 1){
+                nextOrder = room.getUserCount();
+            }
+            if(nextOrder > room.getUserCount()){
+                nextOrder = 1;
+            }
+            GameOrder nowGameOrder = gameOrderRepository.findByUserOrder(nowOrder, room.getId()).get();
+            nowGameOrder.setNowTurn(false);
+            nowGameOrder.setNextTurn(false);
             gameOrder.setNowTurn(true);
             gameOrder.setNextTurn(false);
-            GameOrder nextGameOrder = gameOrderRepository.findByUserOrder(nextOrder).get();
+            GameOrder nextGameOrder = gameOrderRepository.findByUserOrder(nextOrder, room.getId()).get();
             nextGameOrder.setNowTurn(false);
             nextGameOrder.setNextTurn(true);
             room.setCurrentOrder(nextOrder);
+            gameOrderRepository.save(nowGameOrder);
             gameOrderRepository.save(gameOrder);
             gameOrderRepository.save(nextGameOrder);
             chatGameMessage = makeChatGameMessage(chatMessage, room);
 
-            if(sendRoomUser.getGameOrder().getUserOrder() == room.getUserCount()){ // 질문자가 마지막 사람이면 사이클 추가
+            if(gameOrder.getUserOrder() == room.getUserCount()){ // 질문자가 마지막 사람이면 사이클 추가
                 room.setCycle(room.getCycle()+1);
             }
             roomRepository.save(room);  // 게임 메시지를 만든 후 저장한다.   TODO 사이클 추가 부분 생각해봐야할 듯!
@@ -100,13 +122,12 @@ public class ChatService {
         else{
             chatGameMessage = makeChatGameMessage(chatMessage, room);
         }
-
         return chatGameMessage;
     }
 
     public ChatGameMessage correctAnswer(ChatMessage chatMessage) {   // 정답 맞추기
         ChatGameMessage chatGameMessage = new ChatGameMessage();
-        RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender()).get();
+        RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatGameMessage.getRoomId()).get();
         GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(roomUser.getId()).get();
         Room room = roomRepository.findById(chatMessage.getRoomId()).get();
         GameRecord gameRecord = gameRecordRepository.findByRoomId(room.getId()).get();
@@ -188,6 +209,7 @@ public class ChatService {
         chatGameMessage.setGameEnd(room.isGameStatus());
         chatGameMessage.setCycle(room.getCycle());
         chatGameMessage.setGameUserDtos(makeGameUserDtos(chatMessage.getRoomId()));
+        chatGameMessage.setMessageType(chatMessage.getMessageType());
         return chatGameMessage;
     }
 
@@ -212,7 +234,7 @@ public class ChatService {
     }
 
     public AnswerListResponse getAnswerList(Long roomId, String nickname){
-        return new AnswerListResponse(gameOrderRepository.findAnswerNotMe(nickname, roomId));
+        return new AnswerListResponse(gameOrderRepository.findAnswerNotMe(roomId), nickname);
     }
 
 }

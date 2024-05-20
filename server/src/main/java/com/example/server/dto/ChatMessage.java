@@ -18,6 +18,8 @@ public class ChatMessage {
         CORRECT,
         START,
         END,
+        PENALTY,
+        OUT,
         CHANGE,
     }
 }

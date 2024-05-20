@@ -11,10 +11,15 @@ import java.util.List;
 @Getter @Setter
 public class AnswerListResponse {
     List<AnswerUserDto> answerUserDtos;
-    public AnswerListResponse (List<GameOrder> gameOrders){
+    public AnswerListResponse (List<GameOrder> gameOrders, String nickname){
         List<AnswerUserDto> answerUserDtos = new ArrayList<>();
         for(GameOrder gameOrder : gameOrders){
-            answerUserDtos.add(new AnswerUserDto(gameOrder.getRoomUser().getRoomNickname(), gameOrder.getAnswerName()));
+            if(gameOrder.getRoomUser().getRoomNickname().equals(nickname)){
+                answerUserDtos.add(new AnswerUserDto(gameOrder.getRoomUser().getRoomNickname(), "???"));
+            }
+            else{
+                answerUserDtos.add(new AnswerUserDto(gameOrder.getRoomUser().getRoomNickname(), gameOrder.getAnswerName()));
+            }
         }
         this.answerUserDtos = answerUserDtos;
     }
