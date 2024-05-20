@@ -117,7 +117,11 @@ public class WebSocketEventListener {
 
         if(nowturn){
             GameOrder nowGo = gameOrderRepository.findByUserOrder(nowOrder, room.getId()).get();
-            GameOrder nextGo = gameOrderRepository.findByUserOrder((nowOrder + 1) / (room.getUserCount() - 1), room.getId()).get();
+            int nextOrder = nowOrder + 1;
+            if(nextOrder >= room.getUserCount()){
+                nextOrder = 1;
+            }
+            GameOrder nextGo = gameOrderRepository.findByUserOrder(nextOrder, room.getId()).get();
             nowGo.setNowTurn(true);
             nowGo.setNextTurn(false);
             nextGo.setNextTurn(true);
