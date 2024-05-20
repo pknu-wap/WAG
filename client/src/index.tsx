@@ -21,7 +21,6 @@ ReactModal.setAppElement(rootElement); //rootElement를 ReactModal의 app 엘리
 
 
 root.render(
-  
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
         <RecoilRoot>
@@ -33,7 +32,6 @@ root.render(
         </RecoilRoot>
       </Provider>
     </QueryClientProvider>
-  
 );
 
 // If you want to start measuring performance in your app, pass a function

@@ -65,7 +65,14 @@ export interface ChatMessage {
   sender: string; // 사용자 이름
   content: string; // 메시지 텍스트
   roomId: number;
-  isPrivateRoom: boolean;
+  isPrivateRoom: boolean; 
+}
+
+// 게임 메시지 인터페이스 (ChatMessage 확장)
+export interface GameMessage extends ChatMessage {
+  cycle: number; // 게임 사이클
+  gameEnd: boolean; // 게임 종료 여부
+  gameUserDtos: IUserDto[]; // 게임 참여 유저 정보 (IUserDto는 기존에 정의된 유저 정보 인터페이스)
 }
 
 export interface JoinUser {
