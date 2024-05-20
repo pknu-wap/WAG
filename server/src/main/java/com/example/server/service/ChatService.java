@@ -92,7 +92,10 @@ public class ChatService {
 
         if(chatMessage.getMessageType()==ChatMessage.MessageType.ASK){  // 질문일 경우 다음 턴으로 넘어감.
             int currentOrder = gameOrder.getUserOrder();
-            int nextOrder = (currentOrder + 1) / room.getUserCount();
+            int nextOrder = currentOrder + 1;
+            if(nextOrder > room.getUserCount()){
+                nextOrder = 1;
+            }
             gameOrder.setNowTurn(true);
             gameOrder.setNextTurn(false);
             GameOrder nextGameOrder = gameOrderRepository.findByUserOrder(nextOrder, room.getId()).get();
