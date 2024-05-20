@@ -65,7 +65,7 @@ public class ChatService {
     }
 
     public ChatGameMessage penaltyUser(ChatMessage chatMessage){
-        GameOrder penaltyUser = gameOrderRepository.findByNickName(chatMessage.getContent()).get();
+        GameOrder penaltyUser = gameOrderRepository.findByNickName(chatMessage.getContent(), chatMessage.getRoomId()).get();
         if(penaltyUser.getPenalty() >= 3){
             throw new MaxPenaltyExceededException();
         }
