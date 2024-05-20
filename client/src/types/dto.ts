@@ -90,7 +90,7 @@ export interface GameMessage {
   roomId: number;
   gameEnd: boolean;
   cycle: number;
-  GameUserDtos: GameUserDto[];
+  gameUserDtos: GameUserDto[];
 }
 
 interface AnswerUserDto {

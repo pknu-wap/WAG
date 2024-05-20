@@ -14,10 +14,10 @@ import Button from "../components/button/Button";
 import axios from "axios";
 import {
   ChatMessage,
-  ChatMessageJoin,
-  GameMessage,
+  GameUserDto,
   INicknamePossible,
   IRoomResponseInfo,
+  IUserDto,
   URL,
 } from "../types/dto";
 import { Stomp } from "@stomp/stompjs";
@@ -29,13 +29,7 @@ import RadioButton from "../components/radioButton/RadioButton";
 import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 import Toast from "../components/toast/Toast";
 import { history } from "../util/history";
-import {
-  Popover,
-  PopoverHandler,
-  PopoverContent,
-} from "@material-tailwind/react";
 import JoinUser from "../components/ingameComponents/JoinUser";
-import CustomPopoverContent from "../components/ingameComponents/PopoverContent";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -72,8 +66,9 @@ const ReadyToGame = () => {
   };
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
-  const [joinUsers, setJoinUsers] = useState<any[]>([]); // 입장 유저
+  const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]); // 입장 유저
   const [isAnswerMode, setIsAnswerMode] = useState(false); //정답 입력 <-> 채팅 입력 버튼 클릭 시의 입력창 변경
+  const [penaltyCount, setPenaltyCount] = useState<GameUserDto[]>([]);
 
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
   useEffect(() => {
@@ -259,13 +254,13 @@ const ReadyToGame = () => {
     var message = JSON.parse(payload.body);
     if (message.messageType === "JOIN") {
       receiveChatMessage(message);
-      addJoinUser(message);
+      setJoinUsers(message.roomResponse.userDtos);
       setRoomInfo();
       console.log("JOIN으로 온 메세지", message);
       console.log(message.sender + " joined!");
     } else if (message.messageType === "LEAVE") {
       receiveChatMessage(message);
-      addJoinUser(message);
+      setJoinUsers(message.roomResponse.userDtos);
       setRoomInfo();
       console.log("LEAVE으로 온 메세지", message);
     } else if (message.messageType === "CHAT") {
@@ -283,32 +278,19 @@ const ReadyToGame = () => {
       console.log("CORRECT로 온 메세지", message);
     } else if (message.messageType === "START") {
       console.log("START로 온 메세지", message);
-      ingameUsersInfo(message);
       console.log(joinUsers);
     } else if (message.messageType === "PENALTY") {
       console.log("PENALTY로 온 메세지", message);
-      ingameUsersInfo(message);
+      setPenaltyCount(message.gameUserDtos);
     } else {
       console.log(message);
     }
   }
 
-  // 유저 입장 시 상단에 프로필 추가
-  const addJoinUser = (message: ChatMessageJoin) => {
-    setJoinUsers(message.roomResponse.userDtos);
-  };
-  const ingameUsersInfo = (message: GameMessage) => {
-    setJoinUsers(message.GameUserDtos);
-  };
-
-  // 유저 퇴장 시 상단에 프로필 삭제
-  // const deleteLeavtUser = () => {
-  //   console.log(userCount)
-  //   if (message.messageType === "LEAVE") {
-  //     setJoinUsers(message.roomResponse.userDtos)
-  //   }
-  //   setUserCount(joinUsers.length)
-  // }
+  // // 유저 입장 시 상단에 프로필 추가
+  // const addJoinUser = (message: ChatMessageJoin) => {
+  //   setJoinUsers(message.roomResponse.userDtos);
+  // };
 
   const receiveChatMessage = (message: ChatMessage) => {
     setChatMessages([...chatMessages, message]); // 채팅 데이터 상태 업데이트
@@ -362,6 +344,7 @@ const ReadyToGame = () => {
     }
   };
 
+  // 방 나가기
   const exitOnClick = () => {
     navigate(`/`);
   };
@@ -412,30 +395,55 @@ const ReadyToGame = () => {
     setIsAnswerMode(false);
   };
 
+  function socketPenaltyOnClick(recipient: string) {
+    const roomId = localStorage.getItem("roomId");
+    const nickName = localStorage.getItem("nickName");
+
+    stompClient.send(
+      "/app/chat.sendGameMessage",
+      {},
+      JSON.stringify({
+        sender: nickName,
+        content: recipient,
+        messageType: "PENALTY",
+        roomId: roomId,
+      })
+    );
+    console.log("content: ", recipient, ", sender: ", nickName);
+  }
   return (
     <FullLayout>
       <div className="flex flex-row justify-around items-center mt-10 mx-7">
-        {joinUsers.map((info, index) => (
-          <Popover
-            key={index}
-            placement="bottom"
-            animate={{
-              mount: { scale: 1, y: 0 },
-              unmount: { scale: 0, y: 25 },
-            }}
-          >
-            <PopoverHandler>
+        {joinUsers.map((info, index) => {
+          return (
+            <div key={index} className="relative">
               <JoinUser
                 Nickname={info.roomNickname}
                 gameStart={gameStart}
-                penalty={info.penalty}
+                className={""}
+                penalty={penaltyCount}
+                children={
+                  gameStart ? (
+                    <div
+                      className={`p-1 shadow-lg rounded-lg absolute top-1/2 left-0`}
+                    >
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          socketPenaltyOnClick(info.roomNickname);
+                        }}
+                      >
+                        경고 주기
+                      </Button>
+                    </div>
+                  ) : (
+                    <div></div>
+                  )
+                }
               />
-            </PopoverHandler>
-            <PopoverContent>
-              This is a very beautiful popover, show some love.
-            </PopoverContent>{" "}
-          </Popover>
-        ))}
+            </div>
+          );
+        })}
       </div>
 
       <div className="m-auto mt-8 flex justify-center items-center relative">
