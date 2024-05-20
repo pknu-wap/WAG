@@ -1,9 +1,17 @@
 import { ButtonProps } from "../../types/common";
 
-const Button = ({ type, size, className, onClick, children, disabled }: ButtonProps) => {
+const Button = ({
+  type,
+  size,
+  className,
+  onClick,
+  children,
+  disabled,
+}: ButtonProps) => {
   let combinedClassName = ""; // 이 변수에 className을 중첩시킨다.
   if (disabled === true) {
-    combinedClassName = "rounded-xl font-extrabold bg-light-btn_disabled min-w-44 shadow-xl dark:bg-light-btn_disabled"
+    combinedClassName =
+      "rounded-xl font-extrabold bg-light-btn_disabled min-w-44 shadow-xl dark:bg-light-btn_disabled";
   } else {
     combinedClassName =
       "rounded-xl font-extrabold bg-light-btn min-w-44 shadow-xl hover:shadow-2xl hover:bg-light-btn_hover active:bg-light-btn dark:hover:bg-dark-btn_hover dark:active:bg-dark-btn dark:bg-dark-btn";
@@ -11,7 +19,7 @@ const Button = ({ type, size, className, onClick, children, disabled }: ButtonPr
 
   switch (size) {
     case "sm": {
-      combinedClassName += " w-1/5 h-12 text-base";
+      combinedClassName += " w-1/5 h-10 text-base";
       break;
     }
     case "md": {

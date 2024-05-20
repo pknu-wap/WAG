@@ -4,6 +4,7 @@ const IconButton = ({
   type,
   size,
   className,
+  disabled,
   onClick,
   children,
 }: ButtonProps) => {
@@ -34,6 +35,7 @@ const IconButton = ({
       type={type ? type : "button"}
       className={`${className} ${combinedClassName}`}
       onClick={onClick}
+      disabled={disabled}
     >
       {children}
     </button>
