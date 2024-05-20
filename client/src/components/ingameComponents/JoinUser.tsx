@@ -76,8 +76,6 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
       setOtherPenalty();
     }, [penalty]);
 
-    console.log("penaltyCount: ", penaltyCount);
-
     return (
       <div
         ref={ref}
@@ -104,7 +102,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
         ) : penaltyCount === 1 ? (
           <div className="w-3 h-5 rounded absolute top-12 left-12 border-slate-950 bg-[#FFFF00]"></div>
         ) : penaltyCount === 2 ? (
-          <div className="absolute top-12 left-12">
+          <div className="absolute top-12 left-12 flex flex-column">
             <div className="w-3 h-5 rounded border-slate-950 bg-[#FFFF00]"></div>
             <div className="w-3 h-5 rounded border-slate-950 bg-[#FFFF00]"></div>
           </div>
