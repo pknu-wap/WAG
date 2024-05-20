@@ -15,11 +15,11 @@ import axios from "axios";
 import {
   ChatMessage,
   GameUserDto,
+  IGetAnswerList,
   INicknamePossible,
   IRoomResponseInfo,
   IUserDto,
   URL,
-  UserAnswers,
 } from "../types/dto";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
@@ -372,6 +372,7 @@ const ReadyToGame = () => {
       };
     });
   };
+  usePreventRefresh();
 
   const { pathname } = useLocation();
   useEffect(() => {
@@ -477,7 +478,7 @@ const ReadyToGame = () => {
       const getGameAnswer = async () => {
         const nickname = localStorage.getItem("nickName");
         try {
-          const response = await axios.get<UserAnswers>(
+          const response = await axios.get<IGetAnswerList>(
             "http://wwwag-backend.co.kr/answer/list",
             {
               params: {
