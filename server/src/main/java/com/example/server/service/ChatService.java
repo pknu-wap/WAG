@@ -95,7 +95,7 @@ public class ChatService {
             int nextOrder = currentOrder + 1;
             int nowOrder = currentOrder - 1;
             if(nowOrder < 1){
-                nextOrder = room.getUserCount();
+                nowOrder = room.getUserCount();
             }
             if(nextOrder > room.getUserCount()){
                 nextOrder = 1;
