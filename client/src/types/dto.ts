@@ -73,9 +73,32 @@ export interface JoinUser {
   userProfile: string;
 }
 
+export interface GameUserDto {
+  Captain: boolean;
+  roomNickname: string;
+  profileImage: string;
+  penalty: number;
+  MyTurn: boolean;
+  haveAnswerChange: boolean;
+  ranking: number;
+}
+// 게임 중 채팅 객체
+export interface GameMessage {
+  messageType: string;
+  content: string;
+  sender: string;
+  roomId: number;
+  gameEnd: boolean;
+  cycle: number;
+  gameUserDtos: GameUserDto[];
+}
 
+interface AnswerUserDto {
+  nickname: string;
+  answer: string;
+}
 
-// 정답어 리스트 get response
-export interface UserAnswers {
-  answerUserDtos: string[];
+// 정답어 get
+export interface IGetAnswerList {
+  answerUserDtos: AnswerUserDto[];
 }
