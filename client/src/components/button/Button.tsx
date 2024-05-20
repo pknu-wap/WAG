@@ -18,8 +18,12 @@ const Button = ({
   }
 
   switch (size) {
-    case "sm": {
+    case "xs": {
       combinedClassName += " w-1/5 h-10 text-base";
+      break;
+    }
+    case "sm": {
+      combinedClassName += " w-1/5 h-12 text-base";
       break;
     }
     case "md": {
