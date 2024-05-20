@@ -1,11 +1,13 @@
 package com.example.server.controller;
 
+import com.example.server.domain.GameOrder;
 import com.example.server.domain.Room;
 import com.example.server.domain.RoomUser;
 import com.example.server.dto.ChatMessage;
 import com.example.server.dto.ChatRoomInfoMessage;
 import com.example.server.dto.UserDto;
 import com.example.server.payload.response.RoomResponse;
+import com.example.server.repository.GameOrderRepository;
 import com.example.server.repository.RoomRepository;
 import com.example.server.repository.RoomUserRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class WebSocketEventListener {
     private final SimpMessageSendingOperations messagingTemplate;
     private final RoomUserRepository roomUserRepository;
     private final RoomRepository roomRepository;
+    private final GameOrderRepository gameOrderRepository;
 
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
@@ -40,20 +43,26 @@ public class WebSocketEventListener {
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
-        String username = (String) headerAccessor.getSessionAttributes().get("username"); //TODO : username이 맞는가? 맞네요
+        String username = (String) headerAccessor.getSessionAttributes().get("username");
         Long roomId = (Long) headerAccessor.getSessionAttributes().get("roomId");
 
         if(username != null && roomId != null) {
             logger.info("User Disconnected : " + username);
 
-            RoomUser roomUser = roomUserRepository.hasNickName(username).get();
+            RoomUser roomUser = roomUserRepository.hasNickName(username, roomId).get();
             Room room = roomRepository.findById(roomId).get();
             room.setUserCount(room.getUserCount() - 1);  // 유저 수 -1
 
             ChatRoomInfoMessage chatRoomInfoMessage = new ChatRoomInfoMessage();
             chatRoomInfoMessage.setContent(username + " 님이 방을 떠났습니다. ");
 
+            if(room.isGameStatus()){  // 만약 게임 중이라면 해당 유저 게임 진행 정보 삭제
+                GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(roomUser.getId()).get();
+                gameOrderRepository.delete(gameOrder);
+            }
+
             if(room.getUserCount() == 0){  // 나간 사람이 마지막 사람이라면 방 삭제
+                roomUserRepository.delete(roomUser);
                 roomRepository.delete(room);
                 return;
             }

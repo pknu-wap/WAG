@@ -85,16 +85,17 @@ public class ChatService {
 
     public ChatGameMessage playGame(ChatMessage chatMessage) {
         ChatGameMessage chatGameMessage;
-        RoomUser sendRoomUser = roomUserRepository.hasNickName(chatMessage.getSender()).get();
-        GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(sendRoomUser.getId()).get();
         Room room = roomRepository.findById(chatMessage.getRoomId()).get();
+        RoomUser sendRoomUser = roomUserRepository.hasNickName(chatMessage.getSender(), room.getId()).get();
+        GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(sendRoomUser.getId()).get();
+
 
         if(chatMessage.getMessageType()==ChatMessage.MessageType.ASK){  // 질문일 경우 다음 턴으로 넘어감.
             int currentOrder = gameOrder.getUserOrder();
             int nextOrder = (currentOrder + 1) / room.getUserCount();
             gameOrder.setNowTurn(true);
             gameOrder.setNextTurn(false);
-            GameOrder nextGameOrder = gameOrderRepository.findByUserOrder(nextOrder).get();
+            GameOrder nextGameOrder = gameOrderRepository.findByUserOrder(nextOrder, room.getId()).get();
             nextGameOrder.setNowTurn(false);
             nextGameOrder.setNextTurn(true);
             room.setCurrentOrder(nextOrder);
@@ -115,7 +116,7 @@ public class ChatService {
 
     public ChatGameMessage correctAnswer(ChatMessage chatMessage) {   // 정답 맞추기
         ChatGameMessage chatGameMessage = new ChatGameMessage();
-        RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender()).get();
+        RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatGameMessage.getRoomId()).get();
         GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(roomUser.getId()).get();
         Room room = roomRepository.findById(chatMessage.getRoomId()).get();
         GameRecord gameRecord = gameRecordRepository.findByRoomId(room.getId()).get();
