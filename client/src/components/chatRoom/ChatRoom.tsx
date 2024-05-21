@@ -32,7 +32,7 @@ const ChatRoom: React.FC<{ message: ChatMessage }> = ({ message }) => {
         let containerClass = isMyMessage ? "flex flex-col items-end" : "flex flex-col items-start";
         return (
           <div key={index} className={containerClass}>
-            <UserMessage message={msg} />
+            <UserMessage message={msg} /> 
           </div>
         );
       } 
@@ -45,6 +45,10 @@ const ChatRoom: React.FC<{ message: ChatMessage }> = ({ message }) => {
             <NotificationMessage message={{...msg, content: "준비하세요!"}} />
           </div>
         );
+      }
+      else if (msg.messageType === 'PENALTY') //UserMessage가 아니고
+        {
+            //일단 아무처리안함
       } 
       else // 그 외 공지 메시지 처리
       {
