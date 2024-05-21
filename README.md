@@ -2,7 +2,7 @@
 
 
 # WAG - Web Appends Game
-![WAG_LOGO_Dark](https://github.com/pknu-wap/WAG/assets/112786665/e0d26e4f-16e4-4a81-adaf-adb5f77e86c4)
+![WAG-introduce](https://github.com/oesnuj/oesnuj/assets/112786665/982af141-19fe-4a37-8673-41ece7e3959b)
 <br>
 <br>
 <br>
@@ -10,7 +10,7 @@
 ## 🌱 Introduction  
 
 
-간편하고 빠르게 즐길 수 있는 **실시간 채팅기반 웹 미니게임**을 제작하는 WAG 입니다!
+간편하고 빠르게 즐길 수 있는 **실시간 채팅 기반 웹 미니게임**을 제작하는 WAG 입니다!
 <br>
 <br>
 <br>
