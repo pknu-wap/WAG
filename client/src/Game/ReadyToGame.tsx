@@ -18,7 +18,8 @@ import {
   IRoomResponseInfo,
   IUserDto,
   URL,
-  UserAnswers,
+  UserAnswerDto,
+  AnswerUserDto,
 } from "../types/dto";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
@@ -73,13 +74,20 @@ const ReadyToGame = () => {
 
 
   //게임 중
+  const [countdown, setCountdown] = useState<number | null>(null); //게임 시작전 3초대기
   const [gameStart, setgameStart] = useState(false); //방장이 게임시작 눌렀는지
   const [isCORRECTMode, setIsCORRECTMode] = useState(false); //정답 입력 <-> 채팅 입력 버튼 클릭 시의 입력창 변경
-  const [answerList, setAnswerList] = useState([]); //정답어 리스트가 도착하면 상태를 바꾸어줌
+
   const nextTurnUserRef = useRef<any>(null);  //다음턴 사람을 받아와서 저장해둔다.
   const [isMyTurn, setIsMyTurn] = useState(false);
   const gameCycleRef = useRef<number>(0);
   const [currentCycle, setCurrentCycle] = useState<number>(0);
+  const [hasSentCorrect, setHasSentCorrect] = useState(false);  //정답을 외쳤는지 
+  const [hasSentAsk, setHasSentAsk] = useState(false);  //질문을 했는지 
+
+  const answerListRef = useRef<any>(null); //정답어 리스트가 도착하면 상태를 바꾸어줌
+  const currentAnswerRef = useRef<any>(null); 
+  const [currentUserAnswer, setCurrentUserAnswer] = useState<AnswerUserDto>(); //다음 유저의 정보를 바탕으로 정답어 받아놓기
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
   useEffect(() => {
     if ("isCaptin" in roomInfo) {
@@ -233,7 +241,6 @@ const ReadyToGame = () => {
         return;
       }
     }
-
     stompClient.send(
       socketURL,
       {},
@@ -250,19 +257,23 @@ const ReadyToGame = () => {
   //대기방 채팅, 게임중 질문, 답변, 정답 입력 4가지를 조건에 따라 전달하는 함수  -> 답변은 나중에 추가해야함
   function sendMessage() {
     if (gameStart) {
-      if(isMyTurn){ //게임중 나의 턴이라면
-        if (isCORRECTMode) {
+      if (isMyTurn) { 
+        if (isCORRECTMode && !hasSentCorrect) 
+          { // CORRECT 메시지 전송 여부 확인
           sendMessageToSocket("/app/chat.sendGameMessage", "CORRECT");
-        } else {
+          setHasSentCorrect(true); // 전송 후 상태 업데이트
+        } else if (!isCORRECTMode && !hasSentAsk) 
+          { // ASK 메시지 전송 여부 확인
           sendMessageToSocket("/app/chat.sendGameMessage", "ASK");
+          setHasSentAsk(true); // 전송 후 상태 업데이트
+        } 
+        else {
+          Toast({ message: "기회를 모두 소진했습니다!", type: "error" });
         }
-      }
-      else{
+      } else {
         sendMessageToSocket("/app/chat.sendGameMessage", "ANSWER");
       }
-      
-    } //대기방
-    else {
+    } else {
       sendMessageToSocket("/app/chat.sendMessage", "CHAT");
     }
   }
@@ -290,17 +301,22 @@ const ReadyToGame = () => {
     } else if (message.messageType === "ASK") {
       console.log("ASK로 온 메세지", message);
       getNextTurnInfo(message);
-      getGameCycle(message);
     } else if (message.messageType === "ANSWER") {
       console.log("ANSWER로 온 메세지", message);
+      getGameCycle(message);
     } else if (message.messageType === "CORRECT") {
       console.log("CORRECT로 온 메세지", message);
     } else if (message.messageType === "START") {
       console.log("START로 온 메세지", message);
-      getGameCycle(message);
-      getNextTurnInfo(message);
-      setgameStart(true);
-      GameLogic();
+      setCountdown(5);
+      getGameAnswer();
+          // API 응답을 받은 후에 3초를 기다립니다.
+          setTimeout(() => {
+            getGameCycle(message);
+            getNextTurnInfo(message);
+            setgameStart(true);
+            GameLogic(); // 3초 후에 GameLogic 실행
+          }, 5000);
     } else {
       console.log(message);
     }
@@ -410,7 +426,6 @@ const ReadyToGame = () => {
       const exitOnClick = () => {
         navigate("/");
       };
-    
       const {
         time,
         startTimer,
@@ -425,22 +440,26 @@ const ReadyToGame = () => {
           handleTimerEnd();
         }
       }, [stopTimer, resetTimer, time]);
-
+    
       //타이머 30초 종료 후 로직
       const handleTimerEnd = () => {
         const nickname = localStorage.getItem("nickName"); // getItem으로 수정
         startTimer();
-        setIsMyTurn(nextTurnUserRef.current?.roomNickname === nickname); //다음턴이 나라면 재 랜더링시켜라
+        setHasSentCorrect(false); // 턴이 끝나면 다시 보낼 수 있도록 초기화
+        setHasSentAsk(false);    // 턴이 끝나면 다시 보낼 수 있도록 초기화
+        const nextUserNickname = nextTurnUserRef.current?.roomNickname;// 다음 턴 유저 정보 업데이트
+        setIsMyTurn(nextUserNickname === nickname); //다음턴이 나라면 isMyTurn
+        setCurrentUserAnswer(currentAnswerRef.current); //다음 턴 유저의 정답어를 화면에 띄운다.
         if (gameCycleRef.current !== currentCycle) { // 사이클 수가 바뀌었다면 게임턴수 재랜더링
           setCurrentCycle(gameCycleRef.current);
         }
-        if(nextTurnUserRef.current?.roomNickname === nickname)
+        if(nextUserNickname === nickname)
         {
-          Toast({ message: '나는 질문자입니다!', type: 'info' });
+          Toast({ message: '당신은 질문자입니다.', type: 'info' });
         }
         else
         {
-          Toast({ message: '나는 답변자입니다!', type: 'info' });
+          Toast({ message: '당신은 답변자입니다.', type: 'info' });
         }
       };
 
@@ -456,6 +475,11 @@ const ReadyToGame = () => {
 
       // 정답 입력 모드로 전환하는 함수
       const switchToCORRECT = () => {
+        if(currentCycle == 1)
+          {
+            Toast({ message: '정답 맞추기는 턴 2부터!', type: 'error' });
+            return;
+          }
         setIsCORRECTMode(true);
       };
     
@@ -466,13 +490,11 @@ const ReadyToGame = () => {
 
 
       //게임중 작동 함수를 넣는 함수
-      const GameLogic = () => {
-        Toast({ message: '게임을 시작합니다!', type: 'success' });
-        handleTimerEnd(); //START에서 받아온 nextTurn 유저부터하여 시작
-        const answerlist = getGameAnswer(); //정답어 받아오기
-        console.log(answerlist);
-        
+      const GameLogic = async () => { // async 추가
+        Toast({ message: "게임을 시작합니다!", type: "success" });
+          handleTimerEnd(); 
       };
+
       // 게임 사이클의 정보를 받아와서 UseRef에 저장합니다.
       const getGameCycle = (socketMessage: any) => {
         const cycle = socketMessage.cycle;
@@ -483,13 +505,17 @@ const ReadyToGame = () => {
       // 다음 턴의 정보를 받아와서 UseRef에 저장합니다.
       const getNextTurnInfo = (socketMessage: any) => {
         const nextTurnUser = socketMessage.gameUserDtos.find((user: any) => user.nextTurn === true);
-        nextTurnUserRef.current = nextTurnUser; // nextTurnUserRef에 다음 턴 유저 정보 저장
-      
         if (!nextTurnUser) {
           console.log("다음 턴 유저 정보를 찾을 수 없습니다.");
           return; // 반환 값 없이 함수 종료
         }
-      };
+        nextTurnUserRef.current = nextTurnUser; // nextTurnUserRef에 다음 턴 유저 정보 저장
+        const answerUserDtos = answerListRef.current.answerUserDtos; 
+        currentAnswerRef.current = answerUserDtos.find(
+          (user: any) => user.nickname === nextTurnUser.roomNickname
+        );
+        }
+        
 
       //사용자 턴에 따라 질문 <-> 답변 버튼을 보여준다.
       function GameActionButton({ isMyTurn, isAnswerMode }: { isMyTurn: boolean; isAnswerMode: boolean }) {
@@ -508,13 +534,11 @@ const ReadyToGame = () => {
         }
       }
       
-
-
       // 자기자신만 제외하고 정답어를 받아오는 api
       const getGameAnswer = async () => {
         const nickname = localStorage.getItem("nickName");
         try {
-          const response = await axios.get<UserAnswers>(
+          const response = await axios.get<UserAnswerDto>(
             "http://wwwag-backend.co.kr/answer/list",
             {
               params: {
@@ -524,12 +548,25 @@ const ReadyToGame = () => {
             }
           );
           console.log(response.data);
+          const answerList = response.data
+          answerListRef.current = answerList;
           return response.data;
         } catch (error) {
           console.error("정답 리스트 get api 오류 발생 : ", error);
           throw error;
         }
       };
+      useEffect(() => {
+        let countdownInterval: NodeJS.Timeout;
+        if (countdown !== null && countdown > 0) {
+          countdownInterval = setInterval(() => {
+            setCountdown(countdown - 1);
+          }, 1000);
+        } else if (countdown === 0) {
+          setCountdown(null); // 카운트다운 종료
+        }
+        return () => clearInterval(countdownInterval); // 컴포넌트 언마운트 시 setInterval 정리
+      }, [countdown]);
 
 
   return (
@@ -556,7 +593,17 @@ const ReadyToGame = () => {
           <div className="text-xl">{currentCycle}</div>
         </div>)}
         <div className="w-1/2 h-16 shadow-lg text-[#353535] flex justify-center items-center rounded-lg bg-[#FFCCFF] shadow-xl">
-          <div className="text-xl font-semibold">Ready To Game</div>
+          {countdown !== null ? ( // 카운트다운 중일 때
+            <div className="text-xl font-semibold">{countdown}</div>
+          ) : gameStart ? ( // 게임 시작 후
+            <div className="text-xl font-semibold">
+              현재 질문자 : <span className="text-[#5b33de]"> {currentUserAnswer?.nickname}</span>
+              <br />
+              정답어 : <span className="text-[#c93290]"> {currentUserAnswer?.answer}</span>
+            </div>
+          ) : ( // 게임 시작 전
+            <div className="text-xl font-semibold">게임 대기 중</div>
+          )}
         </div>
         <div className="ml-5 text-base">
           방 인원

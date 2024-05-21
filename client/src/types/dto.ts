@@ -82,7 +82,11 @@ export interface JoinUser {
 
 
 
-// 정답어 리스트 get response
-export interface UserAnswers {
-  answerUserDtos: string[];
+export interface UserAnswerDto {
+  answerUserDtos: AnswerUserDto[];
+}
+
+export interface AnswerUserDto {
+  nickname: string;
+  answer: string;
 }

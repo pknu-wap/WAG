@@ -40,7 +40,9 @@ const ChatRoom: React.FC<{ message: ChatMessage }> = ({ message }) => {
         {
         return (
           <div key={index} className="flex flex-col items-center">
-            <NotificationMessage message={{ ...msg, content: "게임이 시작됩니다!" }} />
+            <NotificationMessage message={{...msg, content: "--------------------------"}} />
+            <NotificationMessage message={{...msg, content: "5초 뒤에 게임이 시작됩니다."}} />
+            <NotificationMessage message={{...msg, content: "준비하세요!"}} />
           </div>
         );
       } 

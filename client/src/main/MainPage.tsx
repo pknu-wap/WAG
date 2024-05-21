@@ -80,6 +80,7 @@ function MainPage({ dark }: ComponentProps) {
   //코드입장시 버튼 클릭
   const buttonCheckHandler = async () => {
     const roomId = await getRoomIdCode();
+
     if (roomId !== "invalid enterCode") {
       localStorage.setItem("roomId", roomId);
       navigate(`/ReadyToGame/${roomId}`);
@@ -133,9 +134,10 @@ function MainPage({ dark }: ComponentProps) {
               <FontAwesomeIcon icon={faX} />
             </button>
           </div>
-
+          <div className="text-lg">입장코드 형식 : 랜덤 숫자 4자리</div>
+          <br />
           <input
-            className="w-3/4 h-12 mb-5 rounded shadow-md pl-5 text-[#000000]"
+            className="w-full h-12 mb-5 rounded shadow-md pl-5 text-[#000000]"
             type="error"
             required
             placeholder={"입장코드를 숫자로 입력해주세요"}
