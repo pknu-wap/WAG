@@ -26,10 +26,9 @@ const RadioButton = ({
       checked={checked}
     />
 
-    <label htmlFor={id} className="w-full py-4 text-xl font-medium text-gray-900">
-
-      {label}
-    </label>
+  <label htmlFor={id} className="w-full py-4 text-xl font-medium text-gray-900 text-center">
+    {label}
+  </label>
   </div>
 );
 

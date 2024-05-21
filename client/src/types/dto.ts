@@ -65,7 +65,7 @@ export interface ChatMessage {
   sender: string; // 사용자 이름
   content: string; // 메시지 텍스트
   roomId: number;
-  isPrivateRoom: boolean;
+  isPrivateRoom: boolean; 
 }
 
 export interface JoinUser {
@@ -93,11 +93,16 @@ export interface GameMessage {
   gameUserDtos: GameUserDto[];
 }
 
-interface AnswerUserDto {
+
+//김준서 : 이것도 정답어 get 게임중 화면에 띄워주는데 필요
+export interface UserAnswerDto {
+  answerUserDtos: AnswerUserDto[];
+}
+
+export interface AnswerUserDto {
   nickname: string;
   answer: string;
 }
-
 // 정답어 get
 export interface IGetAnswerList {
   answerUserDtos: AnswerUserDto[];

@@ -20,27 +20,6 @@ const ChatRoom: React.FC<{ message: ChatMessage }> = ({ message }) => {
     setChatMessages((prevMessages) => [...prevMessages, message]);
   }, [message]);
 
-  //CountdownProps의 타입을 지정하기 위한 인터페이스 선언
-  interface CountdownProps {
-    startFrom: number; // startFrom의 타입을 number로 명시
-  }
-    //게임 시작시 채팅창에 3초 카운트다운
-    const Countdown: React.FC<CountdownProps> = ({ startFrom }) => {
-      const [count, setCount] = useState(startFrom);
-    
-      useEffect(() => {
-        if (count <= 0) return;
-    
-        const timerId = setTimeout(() => {
-          setCount(count - 1);
-        }, 1000);
-    
-        return () => clearTimeout(timerId);
-      }, [count]);
-    
-      return <div>{count}</div>;
-    };
-
     // 메시지 렌더링 로직을 별도의 함수로 분리
     const renderMessage = (msg: ChatMessage, index: number) => {
       const userMessageTypes = ['CHAT', 'ASK', 'ANSWER', 'CORRECT']; // UserMessage로 처리될 메시지 타입들
@@ -53,19 +32,23 @@ const ChatRoom: React.FC<{ message: ChatMessage }> = ({ message }) => {
         let containerClass = isMyMessage ? "flex flex-col items-end" : "flex flex-col items-start";
         return (
           <div key={index} className={containerClass}>
-            <UserMessage message={msg} />
+            <UserMessage message={msg} /> 
           </div>
         );
       } 
       else if (msg.messageType === 'START') //UserMessage가 아니고
         {
-        // START 메시지 타입일 때 카운트다운 처리
         return (
           <div key={index} className="flex flex-col items-center">
-            <NotificationMessage message={msg} />
-            <Countdown startFrom={3} /> {/* 3초 카운트다운 */}
+            <NotificationMessage message={{...msg, content: "--------------------------"}} />
+            <NotificationMessage message={{...msg, content: "5초 뒤에 게임이 시작됩니다."}} />
+            <NotificationMessage message={{...msg, content: "준비하세요!"}} />
           </div>
         );
+      }
+      else if (msg.messageType === 'PENALTY') //UserMessage가 아니고
+        {
+            //일단 아무처리안함
       } 
       else // 그 외 공지 메시지 처리
       {
