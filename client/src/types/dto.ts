@@ -80,8 +80,33 @@ export interface JoinUser {
   userProfile: string;
 }
 
+export interface GameUserDto {
+  Captain: boolean;
+  roomNickname: string;
+  profileImage: string;
+  penalty: number;
+  MyTurn: boolean;
+  haveAnswerChange: boolean;
+  ranking: number;
+}
+// 게임 중 채팅 객체
+export interface GameMessage {
+  messageType: string;
+  content: string;
+  sender: string;
+  roomId: number;
+  gameEnd: boolean;
+  cycle: number;
+  gameUserDtos: GameUserDto[];
+}
+
+interface AnswerUserDto {
+  nickname: string;
+  answer: string;
+}
 
 
+//김준서 : 이것도 정답어 get 게임중 화면에 띄워주는데 필요
 export interface UserAnswerDto {
   answerUserDtos: AnswerUserDto[];
 }
@@ -89,4 +114,8 @@ export interface UserAnswerDto {
 export interface AnswerUserDto {
   nickname: string;
   answer: string;
+}
+// 정답어 get
+export interface IGetAnswerList {
+  answerUserDtos: AnswerUserDto[];
 }

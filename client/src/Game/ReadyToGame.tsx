@@ -14,6 +14,8 @@ import Button from "../components/button/Button";
 import axios from "axios";
 import {
   ChatMessage,
+  GameUserDto,
+  IGetAnswerList,
   INicknamePossible,
   IRoomResponseInfo,
   IUserDto,
@@ -25,12 +27,12 @@ import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import ChatRoom from "../components/chatRoom/ChatRoom";
 import { useLocation } from "react-router-dom";
-import JoinUser from "../components/ingameComponents/JoinUser";
 import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
 import RadioButton from "../components/radioButton/RadioButton";
 import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 import Toast from "../components/toast/Toast";
 import { history } from "../util/history";
+import JoinUser from "../components/ingameComponents/JoinUser";
 import Timer from "./timer/Timer";
 import useTimer, { TimerHookProps } from './timer/useTimer';
 
@@ -70,7 +72,8 @@ const ReadyToGame = () => {
   };
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
-  const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]) // 입장 유저
+  const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]); // 입장 유저
+  const [penaltyCount, setPenaltyCount] = useState<GameUserDto[]>([]);
 
 
   //게임 중
@@ -183,7 +186,6 @@ const ReadyToGame = () => {
           },
         }
       );
-      console.log(response.data);
       return response.data;
     } catch (error) {
       console.error("방 정보 get api 오류 발생 : ", error);
@@ -282,13 +284,14 @@ const ReadyToGame = () => {
     var message = JSON.parse(payload.body);
     receiveChatMessage(message);
     if (message.messageType === "JOIN") {
-      //receiveChatMessage(message);
-      addJoinUser();
+      //addJoinUser();
+      setJoinUsers(message.roomResponse.userDtos);
       setRoomInfo();
       console.log("JOIN으로 온 메세지", message);
       console.log(message.sender + " joined!");
     } else if (message.messageType === "LEAVE") {
-      addJoinUser();
+      //addJoinUser();
+      setJoinUsers(message.roomResponse.userDtos);
       setRoomInfo();
       console.log("LEAVE으로 온 메세지", message);
     } else if (message.messageType === "CHAT") {
@@ -317,26 +320,18 @@ const ReadyToGame = () => {
             setgameStart(true);
             GameLogic(); // 3초 후에 GameLogic 실행
           }, 5000);
+    } else if (message.messageType === "PENALTY") {
+      console.log("PENALTY로 온 메세지", message);
+      setPenaltyCount(message.gameUserDtos);
     } else {
       console.log(message);
     }
   }
 
-  // 유저 입장 시 상단에 프로필 추가
-  const addJoinUser = async () => {
-    const roomInfo = await getRoomInfo();
-    setJoinUsers(roomInfo.userDtos);
-    //console.log("addJoinUser 실행됨");
-  };
-
-  // 유저 퇴장 시 상단에 프로필 삭제
-  // const deleteLeavtUser = () => {
-  //   console.log(userCount)
-  //   if (message.messageType === "LEAVE") {
-  //     setJoinUsers(message.roomResponse.userDtos)
-  //   }
-  //   setUserCount(joinUsers.length)
-  // }
+  // // 유저 입장 시 상단에 프로필 추가
+  // const addJoinUser = (message: ChatMessageJoin) => {
+  //   setJoinUsers(message.roomResponse.userDtos);
+  // };
 
   const receiveChatMessage = (message: ChatMessage) => {
     setChatMessages([...chatMessages, message]); // 채팅 데이터 상태 업데이트
@@ -405,6 +400,7 @@ const ReadyToGame = () => {
       };
     });
   };
+  usePreventRefresh();
 
   const { pathname } = useLocation();
   useEffect(() => {
@@ -420,8 +416,22 @@ const ReadyToGame = () => {
     }
   }, [enterCode]);
 
-  usePreventRefresh();
 
+  function socketPenaltyOnClick(recipient: string) {
+    const roomId = localStorage.getItem("roomId");
+    const nickName = localStorage.getItem("nickName");
+        stompClient.send(
+      "/app/chat.sendGameMessage",
+      {},
+      JSON.stringify({
+        sender: nickName,
+        content: recipient,
+        messageType: "PENALTY",
+        roomId: roomId,
+      })
+    );
+    console.log("content: ", recipient, ", sender: ", nickName);
+  }
   /*====================== 게임 중 코드 ====================== */
       const exitOnClick = () => {
         navigate("/");
@@ -538,6 +548,7 @@ const ReadyToGame = () => {
       const getGameAnswer = async () => {
         const nickname = localStorage.getItem("nickName");
         try {
+
           const response = await axios.get<UserAnswerDto>(
             "http://wwwag-backend.co.kr/answer/list",
             {
@@ -571,11 +582,40 @@ const ReadyToGame = () => {
 
   return (
     <FullLayout>
-        <div className="flex flex-row justify-around items-center mt-10 mx-7">
-        {joinUsers.map((name, index) => (
-          <JoinUser key={index} Nickname={name.roomNickname} />
-        ))}
+      <div className="flex flex-row justify-around items-center mt-10 mx-7">
+        {joinUsers.map((info, index) => {
+          return (
+            <div key={index} className="relative">
+              <JoinUser
+                Nickname={info.roomNickname}
+                gameStart={gameStart}
+                className={""}
+                penalty={penaltyCount}
+                children={
+                  gameStart ? (
+                    <div
+                      className={`p-1 shadow-lg rounded-lg absolute top-1/2 left-0`}
+                    >
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          socketPenaltyOnClick(info.roomNickname);
+                        }}
+                      >
+                        경고 주기
+                      </Button>
+                    </div>
+                  ) : (
+                    <div></div>
+                  )
+                }
+              />
+            </div>
+          );
+        })}
       </div>
+
+
       {gameStart&&(
       <div className="flex justify-center items-center">
         <Timer time={time} />
