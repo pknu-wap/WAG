@@ -5,6 +5,7 @@ import com.example.server.domain.RoomUser;
 import com.example.server.domain.User;
 import com.example.server.dto.UserDto;
 import com.example.server.exception.MaxUserCountExceededException;
+import com.example.server.exception.NoSuchRoomException;
 import com.example.server.payload.request.RoomCreateRequest;
 import com.example.server.payload.response.RoomResponse;
 import com.example.server.repository.RoomRepository;
@@ -38,36 +39,29 @@ public class RoomService {
                 break;
             }
         }
+        room = room_init(roomCreateRequest, room);  // room 생성
 
+        return RoomResponse.create(room);
+    }
+
+    private Room room_init(RoomCreateRequest roomCreateRequest, Room room) {
         room.setPrivateRoom(roomCreateRequest.isPrivateRoom());
         room.setGameStatus(false);
         room.setUserCount(0);
         room = roomRepository.save(room);  // 방 생성
-
-//        RoomUser roomUser = new RoomUser();
-//        roomUser.setRoom(room);
-//        roomUser.setCaptain(true);
-//        roomUser.setRoomNickname(roomCreateRequest.getUserNickName());
-//        roomUser = roomUserRepository.save(roomUser);   // 방장 추가
-//
-//        List<UserDto> userDtos = new ArrayList<>();
-//        userDtos.add(new UserDto(roomUser.isCaptain(), roomUser.getRoomNickname(), roomUser.getProfileImage()));
-
-//        return RoomResponse.create(room, userDtos);
-        return RoomResponse.create(room);
+        return room;
     }
 
     public RoomResponse getRoomInfo(Long roomId){ // 닉네임으로 게임방 정보 주기
-        Optional<Room> room = roomRepository.findById(roomId);
+
+        Room room = roomRepository.findById(roomId).orElseThrow(NoSuchRoomException::new);
         List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(roomId));
 
-        return room.map(value -> RoomResponse.create(value, userDtos)).orElse(null);
-
+        return RoomResponse.create(room, userDtos);
     }
 
-
     public RoomResponse enterRoomByRoomId(String nickName, Long roomId, UserPrincipal userPrincipal){ // 소켓 + roomId로 방 입장.
-        Room room = roomRepository.findById(roomId).get();
+        Room room = roomRepository.findById(roomId).orElseThrow(NoSuchRoomException::new);
         boolean isCaptain = false;
         if (room.getUserCount() >= 6) {
             throw new MaxUserCountExceededException();  // 최대 인원 예외 처리.
@@ -80,22 +74,27 @@ public class RoomService {
     }
 
     public void addUser(Room room, String nickName,Boolean isCaptain, UserPrincipal userPrincipal){  // 방에 유저 추가 로직
-        RoomUser roomUser = new RoomUser();
-        roomUser.setCaptain(isCaptain);
-        roomUser.setRoom(room);
-        roomUser.setRoomNickname(nickName);
+        RoomUser roomUser = RoomUserInit(room, nickName, isCaptain);
 
         if (userPrincipal != null && userPrincipal.getId() != null) {
             Optional<User> userOptional = userRepository.findById((userPrincipal.getId()));
             userOptional.ifPresent(roomUser::setUser);
         }
-        roomUserRepository.save(roomUser);
-
         room.setUserCount(room.getUserCount()+1);
+
+        roomUserRepository.save(roomUser);
         roomRepository.save(room);
     }
 
-    public int makeEnterCode(){ // 4자리 랜덤 코드 생성
+    private static RoomUser RoomUserInit(Room room, String nickName, Boolean isCaptain) {
+        RoomUser roomUser = new RoomUser();
+        roomUser.setCaptain(isCaptain);
+        roomUser.setRoom(room);
+        roomUser.setRoomNickname(nickName);
+        return roomUser;
+    }
+
+    private int makeEnterCode(){ // 4자리 랜덤 코드 생성
         return (int)(Math.random() * 8999) + 1000;
     }
 
