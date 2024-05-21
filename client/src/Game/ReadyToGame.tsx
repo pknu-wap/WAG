@@ -15,7 +15,6 @@ import axios from "axios";
 import {
   ChatMessage,
   GameUserDto,
-  IGetAnswerList,
   INicknamePossible,
   IRoomResponseInfo,
   IUserDto,
@@ -485,7 +484,7 @@ const ReadyToGame = () => {
 
       // 정답 입력 모드로 전환하는 함수
       const switchToCORRECT = () => {
-        if(currentCycle == 1)
+        if(currentCycle === 1)
           {
             Toast({ message: '정답 맞추기는 2라운드부터!', type: 'error' });
             return;
