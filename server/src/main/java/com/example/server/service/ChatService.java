@@ -90,16 +90,14 @@ public class ChatService {
         GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(sendRoomUser.getId()).get();
 
 
-        if(chatMessage.getMessageType()==ChatMessage.MessageType.ASK){  // 질문일 경우 다음 턴으로 넘어감.
+        if(chatMessage.getMessageType()==ChatMessage.MessageType.ASK && gameOrder.isNextTurn()){  // 질문일 경우 다음 턴으로 넘어감.
             int currentOrder = gameOrder.getUserOrder();
-            int nextOrder = currentOrder + 1;
+            int nextOrder = getNextTurn(currentOrder, room.getUserCount(), room.getId());
             int nowOrder = currentOrder - 1;
             if(nowOrder < 1){
                 nowOrder = room.getUserCount();
             }
-            if(nextOrder > room.getUserCount()){
-                nextOrder = 1;
-            }
+
             GameOrder nowGameOrder = gameOrderRepository.findByUserOrder(nowOrder, room.getId()).get();
             nowGameOrder.setNowTurn(false);
             nowGameOrder.setNextTurn(false);
@@ -123,6 +121,21 @@ public class ChatService {
             chatGameMessage = makeChatGameMessage(chatMessage, room);
         }
         return chatGameMessage;
+    }
+
+    public int getNextTurn(int currentOrder, int endOrder, long roomId){
+        int nextOrder = currentOrder + 1;
+        while(true){
+            if(nextOrder > endOrder){
+                nextOrder = 1;
+            }
+            GameOrder nextGameOrder = gameOrderRepository.findByUserOrder(nextOrder, roomId).get();
+
+            if(nextGameOrder.getRanking() == 0){
+                return nextOrder;
+            }
+            nextOrder++;
+        }
     }
 
     public ChatGameMessage correctAnswer(ChatMessage chatMessage) {   // 정답 맞추기
