@@ -477,7 +477,7 @@ const ReadyToGame = () => {
       const switchToCORRECT = () => {
         if(currentCycle == 1)
           {
-            Toast({ message: '정답 맞추기는 턴 2부터!', type: 'error' });
+            Toast({ message: '정답 맞추기는 2라운드부터!', type: 'error' });
             return;
           }
         setIsCORRECTMode(true);
@@ -589,7 +589,7 @@ const ReadyToGame = () => {
         </div>)}
         {gameStart &&(
         <div className="mr-5">
-          <div className="text-base">현재 턴</div>
+          <div className="text-base">현재 라운드</div>
           <div className="text-xl">{currentCycle}</div>
         </div>)}
         <div className="w-1/2 h-16 shadow-lg text-[#353535] flex justify-center items-center rounded-lg bg-[#FFCCFF] shadow-xl">
