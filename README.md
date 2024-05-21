@@ -1,18 +1,21 @@
-<img src="https://capsule-render.vercel.app/api?type=waving&color=B931FC&height=150&section=header&text=&fontSize=0" />
+<!-- <img src="https://capsule-render.vercel.app/api?type=waving&color=B931FC&height=150&section=header&text=&fontSize=0" /> -->
+
 
 # WAG - Web Appends Game
-
 ![WAG_LOGO_Dark](https://github.com/pknu-wap/WAG/assets/112786665/e0d26e4f-16e4-4a81-adaf-adb5f77e86c4)
+<br>
+<br>
+<br>
 
 ## 🌱 Introduction  
 
 
-간편하고 빠르게 즐길 수 있는 실시간 채팅기반 웹 미니게임을 제작하는 WAG 입니다!
+간편하고 빠르게 즐길 수 있는 **실시간 채팅기반 웹 미니게임**을 제작하는 WAG 입니다!
 <br>
 <br>
 <br>
 
----
+
 ## 📚 Stack
 ### Front End
 <img src="https://img.shields.io/badge/react-61DAFB?style=for-the-badge&logo=react&logoColor=white"><img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
@@ -25,18 +28,20 @@
 
 <br>
 
----
+
 
 ## 💪 Contributor
+
+<div align="center">
 
 |  <img src="https://avatars.githubusercontent.com/u/112786665?v=4" alt="3_pano" width="120" height="120">  | <img src="https://avatars.githubusercontent.com/u/80705329?v=4" alt="3_jumo" width="120" height="120"> | <img src="https://avatars.githubusercontent.com/u/111286262?v=4" alt="3_simba" width="120" height="120">  | <img src="https://avatars.githubusercontent.com/u/35947667?v=4" alt="3_pano" width="120" height="120"> | <img src="https://avatars.githubusercontent.com/u/130421104?v=4" alt="3_miki" width="120" height="120"> |
 | :------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: |
 |  [김준서](https://github.com/oesnuj)   |    [하준서](https://github.com/dev-junseo)     |    [김종경](https://github.com/JONG-KYEONG)   |     [장홍준](https://github.com/wkdghdwns199)   |      [함규빈](https://github.com/PororoAndFriends)      |
 | Front-End |  Front-End |  Back-End  |  Back-End |  Back-End
 
+</div>
 <br>
 
----
 
 ## 🚥 Git Flow
 기본적으로 Git Flow 전략을 이용합니다. 작업 시작 시 선행되어야 할 작업은 다음과 같습니다.
