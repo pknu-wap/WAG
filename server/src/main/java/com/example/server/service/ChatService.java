@@ -5,7 +5,7 @@ import com.example.server.dto.ChatGameMessage;
 import com.example.server.dto.ChatMessage;
 import com.example.server.dto.ChatRoomModeMessage;
 import com.example.server.dto.GameUserDto;
-import com.example.server.exception.MaxPenaltyExceededException;
+import com.example.server.exception.*;
 import com.example.server.payload.response.AnswerListResponse;
 import com.example.server.payload.response.ResultResponse;
 import com.example.server.repository.*;
@@ -45,17 +45,12 @@ public class ChatService {
 
     public ChatGameMessage startGame(ChatMessage chatMessage) {
         makeGameOrder(chatMessage.getRoomId());
-        Room room = roomRepository.findByRoomId(chatMessage.getRoomId()).get();
-        room.setGameStatus(true);
-        room.setCycle(1);
-        room.setCurrentOrder(1);
-        room.setCorrectMemberCnt(0);
-        roomRepository.save(room);
+        Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
+                .orElseThrow(NoSuchRoomException::new);
+        roomInit(room);
+        GameRecord gameRecord = gameRecordInit(room);
 
-        GameRecord gameRecord = new GameRecord();
-        List<User> userRanking = new ArrayList<>();
-        gameRecord.setUserRanking(userRanking);
-        gameRecord.setRoomId(room.getId());
+        roomRepository.save(room);
         gameRecordRepository.save(gameRecord);
 
         ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
@@ -64,8 +59,25 @@ public class ChatService {
         return chatGameMessage;
     }
 
+    private static GameRecord gameRecordInit(Room room) {
+        GameRecord gameRecord = new GameRecord();
+        List<User> userRanking = new ArrayList<>();
+        gameRecord.setUserRanking(userRanking);
+        gameRecord.setRoomId(room.getId());
+        return gameRecord;
+    }
+
+    private static void roomInit(Room room) {
+        room.setGameStatus(true);
+        room.setCycle(1);
+        room.setCurrentOrder(1);
+        room.setCorrectMemberCnt(0);
+    }
+
     public ChatGameMessage penaltyUser(ChatMessage chatMessage){
-        GameOrder penaltyUser = gameOrderRepository.findByNickName(chatMessage.getContent(), chatMessage.getRoomId()).get();
+        GameOrder penaltyUser = gameOrderRepository.findByNickName(chatMessage.getContent(), chatMessage.getRoomId())
+                .orElseThrow(NoSuchGameOrderException::new);
+
         if(penaltyUser.getPenalty() >= 3){
             throw new MaxPenaltyExceededException();
         }
@@ -74,20 +86,23 @@ public class ChatService {
         }
         gameOrderRepository.save(penaltyUser);
 
-        Room room = roomRepository.findByRoomId(chatMessage.getRoomId()).get();
+        Room room = roomRepository.findByRoomId(chatMessage.getRoomId()).
+                orElseThrow(NoSuchRoomException::new);
         ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
         chatGameMessage.setMessageType(ChatMessage.MessageType.PENALTY);
 
         return chatGameMessage;
-
     }
 
 
     public ChatGameMessage playGame(ChatMessage chatMessage) {
         ChatGameMessage chatGameMessage;
-        Room room = roomRepository.findById(chatMessage.getRoomId()).get();
-        RoomUser sendRoomUser = roomUserRepository.hasNickName(chatMessage.getSender(), room.getId()).get();
-        GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(sendRoomUser.getId()).get();
+        Room room = roomRepository.findById(chatMessage.getRoomId())
+                .orElseThrow(NoSuchRoomException::new);
+        RoomUser sendRoomUser = roomUserRepository.hasNickName(chatMessage.getSender(), room.getId())
+                .orElseThrow(NoSuchRoomUserException::new);
+        GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(sendRoomUser.getId())
+                .orElseThrow(NoSuchGameOrderException::new);
 
 
         if(chatMessage.getMessageType()==ChatMessage.MessageType.ASK && gameOrder.isNextTurn()){  // 질문일 경우 다음 턴으로 넘어감.
@@ -98,12 +113,14 @@ public class ChatService {
                 nowOrder = room.getUserCount();
             }
 
-            GameOrder nowGameOrder = gameOrderRepository.findByUserOrder(nowOrder, room.getId()).get();
+            GameOrder nowGameOrder = gameOrderRepository.findByUserOrder(nowOrder, room.getId())
+                    .orElseThrow(NoSuchGameOrderException::new);
             nowGameOrder.setNowTurn(false);
             nowGameOrder.setNextTurn(false);
             gameOrder.setNowTurn(true);
             gameOrder.setNextTurn(false);
-            GameOrder nextGameOrder = gameOrderRepository.findByUserOrder(nextOrder, room.getId()).get();
+            GameOrder nextGameOrder = gameOrderRepository.findByUserOrder(nextOrder, room.getId())
+                    .orElseThrow(NoSuchGameOrderException::new);
             nextGameOrder.setNowTurn(false);
             nextGameOrder.setNextTurn(true);
             room.setCurrentOrder(nextOrder);
@@ -129,7 +146,8 @@ public class ChatService {
             if(nextOrder > endOrder){
                 nextOrder = 1;
             }
-            GameOrder nextGameOrder = gameOrderRepository.findByUserOrder(nextOrder, roomId).get();
+            GameOrder nextGameOrder = gameOrderRepository.findByUserOrder(nextOrder, roomId)
+                    .orElseThrow(NoSuchGameOrderException::new);
 
             if(nextGameOrder.getRanking() == 0){
                 return nextOrder;
@@ -140,10 +158,14 @@ public class ChatService {
 
     public ChatGameMessage correctAnswer(ChatMessage chatMessage) {   // 정답 맞추기
         ChatGameMessage chatGameMessage = new ChatGameMessage();
-        RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatGameMessage.getRoomId()).get();
-        GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(roomUser.getId()).get();
-        Room room = roomRepository.findById(chatMessage.getRoomId()).get();
-        GameRecord gameRecord = gameRecordRepository.findByRoomId(room.getId()).get();
+        RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatGameMessage.getRoomId())
+                .orElseThrow(NoSuchRoomUserException::new);
+        GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(roomUser.getId())
+                .orElseThrow(NoSuchGameOrderException::new);
+        Room room = roomRepository.findById(chatMessage.getRoomId())
+                .orElseThrow(NoSuchRoomException::new);
+        GameRecord gameRecord = gameRecordRepository.findByRoomId(room.getId())
+                .orElseThrow(NoSuchGameRecordException::new);
 
         if(gameOrder.getAnswerName().equals(chatMessage.getContent())){ // 정답
             room.setCorrectMemberCnt(room.getCorrectMemberCnt()+1);
@@ -190,20 +212,16 @@ public class ChatService {
     public void makeGameOrder(Long roomId){  // 게임 순서 & 정답어 설정
         List<RoomUser> roomUsers = roomUserRepository.findRandomByRoomId(roomId);
         List<AnswerList> answerLists = answerListRepository.findAnswerListBy();
-        Optional<Room> room = roomRepository.findById(roomId);
+        Room room = roomRepository.findById(roomId).orElseThrow(NoSuchRoomException::new);
         int order = 1;
         for(RoomUser roomUser : roomUsers){
             GameOrder gameOrder = new GameOrder();
-            gameOrder.setRoom(room.get());
+            gameOrder.setRoom(room);
             gameOrder.setRoomUser(roomUser);
-            if(order == 1){
-                gameOrder.setNowTurn(false);
-                gameOrder.setNextTurn(true);
-            }
-            else{
-                gameOrder.setNowTurn(false);
-                gameOrder.setNextTurn(false);
-            }
+
+            gameOrder.setNowTurn(false);
+            gameOrder.setNextTurn(order == 1);
+
             gameOrder.setRanking(0);
             gameOrder.setPenalty(0);
             gameOrder.setHaveAnswerChance(true);
@@ -238,7 +256,8 @@ public class ChatService {
     }
 
     public ChatRoomModeMessage changeRoomMode(ChatMessage chatMessage){
-        Room room = roomRepository.findById(chatMessage.getRoomId()).get();
+        Room room = roomRepository.findById(chatMessage.getRoomId())
+                .orElseThrow(NoSuchRoomException::new);
 
         room.setPrivateRoom(!room.isPrivateRoom());
 
