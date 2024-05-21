@@ -19,17 +19,17 @@ const root = ReactDOM.createRoot(rootElement);
 ReactModal.setAppElement(rootElement); //rootElement를 ReactModal의 app 엘리먼트로 설정
 
 root.render(
-  <QueryClientProvider client={queryClient}>
-    <Provider store={store}>
-      <RecoilRoot>
-        <BrowserRouter>
-          <Header />
-          <App />
-          <ToastContainer />
-        </BrowserRouter>
-      </RecoilRoot>
-    </Provider>
-  </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <Provider store={store}>
+        <RecoilRoot>
+          <BrowserRouter>
+            <Header />
+            <App />
+            <ToastContainer />
+          </BrowserRouter>
+        </RecoilRoot>
+      </Provider>
+    </QueryClientProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function

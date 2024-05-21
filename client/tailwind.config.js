@@ -1,7 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-import withMT from "@material-tailwind/html/utils/withMT";
-
-module.exports = withMT({
+module.exports = { 
   content: ["./src/**/*.{html,js,ts,tsx}"],
   theme: {
     extend: {},
@@ -24,4 +22,4 @@ module.exports = withMT({
   },
   plugins: [require("@tailwindcss/forms")],
   darkMode: "class",
-});
+}; 
