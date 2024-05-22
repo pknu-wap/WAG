@@ -25,9 +25,10 @@ const ChatRoom: React.FC<{ message: ChatMessage }> = ({ message }) => {
       const userMessageTypes = ['CHAT', 'ASK', 'ANSWER', 'CORRECT']; // UserMessage로 처리될 메시지 타입들
       const isUserMessage = userMessageTypes.includes(msg.messageType); //UserMessage 인지 아닌지
       const isMyMessage = msg.sender === myName;   //내가 보낸 메세지인지 아닌지
-    
       if (isUserMessage) //CHAT, ASK, ANSWER, CORRECT 중에 하나라면
         {
+          if(msg.content === "")
+            return;
         // 사용자 메시지 처리
         let containerClass = isMyMessage ? "flex flex-col items-end" : "flex flex-col items-start";
         return (
@@ -47,9 +48,9 @@ const ChatRoom: React.FC<{ message: ChatMessage }> = ({ message }) => {
         );
       }
       else if (msg.messageType === 'PENALTY') //UserMessage가 아니고
-        {
+      {
             //일단 아무처리안함
-      } 
+      }
       else // 그 외 공지 메시지 처리
       {
         return (

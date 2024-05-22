@@ -232,17 +232,11 @@ const ReadyToGame = () => {
   function sendMessageToSocket(socketURL: string, messageType: string) {
     const roomId = localStorage.getItem("roomId");
     const nickName = localStorage.getItem("nickName");
-    let contentToSend = myChatMessages; // 기본적으로 myChatMessages 값을 사용합니다.
-
+    let contentToSend = myChatMessages; // 기본적으로 myChatMessages 값을 사용합니다. 
     // messageType이 'JOIN', 'START', 'CHANGE' 중 하나라면, contentToSend를 빈 문자열로 보냄
     if (["JOIN", "START", "CHANGE"].includes(messageType)) {
-      contentToSend = "";
-    } else {
-      if (contentToSend === "") {
-        Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
-        return;
-      }
-    }
+      contentToSend = "1";
+    } 
     stompClient.send(
       socketURL,
       {},
@@ -309,16 +303,17 @@ const ReadyToGame = () => {
       getGameCycle(message);
     } else if (message.messageType === "CORRECT") {
       console.log("CORRECT로 온 메세지", message);
+      handleCorrectAnswer(message);
     } else if (message.messageType === "START") {
       console.log("START로 온 메세지", message);
       setCountdown(5);
       getGameAnswer();
-          // API 응답을 받은 후에 3초를 기다립니다.
+          // API 응답을 받은 후에 5초를 기다립니다.
           setTimeout(() => {
             getGameCycle(message);
             getNextTurnInfo(message);
             setgameStart(true);
-            GameLogic(); // 3초 후에 GameLogic 실행
+            GameLogic(); // 5초 후에 GameLogic 실행
           }, 5000);
     } else if (message.messageType === "PENALTY") {
       console.log("PENALTY로 온 메세지", message);
@@ -447,22 +442,50 @@ const ReadyToGame = () => {
         if (time < 0) {
           stopTimer();
           resetTimer();
-          handleTimerEnd();
+          if(!hasSentAsk) //질문을 30초 안에 하지 않는다면 강제로 턴을 넘긴다
+          {
+            if(isMyTurn){
+              const roomId = localStorage.getItem("roomId");
+              const nickName = localStorage.getItem("nickName");
+              stompClient.send(
+                "/app/chat.sendGameMessage",
+                {},
+                JSON.stringify({
+                  sender: nickName,
+                  content: "",
+                  messageType: "ASK",
+                  roomId: roomId,
+                }));
+                stompClient.send(
+                  "/app/chat.sendGameMessage",
+                  {},
+                  JSON.stringify({
+                    sender: nickName,
+                    content: "",
+                    messageType: "ANSWER",
+                    roomId: roomId,
+                  }))
+            }    
+          }
+          setTimeout(() => {  //잠깐 대기후 다음 진행 : 위 강제 ASK를 받고 나서 초기화 진행
+            handleTimerEnd();
+            setChatMessages([]);
+          }, 5000);
         }
       }, [stopTimer, resetTimer, time]);
     
       //타이머 30초 종료 후 로직
       const handleTimerEnd = () => {
-        const nickname = localStorage.getItem("nickName"); // getItem으로 수정
+        const nickname = localStorage.getItem("nickName");
         startTimer();
         setHasSentCorrect(false); // 턴이 끝나면 다시 보낼 수 있도록 초기화
         setHasSentAsk(false);    // 턴이 끝나면 다시 보낼 수 있도록 초기화
         const nextUserNickname = nextTurnUserRef.current?.roomNickname;// 다음 턴 유저 정보 업데이트
         setIsMyTurn(nextUserNickname === nickname); //다음턴이 나라면 isMyTurn
         setCurrentUserAnswer(currentAnswerRef.current); //다음 턴 유저의 정답어를 화면에 띄운다.
-        if (gameCycleRef.current !== currentCycle) { // 사이클 수가 바뀌었다면 게임턴수 재랜더링
+        //if (gameCycleRef.current !== currentCycle) { // 사이클 수가 바뀌었다면 게임턴수 재랜더링
           setCurrentCycle(gameCycleRef.current);
-        }
+        //}
         if(nextUserNickname === nickname)
         {
           Toast({ message: '당신은 질문자입니다.', type: 'info' });
@@ -471,8 +494,29 @@ const ReadyToGame = () => {
         {
           Toast({ message: '당신은 답변자입니다.', type: 'info' });
         }
+        setChatMessages([]);
       };
 
+
+    //정답자 처리 함수
+    let currentAnswererIndex = 0; // 현재 정답자 인덱스
+    const maxAnswerers = 3; // 최대 정답자 수
+    function handleCorrectAnswer(message : any)
+    {
+      const sender = message.sender;
+      const gameUserDtos = message.gameUserDtos;
+      const senderIndex = gameUserDtos.findIndex((user: any)=> user.roomNickname === sender);
+      if (senderIndex !== -1) {
+        gameUserDtos[senderIndex].ranking = currentAnswererIndex + 1; // 1부터 시작
+      }
+    
+      currentAnswererIndex++;
+    
+      if (currentAnswererIndex >= maxAnswerers) {
+        Toast({ message: '게임 끝', type: 'success' });
+        navigate("/ranking");
+      }
+    } 
     //게임시작 버튼 클릭 이벤트
     const clickGameStart = () => {
       if(joinUsers.length > 1)
@@ -485,7 +529,7 @@ const ReadyToGame = () => {
 
       // 정답 입력 모드로 전환하는 함수
       const switchToCORRECT = () => {
-        if(currentCycle == 1)
+        if(currentCycle === 1)
           {
             Toast({ message: '정답 맞추기는 2라운드부터!', type: 'error' });
             return;
@@ -502,7 +546,7 @@ const ReadyToGame = () => {
       //게임중 작동 함수를 넣는 함수
       const GameLogic = async () => { // async 추가
         Toast({ message: "게임을 시작합니다!", type: "success" });
-          handleTimerEnd(); 
+        handleTimerEnd();
       };
 
       // 게임 사이클의 정보를 받아와서 UseRef에 저장합니다.
@@ -695,10 +739,16 @@ const ReadyToGame = () => {
           ></input>
 
           <IconButton
-            className="shadow-none hover:shadow-none dark:shadow-none top-1 right-0 absolute"
-            size="sm"
-            onClick={sendMessage}
-          >
+              className="shadow-none hover:shadow-none dark:shadow-none top-1 right-0 absolute"
+              size="sm"
+              onClick={() => {  // onClick 핸들러 수정
+                if (myChatMessages.trim() !== "") { 
+                  sendMessage();
+                } else {
+                  Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
+                }
+              }}
+            >
             <FontAwesomeIcon className="text-[#000000]" icon={faPaperPlane} />
           </IconButton>
         </div>
