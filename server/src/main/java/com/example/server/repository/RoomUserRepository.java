@@ -18,6 +18,9 @@ public interface RoomUserRepository extends JpaRepository<RoomUser, Long> {
     Room findRoomIdByNickName(@Param("nickName") String nickName);
     @Query("SELECT ru FROM RoomUser ru JOIN ru.room r WHERE r.id = :roomid ")
     List<RoomUser> findByRoomId(@Param("roomid") Long roomid);
+    @Query("SELECT ru FROM RoomUser ru JOIN ru.room r WHERE r.id = :roomid ORDER BY CASE WHEN ru.gameOrder.ranking = 0 THEN 1 ELSE 0 END ASC, ru.gameOrder.ranking ASC")
+    List<RoomUser> findByRoomIdOrderByRanking(@Param("roomid") Long roomid);
+
     @Query("SELECT ru FROM RoomUser ru JOIN ru.room r WHERE r.id = :roomid order by RAND()")
     List<RoomUser> findRandomByRoomId(@Param("roomid") Long roomid);
     @Query("SELECT ru FROM RoomUser ru WHERE ru.roomNickname = :nickName and ru.room.id = :roomId")

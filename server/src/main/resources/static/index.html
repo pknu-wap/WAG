@@ -4,46 +4,83 @@
   <title>환영합니다</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
+      font-family: 'Permanent Marker', cursive;
+      background: linear-gradient(135deg, #ff69b4, #8a2be2);
+      color: #fff;
       margin: 0;
       padding: 0;
+      overflow: hidden;
     }
     .container {
       width: 80%;
       margin: 50px auto;
-      background-color: #fff;
+      background: rgba(0, 0, 0, 0.8);
       padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+      position: relative;
+      animation: slidein 1s ease-out;
+    }
+    @keyframes slidein {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
     h1 {
       text-align: center;
+      font-size: 3em;
+      text-shadow: 2px 2px #000;
     }
     .link-list {
       text-align: center;
+      margin-top: 30px;
     }
     .link-list a {
       display: inline-block;
       margin: 10px;
-      padding: 10px 20px;
+      padding: 15px 30px;
       text-decoration: none;
       color: #fff;
-      background-color: #007bff;
-      border-radius: 5px;
-      transition: background-color 0.3s;
+      background: linear-gradient(45deg, #ff4500, #ff8c00);
+      border-radius: 10px;
+      transition: background 0.5s, transform 0.3s;
+      box-shadow: 0 0 10px #ff4500;
     }
     .link-list a:hover {
-      background-color: #0056b3;
+      background: linear-gradient(45deg, #ff8c00, #ff4500);
+      transform: scale(1.1);
+      box-shadow: 0 0 20px #ff4500;
+    }
+    .link-list a:active {
+      transform: scale(0.9);
+    }
+    img {
+      display: block;
+      margin: 0 auto;
+      width: 300px;
+      height: auto;
+      border: 5px solid #fff;
+      border-radius: 15px;
+      box-shadow: 0 0 15px #fff;
+      transition: transform 0.5s;
+    }
+    img:hover {
+      transform: rotate(360deg);
     }
   </style>
 </head>
 <body>
 <div class="container">
-  <img src="./WAG01.png" alt="환영합니다 이미지" style="display: block; margin: 0 auto; width: 300px; height: auto;">
+  <img src="./WAG02.jpeg" alt="환영합니다 이미지">
+  <h1>404</h1>
   <div class="link-list">
-    <a href="/hello">Hello 페이지로 이동</a>
     <a href="/oauth2/authorization/kakao">카카오로 로그인</a>
     <a href="/oauth2/authorization/google">구글로 로그인</a>
   </div>
