@@ -150,7 +150,8 @@ public class ChatService {
 
     public void changeNowTurn(int currentOrder, int endOrder, long roomId){
         int nowOrder = currentOrder - 1;
-        while(true){
+        int startOrder = currentOrder;
+        while(startOrder != currentOrder){
             if(nowOrder < 1){
                 nowOrder = endOrder;
             }
