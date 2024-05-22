@@ -73,7 +73,7 @@ export class Realistic extends Component {
     return (
       <>
         <IconButton className="text-[red]" size="sm" onClick={this.handlerFire}>
-          <FontAwesomeIcon icon={faFire} />
+          <FontAwesomeIcon className="text-[red]" icon={faFire} />
         </IconButton>
         <ReactCanvasConfetti
           refConfetti={this.getInstance}

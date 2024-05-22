@@ -72,8 +72,7 @@ const ReadyToGame = () => {
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
   const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]); // 입장 유저
-  const [penaltyCount, setPenaltyCount] = useState<GameUserDto[]>([]);
-
+  const [gameUserDto, setGameUserDto] = useState<GameUserDto[]>([]);
 
   //게임 중
   const [countdown, setCountdown] = useState<number | null>(null); //게임 시작전 3초대기
@@ -308,6 +307,7 @@ const ReadyToGame = () => {
       getGameCycle(message);
     } else if (message.messageType === "CORRECT") {
       console.log("CORRECT로 온 메세지", message);
+
     } else if (message.messageType === "START") {
       console.log("START로 온 메세지", message);
       setCountdown(5);
@@ -321,7 +321,7 @@ const ReadyToGame = () => {
           }, 5000);
     } else if (message.messageType === "PENALTY") {
       console.log("PENALTY로 온 메세지", message);
-      setPenaltyCount(message.gameUserDtos);
+      setGameUserDto(message.gameUserDtos);
     } else {
       console.log(message);
     }
@@ -586,7 +586,7 @@ const ReadyToGame = () => {
                 Nickname={info.roomNickname}
                 gameStart={gameStart}
                 className={""}
-                penalty={penaltyCount}
+                gameUserDto={gameUserDto}
                 children={
                   gameStart ? (
                     <div className={`p-1 shadow-lg rounded-lg absolute top-1/2 left-0`}>

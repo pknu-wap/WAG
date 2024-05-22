@@ -26,7 +26,7 @@ function Ranking() {
                 ranking: 1
             },
             {
-                roomNickname: "ㅎㅇ",
+                roomNickname: "gd",
                 profileImage: "d",
                 answerName: "string",
                 ranking: 2
@@ -50,7 +50,7 @@ function Ranking() {
                 ranking: 5
             },
             {
-                roomNickname: "gd",
+                roomNickname: "ㅎㅇ",
                 profileImage: "d",
                 answerName: "string",
                 ranking: 6
@@ -60,17 +60,19 @@ function Ranking() {
 
     const haveParty = () => {
         gameResultDummyData.resultUserDtos.forEach((user) => {
-            if (user.roomNickname === myName && user.ranking <= 3) {
-                setShowConfetti(true);
+            if (user.roomNickname === myName) {
+                setMyRank(user.ranking);
+                if (user.ranking <= 3) {
+                    setShowConfetti(true);
+                }
             }
-            setMyRank(user.ranking);
         });
     }
 
     useEffect(() => {
         haveParty();
     }, []);
-
+    console.log(myName, myRank)
     useEffect(() => {
       const handleResize = () => {
         if (window.innerWidth <= 1024) {
@@ -112,7 +114,7 @@ function Ranking() {
             <div style={{height: `${size/3}px`}}>
             </div>
             <div className="m-auto w-3/4">
-                {showConfetti && <div className="flex justify-center"><Realistic /></div>}
+                {showConfetti && <div className="flex text-[#FF0000] justify-center"><Realistic /></div>}
                 {gameResultDummyData.resultUserDtos.map((user, index) => {
                     return (
                         <RankingUser 
