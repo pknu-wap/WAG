@@ -5,7 +5,7 @@ import { Component } from "react";
 import ReactCanvasConfetti from "./Party";
 import IconButton from "../button/IconButton";
 
-export default class Realistic extends Component {
+export class Realistic extends Component {
   private isAnimationEnabled: boolean;
   private animationInstance: CreateTypes | null = null;
 
@@ -13,6 +13,10 @@ export default class Realistic extends Component {
     super(props);
     this.isAnimationEnabled = false;
     this.fire = this.fire.bind(this);
+  }
+
+  componentDidMount(): void {
+    this.handlerFire();
   }
 
   makeShot(particleRatio: number, opts: object) {
@@ -53,7 +57,6 @@ export default class Realistic extends Component {
       startVelocity: 45,
     });
   }
-
   handlerFire = () => {
     if (!this.isAnimationEnabled) {
       this.isAnimationEnabled = true;
@@ -65,11 +68,11 @@ export default class Realistic extends Component {
   getInstance = (instance: CreateTypes | null) => {
     this.animationInstance = instance;
   };
-
+  
   render() {
     return (
       <>
-        <IconButton size="sm" onClick={this.handlerFire}>
+        <IconButton className="text-[red]" size="sm" onClick={this.handlerFire}>
           <FontAwesomeIcon icon={faFire} />
         </IconButton>
         <ReactCanvasConfetti

@@ -129,7 +129,7 @@ import canvasConfetti, {
         <canvas
           ref={this.refCanvas}
           style={style}
-          className={className}
+          className={`${className}`}
           width={width}
           height={height}
         />
