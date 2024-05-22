@@ -14,3 +14,8 @@ export const captainReadyToGameModalState = atom<boolean>({
   key: 'fromCaptain',
   default: false
 })
+
+export const celebrateCount = atom<number>({
+  key: 'celebrate',
+  default: 0
+})

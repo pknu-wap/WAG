@@ -24,9 +24,10 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
   }, [dark]);
 
   return (
-    <header className="m-5">
-      <div className="flex justify-end ">
+    <header className="m-5 z-50">
+      <div className="flex justify-end z-50">
         <IconButton
+          className="z-50"
           size="md"
           onClick={() => {
             toggleDarkMode("");
