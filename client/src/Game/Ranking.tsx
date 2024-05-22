@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import FullLayout from "../components/layout/FullLayout";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser } from "@fortawesome/free-regular-svg-icons";
+import Realistic from "../components/party/Realistic";
 
 function Ranking() {
     const [size, setSize] = useState(window.innerWidth);
@@ -19,12 +22,11 @@ function Ranking() {
         window.removeEventListener('resize', handleResize);
       };
     }, []);
-    console.log(size)
     return (
         <FullLayout>
             <div className="relative">
                 {/* Bottom section with purple semi-circle */}
-                <div className="w-full h-[96px] absolute -top-[96px] bg-[#6E11E2]"></div>
+                <div className="w-full h-[96px] absolute -top-[96px] bg-light-btn dark:bg-dark-btn"></div>
                 <div 
                     style={{
                         width: '100%',
@@ -32,10 +34,10 @@ function Ranking() {
                         maxHeight: '1024px',
                         clipPath: 'ellipse(50% 50% at 50% 0%)'
                     }} 
-                    className="absolute text-white max-w-5xl bg-[#6E11E2] overflow-hidden"
+                    className="absolute text-white max-w-5xl bg-light-btn dark:bg-dark-btn overflow-hidden"
                 >
                     <div className="flex flex-col items-center justify-center">
-                        <h1 className="text-[#ffffff] text-3xl font-bold">4등</h1>
+                        <h1 className="text-[#ffffff] pt-0 text-3xl font-bold">4등</h1>
                         <p className="text-[#ffffff] text-xl">Player Name</p>
                     </div>
                 </div>
@@ -45,8 +47,59 @@ function Ranking() {
             <div style={{height: `${size/3}px`}}>
             </div>
             <div className="m-auto w-3/4">
-                <div className="w-full h-24 border-solid border-2 border-sky-500"></div>
+                <div className="w-full h-16 border-b-2 flex flex-row items-center justify-start">
+                    <div className="mr-5">
+                        <img className="w-14 h-14" src="images/1st.png" alt="1st"></img>
+                    </div>
+                    <div className="w-10 h-10 rounded-lg bg-[#B9B7C7] mr-5 flex items-center justify-center">
+                        <FontAwesomeIcon icon={faUser} size="xl" />
+                    </div>
+                    <div>User Name</div>
+                    <Realistic />
+                </div>
+                <div className="w-full h-16 border-b-2 flex flex-row items-center justify-start">
+                    <div className="mr-7">
+                        <img className="w-12 h-12" src="images/2nd.png" alt="1st"></img>
+                    </div>
+                    <div className="w-10 h-10 rounded-lg bg-[#B9B7C7] mr-5 flex items-center justify-center">
+                        <FontAwesomeIcon icon={faUser} size="xl" />
+                    </div>
+                    <div>User Name</div>
+                    <Realistic />
+                </div>
+                <div className="w-full h-16 border-b-2 flex flex-row items-center justify-start">
+                    <div className="mr-8">
+                        <img className="w-11 h-11" src="images/3rd.png" alt="1st"></img>
+                    </div>
+                    <div className="w-10 h-10 rounded-lg bg-[#B9B7C7] mr-5 flex items-center justify-center">
+                        <FontAwesomeIcon icon={faUser} size="xl" />
+                    </div>
+                    <div>User Name</div>
+                    <Realistic />
+                </div>
+                <div className="w-full h-16 border-b-2 flex flex-row items-center justify-start">
+                    <div className="mx-4 mr-[50px]"> 4 </div>
+                    <div className="w-10 h-10 rounded-lg bg-[#B9B7C7] mr-5 flex items-center justify-center">
+                        <FontAwesomeIcon icon={faUser} size="xl" />
+                    </div>
+                    <div>User Name</div>
+                </div>
+                <div className="w-full h-16 border-b-2 flex flex-row items-center justify-start">
+                    <div className="mx-4 mr-[50px]"> 5 </div>
+                    <div className="w-10 h-10 rounded-lg bg-[#B9B7C7] mr-5 flex items-center justify-center">
+                        <FontAwesomeIcon icon={faUser} size="xl" />
+                    </div>
+                    <div>User Name</div>
+                </div>
+                <div className="w-full h-16 border-b-2 flex flex-row items-center justify-start">
+                    <div className="mx-4 mr-[50px]"> 6 </div>
+                    <div className="w-10 h-10 rounded-lg bg-[#B9B7C7] mr-5 flex items-center justify-center">
+                        <FontAwesomeIcon icon={faUser} size="xl" />
+                    </div>
+                    <div>User Name</div>
+                </div>
             </div>
+            <Realistic />
         </FullLayout>
     )
 }
