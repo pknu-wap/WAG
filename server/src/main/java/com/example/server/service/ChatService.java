@@ -134,7 +134,8 @@ public class ChatService {
 
     public int getNextTurn(int currentOrder, int endOrder, long roomId){
         int nextOrder = currentOrder + 1;
-        while(true){
+        int startOrder = currentOrder;
+        while(startOrder != nextOrder){
             if(nextOrder > endOrder){
                 nextOrder = 1;
             }
@@ -146,6 +147,7 @@ public class ChatService {
             }
             nextOrder++;
         }
+        return nextOrder;
     }
 
     public void changeNowTurn(int currentOrder, int endOrder, long roomId){
@@ -210,6 +212,9 @@ public class ChatService {
             }
             gameRecord.setRankingNicknameSet(rankingNicknameSet);
             gameRecordRepository.save(gameRecord);
+            room.setGameStatus(false);
+            roomRepository.save(room);
+            gameOrderRepository.deleteByRoomId(room.getId());
 
             chatGameMessage = makeEndChatGameMessage(chatMessage, room);
             chatGameMessage.setMessageType(ChatMessage.MessageType.END);

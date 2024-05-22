@@ -8,14 +8,14 @@ import { GameUserDto, IGetAnswerList } from "../../types/dto";
 interface JoinUserProps {
   Nickname: string;
   gameStart: boolean;
-  penalty: GameUserDto[];
+  gameUserDto: GameUserDto[];
   className: string;
   onClick?: () => void;
   children: ReactNode;
 }
 
 const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
-  ({ Nickname, gameStart, penalty, className, onClick, children }, ref) => {
+  ({ Nickname, gameStart, gameUserDto, className, onClick, children }, ref) => {
     const roomId = localStorage.getItem("roomId");
     const myName = localStorage.getItem("nickName");
     const [answer, setAnswer] = useState("");
@@ -56,6 +56,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
         console.log("게임 시작 전");
       }
     }, [gameStart]);
+
     const [opacity, setOpacity] = useState("opacity-0");
     const openTollTip = () => {
       if (opacity === "opacity-0") {
@@ -65,16 +66,27 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
       }
     };
     const [penaltyCount, setPenaltyCount] = useState(0);
+
+    // 패널티 갯수 확인
     const setOtherPenalty = () => {
-      penalty.forEach((dto) => {
+      gameUserDto.forEach((dto) => {
         if (Nickname === dto.roomNickname) {
           setPenaltyCount(dto.penalty);
         }
       });
     };
+
+    // 순위 확인
+    const finishToRank = () => {
+     gameUserDto.forEach((dto) => {
+      if (Nickname === dto.roomNickname) {
+
+      }
+     }) 
+    }
     useEffect(() => {
       setOtherPenalty();
-    }, [penalty]);
+    }, [gameUserDto]);
 
     return (
       <div

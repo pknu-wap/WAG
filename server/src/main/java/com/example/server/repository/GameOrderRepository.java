@@ -18,8 +18,8 @@ public interface GameOrderRepository extends JpaRepository<GameOrder, Long> {
     @Query("SELECT go.answerName FROM GameOrder go WHERE go.roomUser.id = :userid ")
     String findAnswerByUserId(@Param("userid") long userid);
 
-    @Query("DELETE FROM GameOrder go WHERE go.room.id = :roomid ")
-    Void deleteGameOrderByRoomId(@Param("roomid") long roomid);
+    @Query("DELETE FROM GameOrder go WHERE go.room.id = :roomid")
+    void deleteByRoomId(@Param("roomid") Long roomid);
 
     @Query("SELECT go FROM GameOrder go WHERE go.userOrder = :userorder and go.room.id = :roomId")
     Optional<GameOrder> findByUserOrder(@Param("userorder") long userorder, @Param("roomId") long roomId);
