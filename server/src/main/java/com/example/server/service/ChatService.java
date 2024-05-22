@@ -108,15 +108,8 @@ public class ChatService {
         if(chatMessage.getMessageType()==ChatMessage.MessageType.ASK && gameOrder.isNextTurn()){  // 질문일 경우 다음 턴으로 넘어감.
             int currentOrder = gameOrder.getUserOrder();
             int nextOrder = getNextTurn(currentOrder, room.getUserCount(), room.getId());
-            int nowOrder = currentOrder - 1;
-            if(nowOrder < 1){
-                nowOrder = room.getUserCount();
-            }
+            changeNowTurn(currentOrder, room.getUserCount(), room.getId());
 
-            GameOrder nowGameOrder = gameOrderRepository.findByUserOrder(nowOrder, room.getId())
-                    .orElseThrow(NoSuchGameOrderException::new);
-            nowGameOrder.setNowTurn(false);
-            nowGameOrder.setNextTurn(false);
             gameOrder.setNowTurn(true);
             gameOrder.setNextTurn(false);
             GameOrder nextGameOrder = gameOrderRepository.findByUserOrder(nextOrder, room.getId())
@@ -124,7 +117,6 @@ public class ChatService {
             nextGameOrder.setNowTurn(false);
             nextGameOrder.setNextTurn(true);
             room.setCurrentOrder(nextOrder);
-            gameOrderRepository.save(nowGameOrder);
             gameOrderRepository.save(gameOrder);
             gameOrderRepository.save(nextGameOrder);
             chatGameMessage = makeChatGameMessage(chatMessage, room);
@@ -153,6 +145,25 @@ public class ChatService {
                 return nextOrder;
             }
             nextOrder++;
+        }
+    }
+
+    public void changeNowTurn(int currentOrder, int endOrder, long roomId){
+        int nowOrder = currentOrder - 1;
+        while(true){
+            if(nowOrder < 1){
+                nowOrder = endOrder;
+            }
+            GameOrder nowGameOrder = gameOrderRepository.findByUserOrder(nowOrder, roomId)
+                    .orElseThrow(NoSuchGameOrderException::new);
+
+            if(nowGameOrder.isNowTurn()){
+                nowGameOrder.setNowTurn(false);
+                nowGameOrder.setNextTurn(false);
+                gameOrderRepository.save(nowGameOrder);
+                return;
+            }
+            nowOrder--;
         }
     }
 
@@ -186,7 +197,6 @@ public class ChatService {
             gameOrderRepository.save(gameOrder);
         }
 
-        makeChatGameMessage(chatMessage, room);
 
         if(room.getCorrectMemberCnt() >= 3 || room.getUserCount()-1 <= room.getCorrectMemberCnt()){ // 게임 끝나는 경우
 
@@ -200,9 +210,11 @@ public class ChatService {
             gameRecord.setRankingNicknameSet(rankingNicknameSet);
             gameRecordRepository.save(gameRecord);
 
+            chatGameMessage = makeEndChatGameMessage(chatMessage, room);
             chatGameMessage.setMessageType(ChatMessage.MessageType.END);
         }
         else{
+            chatGameMessage = makeChatGameMessage(chatMessage, room);
             chatGameMessage.setMessageType(ChatMessage.MessageType.CORRECT);
         }
         return chatGameMessage;
@@ -246,6 +258,29 @@ public class ChatService {
 
     public List<GameUserDto> makeGameUserDtos(Long roomId){ // GameUserDtos 생성 메소드
         List<RoomUser> roomUsers = roomUserRepository.findByRoomId(roomId);
+        List<GameUserDto> gameUserDtos = new ArrayList<>();
+        for(RoomUser roomUser : roomUsers){
+            Optional<GameOrder> gameOrderOptional = gameOrderRepository.findGameOrderByUserId(roomUser.getId());
+            GameUserDto gameUserDto = GameUserDto.of(gameOrderOptional.get(), roomUser);
+            gameUserDtos.add(gameUserDto);
+        }
+        return gameUserDtos;
+    }
+
+    public ChatGameMessage makeEndChatGameMessage(ChatMessage chatMessage, Room room){  // 순위 기준 정렬 chatGameMessage 생성
+        ChatGameMessage chatGameMessage = new ChatGameMessage();
+        chatGameMessage.setContent(chatMessage.getContent());
+        chatGameMessage.setSender(chatMessage.getSender());
+        chatGameMessage.setRoomId(chatMessage.getRoomId());
+        chatGameMessage.setGameEnd(room.isGameStatus());
+        chatGameMessage.setCycle(room.getCycle());
+        chatGameMessage.setGameUserDtos(makeEndGameUserDtos(chatMessage.getRoomId()));
+        chatGameMessage.setMessageType(chatMessage.getMessageType());
+        return chatGameMessage;
+    }
+
+    public List<GameUserDto> makeEndGameUserDtos(Long roomId){ // GameUserDtos(순위 기준 정렬) 생성 메소드
+        List<RoomUser> roomUsers = roomUserRepository.findByRoomIdOrderByRanking(roomId);
         List<GameUserDto> gameUserDtos = new ArrayList<>();
         for(RoomUser roomUser : roomUsers){
             Optional<GameOrder> gameOrderOptional = gameOrderRepository.findGameOrderByUserId(roomUser.getId());

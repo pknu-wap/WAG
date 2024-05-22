@@ -62,8 +62,6 @@ public class ChatController {
     public ChatRoomInfoMessage addUser(@Payload ChatMessage chatMessage,
                                        SimpMessageHeaderAccessor headerAccessor,
                                        @CurrentUser UserPrincipal userPrincipal) {   // 방장 아닌 유저 소켓 연결
-
-        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
         String sender = chatMessage.getSender();
         headerAccessor.getSessionAttributes().put("username", sender);
         headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
@@ -83,7 +81,6 @@ public class ChatController {
     @MessageMapping("/chat.addCaptainUser")   // 방장 소켓 연결
     public ChatMessage addCaptainUser(@Payload ChatMessage chatMessage,
                                       SimpMessageHeaderAccessor headerAccessor) {
-        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
         String sender = chatMessage.getSender();
         headerAccessor.getSessionAttributes().put("username", sender);
         headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
