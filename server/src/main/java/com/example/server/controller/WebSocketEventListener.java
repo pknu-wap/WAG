@@ -74,6 +74,8 @@ public class WebSocketEventListener {
                 String destination = "/topic/public/"+room.getId();
                 deleteRoomUser(roomUser);
                 messagingTemplate.convertAndSend(destination, chatGameMessage);
+                room.setGameStatus(false);
+                roomRepository.save(room);
 
                 return;
             }

@@ -25,6 +25,6 @@ public class RoomUser {
     @OneToOne(fetch = FetchType.LAZY)
     private User user;
 
-    @OneToOne(fetch = FetchType.LAZY , cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY , cascade = CascadeType.ALL)
     private GameOrder gameOrder;
 }
