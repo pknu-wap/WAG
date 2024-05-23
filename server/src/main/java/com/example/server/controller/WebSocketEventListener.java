@@ -72,9 +72,6 @@ public class WebSocketEventListener {
 
 
             if(room.getUserCount() == 0){  // 나간 사람이 마지막 사람이라면 방 삭제
-                if(room.isGameStatus()){
-                    gameOrderRepository.deleteAll(room.getGameOrders());
-                }
                 roomUserRepository.delete(roomUser);
                 roomRepository.delete(room);
                 return;
