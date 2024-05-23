@@ -54,14 +54,14 @@ public class RoomService {
 
     public RoomResponse getRoomInfo(Long roomId){ // 닉네임으로 게임방 정보 주기
 
-        Room room = roomRepository.findById(roomId).orElseThrow(NoSuchRoomException::new);
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new NoSuchRoomException(roomId));
         List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(roomId));
 
         return RoomResponse.create(room, userDtos);
     }
 
     public RoomResponse enterRoomByRoomId(String nickName, Long roomId, UserPrincipal userPrincipal){ // 소켓 + roomId로 방 입장.
-        Room room = roomRepository.findById(roomId).orElseThrow(NoSuchRoomException::new);
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new NoSuchRoomException(roomId));
         boolean isCaptain = false;
         if (room.getUserCount() >= 6) {
             throw new MaxUserCountExceededException();  // 최대 인원 예외 처리.

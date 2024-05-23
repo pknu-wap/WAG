@@ -57,9 +57,9 @@ public class WebSocketEventListener {
             logger.info("User Disconnected : " + username);
 
             RoomUser roomUser = roomUserRepository.hasNickName(username, roomId)
-                    .orElseThrow(NoSuchRoomUserException::new);
+                    .orElseThrow(()-> new NoSuchRoomUserException(roomId));
             Room room = roomRepository.findById(roomId)
-                    .orElseThrow(NoSuchRoomException::new);
+                    .orElseThrow(()-> new NoSuchRoomException(roomId));
 
             if(room.isGameStatus()){  // 만약 게임 중이라면 해당 유저 게임 진행 정보 삭제
                 nowUserOut = updateGameOrder(roomUser);
@@ -81,7 +81,7 @@ public class WebSocketEventListener {
             }
             else if(roomUser.isCaptain()){   // 나간 사람이 방장이라면 방장 위임
                 RoomUser nextCaption = roomUserRepository.findNextCaptinByRandom(roomId)
-                        .orElseThrow(NoSuchRoomUserException::new);
+                        .orElseThrow(() -> new NoSuchRoomUserException(roomId));
                 nextCaption.setCaptain(true);
                 roomUserRepository.save(nextCaption);
                 chatRoomInfoMessage.setContent(username + " 님이 방을 떠나 " + nextCaption.getRoomNickname() + " 님이 방장이 되었습니다.");
@@ -125,12 +125,14 @@ public class WebSocketEventListener {
         gameOrderRepository.delete(gameOrder);
 
         if(nowTurn){
-            GameOrder nowGo = gameOrderRepository.findByUserOrder(nowOrder, room.getId()).get();
+            GameOrder nowGo = gameOrderRepository.findByUserOrder(nowOrder, room.getId())
+                    .orElseThrow(NoSuchGameOrderException::new);
             int nextOrder = nowOrder + 1;
             if(nextOrder >= room.getUserCount()){
                 nextOrder = 1;
             }
-            GameOrder nextGo = gameOrderRepository.findByUserOrder(nextOrder, room.getId()).get();
+            GameOrder nextGo = gameOrderRepository.findByUserOrder(nextOrder, room.getId())
+                    .orElseThrow(NoSuchGameOrderException::new);
             nowGo.setNowTurn(true);
             nowGo.setNextTurn(false);
             nextGo.setNextTurn(true);
