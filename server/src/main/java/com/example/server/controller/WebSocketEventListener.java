@@ -61,27 +61,25 @@ public class WebSocketEventListener {
             Room room = roomRepository.findById(roomId)
                     .orElseThrow(()-> new NoSuchRoomException(roomId));
 
-
-            if(room.getUserCount() == 1){  // 나간 사람이 마지막 사람이라면 방 삭제
-                deleteRoomUser(roomUser);
-                roomRepository.delete(room);
-                return;
-            }
-            else if(room.getUserCount() == 2){  // 나간 사람이 마지막 한명이라면 게임 종료
-                ChatGameMessage chatGameMessage;
-                chatGameMessage = new ChatGameMessage();
-                chatGameMessage.setMessageType(ChatMessage.MessageType.END);
-                chatGameMessage.setContent("혼자 남았구나..");
-                String destination = "/topic/public/"+room.getId();
-                deleteRoomUser(roomUser);
-                messagingTemplate.convertAndSend(destination, chatGameMessage);
-                room.setGameStatus(false);
-                roomRepository.save(room);
-
-                return;
-            }
-
             if(room.isGameStatus()){  // 만약 게임 중이라면 해당 유저 게임 진행 정보 삭제
+                if(room.getUserCount() == 1){  // 나간 사람이 마지막 사람이라면 방 삭제
+                    deleteRoomUser(roomUser);
+                    roomRepository.delete(room);
+                    return;
+                }
+                else if(room.getUserCount() == 2){  // 나간 사람이 마지막 한명이라면 게임 종료
+                    ChatGameMessage chatGameMessage;
+                    chatGameMessage = new ChatGameMessage();
+                    chatGameMessage.setMessageType(ChatMessage.MessageType.END);
+                    chatGameMessage.setContent("혼자 남았구나..");
+                    String destination = "/topic/public/"+room.getId();
+                    deleteRoomUser(roomUser);
+                    messagingTemplate.convertAndSend(destination, chatGameMessage);
+                    room.setGameStatus(false);
+                    roomRepository.save(room);
+
+                    return;
+                }
                 nowUserOut = updateGameOrder(roomUser);
             }
 
