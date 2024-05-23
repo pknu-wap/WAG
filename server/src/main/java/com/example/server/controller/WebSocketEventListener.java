@@ -61,6 +61,24 @@ public class WebSocketEventListener {
             Room room = roomRepository.findById(roomId)
                     .orElseThrow(()-> new NoSuchRoomException(roomId));
 
+
+            if(room.getUserCount() == 1){  // 나간 사람이 마지막 사람이라면 방 삭제
+                roomUserRepository.delete(roomUser);
+                roomRepository.delete(room);
+                return;
+            }
+            else if(room.getUserCount() == 2){  // 나간 사람이 마지막 한명이라면 게임 종료
+                ChatGameMessage chatGameMessage;
+                chatGameMessage = new ChatGameMessage();
+                chatGameMessage.setMessageType(ChatMessage.MessageType.END);
+                chatGameMessage.setContent("혼자 남게 되어 게임 종료");
+                String destination = "/topic/public/"+room.getId();
+                roomUserRepository.delete(roomUser);
+                messagingTemplate.convertAndSend(destination, chatGameMessage);
+
+                return;
+            }
+
             if(room.isGameStatus()){  // 만약 게임 중이라면 해당 유저 게임 진행 정보 삭제
                 nowUserOut = updateGameOrder(roomUser);
             }
@@ -71,21 +89,7 @@ public class WebSocketEventListener {
             chatRoomInfoMessage.setMessageType(ChatMessage.MessageType.LEAVE);
 
 
-            if(room.getUserCount() == 0){  // 나간 사람이 마지막 사람이라면 방 삭제
-                roomUserRepository.delete(roomUser);
-                roomRepository.delete(room);
-                return;
-            }
-            else if(room.getUserCount() == 1){  // 나간 사람이 마지막 사람이라면 방 삭제
-                ChatGameMessage chatGameMessage;
-                chatGameMessage = new ChatGameMessage();
-                chatGameMessage.setMessageType(ChatMessage.MessageType.END);
-                String destination = "/topic/public/"+room.getId();
-                messagingTemplate.convertAndSend(destination, chatGameMessage);
-
-                return;
-            }
-            else if(roomUser.isCaptain()){   // 나간 사람이 방장이라면 방장 위임
+            if(roomUser.isCaptain()){   // 나간 사람이 방장이라면 방장 위임
                 RoomUser nextCaption = roomUserRepository.findNextCaptinByRandom(roomId)
                         .orElseThrow(() -> new NoSuchRoomUserException(roomId));
                 nextCaption.setCaptain(true);
