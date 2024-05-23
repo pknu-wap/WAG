@@ -15,7 +15,7 @@ public class GameOrder {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Room room;
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private RoomUser roomUser;
 
     @NotNull
