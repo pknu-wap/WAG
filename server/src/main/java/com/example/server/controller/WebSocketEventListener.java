@@ -64,6 +64,7 @@ public class WebSocketEventListener {
 
             if(room.getUserCount() == 1){  // 나간 사람이 마지막 사람이라면 방 삭제
                 deleteRoomUser(roomUser);
+                roomRepository.delete(room);
                 return;
             }
             else if(room.getUserCount() == 2){  // 나간 사람이 마지막 한명이라면 게임 종료
@@ -74,6 +75,8 @@ public class WebSocketEventListener {
                 String destination = "/topic/public/"+room.getId();
                 deleteRoomUser(roomUser);
                 messagingTemplate.convertAndSend(destination, chatGameMessage);
+                room.setGameStatus(false);
+                roomRepository.save(room);
 
                 return;
             }
