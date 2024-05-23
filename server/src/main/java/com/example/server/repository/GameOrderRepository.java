@@ -13,13 +13,11 @@ import java.util.Optional;
 
 @Repository
 public interface GameOrderRepository extends JpaRepository<GameOrder, Long> {
-    @Query("SELECT go FROM GameOrder go WHERE go.roomUser.id = :userId ")
-    Optional<GameOrder> findGameOrderByUserId(@Param("userId") long userId);
+
+    Optional<GameOrder> findByRoomUser(RoomUser roomUser);
 
     @Query("SELECT go.answerName FROM GameOrder go WHERE go.roomUser.id = :userId ")
     String findAnswerByUserId(@Param("userId") long userId);
-
-    void deleteAllByRoom(Room room);
 
     @Query("SELECT go FROM GameOrder go WHERE go.userOrder = :userOrder and go.room.id = :roomId")
     Optional<GameOrder> findByUserOrder(@Param("userOrder") long userOrder, @Param("roomId") long roomId);
@@ -29,6 +27,7 @@ public interface GameOrderRepository extends JpaRepository<GameOrder, Long> {
 
     @Query("SELECT go FROM GameOrder go WHERE go.roomUser.roomNickname = :nickName and go.room.id = :roomId")
     Optional<GameOrder> findByNickName(@Param("nickName") String nickName, @Param("roomId") Long roomId);
+
 
     @Query("SELECT go FROM GameOrder go WHERE go.room.id = :roomId and go.userOrder BETWEEN :start AND :end")
     List<GameOrder> findBackUser(@Param("roomId") Long roomId, @Param("start") int start, @Param("end") int end);

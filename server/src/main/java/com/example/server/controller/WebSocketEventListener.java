@@ -109,7 +109,7 @@ public class WebSocketEventListener {
         }
     }
     public boolean updateGameOrder(RoomUser roomUser){
-        GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(roomUser.getId())
+        GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
                 .orElseThrow(NoSuchGameOrderException::new);
         int nowOrder = gameOrder.getUserOrder();
         boolean nowTurn = gameOrder.isNowTurn();
