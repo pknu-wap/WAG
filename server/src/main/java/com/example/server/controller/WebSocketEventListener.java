@@ -132,7 +132,7 @@ public class WebSocketEventListener {
             gameOrderRepository.save(go);
         }
 
-        deleteGameOrder(gameOrder);
+//        deleteGameOrder(gameOrder);
 
         if(nowTurn){
             GameOrder nowGo = gameOrderRepository.findByUserOrder(nowOrder, room.getId())
@@ -156,8 +156,10 @@ public class WebSocketEventListener {
             go.setNextTurn(true);
             go.setNowTurn(false);
             gameOrderRepository.save(go);
+            deleteGameOrder(gameOrder);
             return true;
         }
+        deleteGameOrder(gameOrder);
 
         return false;
     }
