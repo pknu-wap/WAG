@@ -215,13 +215,13 @@ public class ChatService {
         if(room.getCorrectMemberCnt() >= 3 || room.getUserCount()-1 <= room.getCorrectMemberCnt()){ // 게임 끝나는 경우
 
             // 기존 저장되어 있던 순위권 닉네임 리스트에 순위권에 들지 못한 나머지 닉네임 추가
-            String rankingNicknameSet = gameRecord.getRankingNicknameSet();
-            rankingNicknameSet += " / ";
+            StringBuilder rankingNicknameSet = new StringBuilder(gameRecord.getRankingNicknameSet());
+            rankingNicknameSet.append(" / ");
             List<String> allNicknames = roomUserRepository.findNickNameByRoomId(room.getId());
             for (String nickname : allNicknames) {
-                if(!rankingNicknameSet.contains(nickname)) rankingNicknameSet += " " + nickname;
+                if(!rankingNicknameSet.toString().contains(nickname)) rankingNicknameSet.append(" ").append(nickname);
             }
-            gameRecord.setRankingNicknameSet(rankingNicknameSet);
+            gameRecord.setRankingNicknameSet(rankingNicknameSet.toString());
             gameRecordRepository.save(gameRecord);
             room.setGameStatus(false);
             roomRepository.save(room);
