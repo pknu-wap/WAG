@@ -165,9 +165,10 @@ public class WebSocketEventListener {
         if (roomUser != null) {
             GameOrder gameOrder = roomUser.getGameOrder();
             if (gameOrder != null) {
-                // 양방향 관계 제거
                 roomUser.setGameOrder(null);
                 gameOrder.setRoomUser(null);
+                gameOrderRepository.save(gameOrder);  // 관계를 제거한 후 업데이트
+                roomUserRepository.save(roomUser);    // 관계를 제거한 후 업데이트
                 gameOrderRepository.delete(gameOrder); // GameOrder 삭제
             }
             roomUserRepository.delete(roomUser); // RoomUser 삭제
@@ -178,12 +179,13 @@ public class WebSocketEventListener {
         if (gameOrder != null) {
             RoomUser roomUser = gameOrder.getRoomUser();
             if (roomUser != null) {
-                // 양방향 관계 제거
                 roomUser.setGameOrder(null);
                 gameOrder.setRoomUser(null);
-                roomUserRepository.delete(roomUser); // GameOrder 삭제
+                gameOrderRepository.save(gameOrder);  // 관계를 제거한 후 업데이트
+                roomUserRepository.save(roomUser);    // 관계를 제거한 후 업데이트
+                roomUserRepository.delete(roomUser); // RoomUser 삭제
             }
-            gameOrderRepository.delete(gameOrder); // RoomUser 삭제
+            gameOrderRepository.delete(gameOrder); // GameOrder 삭제
         }
     }
 }
