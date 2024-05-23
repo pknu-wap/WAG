@@ -119,6 +119,7 @@ public class WebSocketEventListener {
         }
     }
     public boolean updateGameOrder(RoomUser roomUser){
+        boolean isNextTuen = false;
         GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
                 .orElseThrow(NoSuchGameOrderException::new);
         int nowOrder = gameOrder.getUserOrder();
@@ -126,42 +127,41 @@ public class WebSocketEventListener {
         boolean nextTurn = gameOrder.isNextTurn();
         Room room = gameOrder.getRoom();
 
+//        deleteGameOrder(gameOrder);
+
+//        if(nowTurn){
+//            GameOrder nowGo = gameOrderRepository.findByUserOrder(nowOrder, room.getId())
+//                    .orElseThrow(NoSuchGameOrderException::new);
+//            int nextOrder = chatService.getNextTurn(nowOrder, room.getCurrentOrder(), room.getId());
+//            GameOrder nextGo = gameOrderRepository.findByUserOrder(nextOrder, room.getId())
+//                    .orElseThrow(NoSuchGameOrderException::new);
+//            nowGo.setNowTurn(true);
+//            nowGo.setNextTurn(false);
+//            nextGo.setNextTurn(true);
+//            nowGo.setNowTurn(false);
+//            gameOrderRepository.save(nextGo);
+//            gameOrderRepository.save(nowGo);
+//        }
+        if(nextTurn){
+            int nextOrder = chatService.getNextTurn(nowOrder, room.getCurrentOrder(), room.getId());
+            GameOrder go = gameOrderRepository.findByUserOrder(nextOrder, room.getId())
+                    .orElseThrow(NoSuchGameOrderException::new);
+            go.setNextTurn(true);
+            go.setNowTurn(false);
+            gameOrderRepository.save(go);
+            deleteGameOrder(gameOrder);
+            isNextTuen = true;
+        }
+
         List<GameOrder> gameOrders = gameOrderRepository.findBackUser(gameOrder.getRoom().getId(), nowOrder+1, gameOrder.getRoom().getUserCount());
         for(GameOrder go : gameOrders){
             go.setUserOrder(go.getUserOrder()-1);
             gameOrderRepository.save(go);
         }
 
-//        deleteGameOrder(gameOrder);
-
-        if(nowTurn){
-            GameOrder nowGo = gameOrderRepository.findByUserOrder(nowOrder, room.getId())
-                    .orElseThrow(NoSuchGameOrderException::new);
-            int nextOrder = nowOrder + 1;
-            if(nextOrder >= room.getUserCount()){
-                nextOrder = 1;
-            }
-            GameOrder nextGo = gameOrderRepository.findByUserOrder(nextOrder, room.getId())
-                    .orElseThrow(NoSuchGameOrderException::new);
-            nowGo.setNowTurn(true);
-            nowGo.setNextTurn(false);
-            nextGo.setNextTurn(true);
-            nowGo.setNowTurn(false);
-            gameOrderRepository.save(nextGo);
-            gameOrderRepository.save(nowGo);
-        }
-        if(nextTurn){
-            GameOrder go = gameOrderRepository.findByUserOrder(nowOrder, room.getId())
-                    .orElseThrow(NoSuchGameOrderException::new);
-            go.setNextTurn(true);
-            go.setNowTurn(false);
-            gameOrderRepository.save(go);
-            deleteGameOrder(gameOrder);
-            return true;
-        }
         deleteGameOrder(gameOrder);
 
-        return false;
+        return isNextTuen;
     }
 
     public void deleteRoomUser(RoomUser roomUser) {
