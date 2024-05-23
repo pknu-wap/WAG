@@ -16,9 +16,6 @@ public interface GameOrderRepository extends JpaRepository<GameOrder, Long> {
 
     Optional<GameOrder> findByRoomUser(RoomUser roomUser);
 
-    @Query("SELECT go.answerName FROM GameOrder go WHERE go.roomUser.id = :userId ")
-    String findAnswerByUserId(@Param("userId") long userId);
-
     @Query("SELECT go FROM GameOrder go WHERE go.userOrder = :userOrder and go.room.id = :roomId")
     Optional<GameOrder> findByUserOrder(@Param("userOrder") long userOrder, @Param("roomId") long roomId);
 
