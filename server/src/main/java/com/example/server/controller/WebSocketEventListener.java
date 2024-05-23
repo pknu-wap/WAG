@@ -149,7 +149,7 @@ public class WebSocketEventListener {
             go.setNextTurn(true);
             go.setNowTurn(false);
             gameOrderRepository.save(go);
-            deleteGameOrder(gameOrder);
+//            deleteGameOrder(gameOrder);
             isNextTuen = true;
         }
 
