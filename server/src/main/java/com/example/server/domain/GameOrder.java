@@ -15,6 +15,8 @@ public class GameOrder {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Room room;
+    @OneToOne(fetch = FetchType.LAZY)
+    private RoomUser roomUser;
 
     @NotNull
     private int userOrder;
