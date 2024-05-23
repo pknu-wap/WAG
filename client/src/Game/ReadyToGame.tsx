@@ -297,10 +297,10 @@ const ReadyToGame = () => {
       Toast({ message: message.privateRoom ? '방이 비공개로 설정되었습니다.' : '방이 공개로 설정되었습니다.', type: 'info' });
     } else if (message.messageType === "ASK") {
       console.log("ASK로 온 메세지", message);
+      getGameCycle(message);
       getNextTurnInfo(message);
     } else if (message.messageType === "ANSWER") {
       console.log("ANSWER로 온 메세지", message);
-      getGameCycle(message);
     } else if (message.messageType === "CORRECT") {
       console.log("CORRECT로 온 메세지", message);
       handleCorrectAnswer(message);
@@ -316,9 +316,12 @@ const ReadyToGame = () => {
             GameLogic(); // 5초 후에 GameLogic 실행
           }, 5000);
     } else if (message.messageType === "PENALTY") {
-      console.log("PENALTY로 온 메세지", message);
       setPenaltyCount(message.gameUserDtos);
-    } else {
+    } else if(message.messageType === "END"){
+      navigate("/ranking");
+      console.log("END로 온 메세지", message);
+    } 
+    else {
       console.log(message);
     }
   }
@@ -456,21 +459,12 @@ const ReadyToGame = () => {
                   messageType: "ASK",
                   roomId: roomId,
                 }));
-                stompClient.send(
-                  "/app/chat.sendGameMessage",
-                  {},
-                  JSON.stringify({
-                    sender: nickName,
-                    content: "",
-                    messageType: "ANSWER",
-                    roomId: roomId,
-                  }))
             }    
           }
           setTimeout(() => {  //잠깐 대기후 다음 진행 : 위 강제 ASK를 받고 나서 초기화 진행
             handleTimerEnd();
             setChatMessages([]);
-          }, 5000);
+          }, 500);
         }
       }, [stopTimer, resetTimer, time]);
     
@@ -500,7 +494,6 @@ const ReadyToGame = () => {
 
     //정답자 처리 함수
     let currentAnswererIndex = 0; // 현재 정답자 인덱스
-    const maxAnswerers = 3; // 최대 정답자 수
     function handleCorrectAnswer(message : any)
     {
       const sender = message.sender;
@@ -511,11 +504,6 @@ const ReadyToGame = () => {
       }
     
       currentAnswererIndex++;
-    
-      if (currentAnswererIndex >= maxAnswerers) {
-        Toast({ message: '게임 끝', type: 'success' });
-        navigate("/ranking");
-      }
     } 
     //게임시작 버튼 클릭 이벤트
     const clickGameStart = () => {
