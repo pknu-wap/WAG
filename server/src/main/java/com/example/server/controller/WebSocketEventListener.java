@@ -74,8 +74,10 @@ public class WebSocketEventListener {
                     chatGameMessage.setMessageType(ChatMessage.MessageType.END);
                     chatGameMessage.setContent("혼자 남았구나..");
                     String destination = "/topic/public/"+room.getId();
-                    deleteGameOrder(roomUser.getGameOrder());
-                    deleteRoomUser(roomUser);
+                    GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
+                            .orElseThrow(NoSuchGameOrderException::new);
+                    deleteGameOrder(gameOrder);
+                    //deleteRoomUser(roomUser);
                     messagingTemplate.convertAndSend(destination, chatGameMessage);
                     room.setUserCount(room.getUserCount() - 1);  // 유저 수 -1
                     room.setGameStatus(false);
