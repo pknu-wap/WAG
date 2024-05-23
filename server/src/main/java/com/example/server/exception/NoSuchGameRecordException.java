@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class NoSuchGameRecordException extends RuntimeException{
 
-    public NoSuchGameRecordException() {
-        super("no such game record");
+    public NoSuchGameRecordException(Long roomId) {
+        super("no such game record, roomId : " + roomId);
     }
 }

@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface GameRecordRepository extends JpaRepository<GameRecord, Long> {
 
-    Optional<GameRecord> findByRoomId(Long roomId);
+    Optional<GameRecord> findFirstByRoomIdOrderByDateDesc(Long roomId);
 
 }
