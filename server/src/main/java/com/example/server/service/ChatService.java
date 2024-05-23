@@ -105,7 +105,7 @@ public class ChatService {
                 .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
         RoomUser sendRoomUser = roomUserRepository.hasNickName(chatMessage.getSender(), room.getId())
                 .orElseThrow(()->new NoSuchRoomUserException(chatMessage.getRoomId()));
-        GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(sendRoomUser.getId())
+        GameOrder gameOrder = gameOrderRepository.findByRoomUser(sendRoomUser)
                 .orElseThrow(NoSuchGameOrderException::new);
 
         if(gameOrder.isNextTurn()){  // 질문일 경우 다음 턴으로 넘어감.
@@ -184,7 +184,7 @@ public class ChatService {
         ChatGameMessage chatGameMessage = new ChatGameMessage();
         RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatMessage.getRoomId())
                 .orElseThrow(()->new NoSuchRoomUserException(chatMessage.getRoomId()));
-        GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(roomUser.getId())
+        GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
                 .orElseThrow(NoSuchGameOrderException::new);
         Room room = roomRepository.findById(chatMessage.getRoomId())
                 .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
@@ -225,7 +225,7 @@ public class ChatService {
             gameRecordRepository.save(gameRecord);
             room.setGameStatus(false);
             roomRepository.save(room);
-            gameOrderRepository.deleteAllByRoom(room);
+            gameOrderRepository.deleteAll(room.getGameOrders());
 
             chatGameMessage = makeEndChatGameMessage(chatMessage, room);
             chatGameMessage.setMessageType(ChatMessage.MessageType.END);
@@ -285,7 +285,7 @@ public class ChatService {
     private List<GameUserDto> getGameUserDtos(List<RoomUser> roomUsers) {
         List<GameUserDto> gameUserDtos = new ArrayList<>();
         for(RoomUser roomUser : roomUsers){
-            GameOrder gameOrder = gameOrderRepository.findGameOrderByUserId(roomUser.getId())
+            GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
                     .orElseThrow(NoSuchGameOrderException::new);
             GameUserDto gameUserDto = GameUserDto.of(gameOrder, roomUser);
             gameUserDtos.add(gameUserDto);
