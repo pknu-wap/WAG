@@ -63,21 +63,16 @@ public class WebSocketEventListener {
 
 
             if(room.getUserCount() == 1){  // 나간 사람이 마지막 사람이라면 방 삭제
-                roomUser.setGameOrder(null);
-                roomUserRepository.save(roomUser);
-                roomUserRepository.delete(roomUser);
-                roomRepository.delete(room);
+                deleteRoomUser(roomUser);
                 return;
             }
             else if(room.getUserCount() == 2){  // 나간 사람이 마지막 한명이라면 게임 종료
                 ChatGameMessage chatGameMessage;
                 chatGameMessage = new ChatGameMessage();
                 chatGameMessage.setMessageType(ChatMessage.MessageType.END);
-                chatGameMessage.setContent("혼자 남게 되어 게임 종료");
+                chatGameMessage.setContent("혼자 남았구나..");
                 String destination = "/topic/public/"+room.getId();
-                roomUser.setGameOrder(null);
-                roomUserRepository.save(roomUser);
-                roomUserRepository.delete(roomUser);
+                deleteRoomUser(roomUser);
                 messagingTemplate.convertAndSend(destination, chatGameMessage);
 
                 return;
@@ -111,7 +106,7 @@ public class WebSocketEventListener {
                 messagingTemplate.convertAndSend("/topic/public/"+roomId, chatGameMessage);
             }
 
-            roomUserRepository.delete(roomUser);
+            deleteRoomUser(roomUser);
 
             roomRepository.save(room);  // 룸 정보 저장.
             List <RoomUser> roomUsers = roomUserRepository.findByRoomId(roomId);
@@ -136,7 +131,7 @@ public class WebSocketEventListener {
             gameOrderRepository.save(go);
         }
 
-        gameOrderRepository.delete(gameOrder);
+        deleteGameOrder(gameOrder);
 
         if(nowTurn){
             GameOrder nowGo = gameOrderRepository.findByUserOrder(nowOrder, room.getId())
@@ -164,5 +159,31 @@ public class WebSocketEventListener {
         }
 
         return false;
+    }
+
+    public void deleteRoomUser(RoomUser roomUser) {
+        if (roomUser != null) {
+            GameOrder gameOrder = roomUser.getGameOrder();
+            if (gameOrder != null) {
+                // 양방향 관계 제거
+                roomUser.setGameOrder(null);
+                gameOrder.setRoomUser(null);
+                gameOrderRepository.delete(gameOrder); // GameOrder 삭제
+            }
+            roomUserRepository.delete(roomUser); // RoomUser 삭제
+        }
+    }
+
+    public void deleteGameOrder(GameOrder gameOrder) {
+        if (gameOrder != null) {
+            RoomUser roomUser = gameOrder.getRoomUser();
+            if (roomUser != null) {
+                // 양방향 관계 제거
+                roomUser.setGameOrder(null);
+                gameOrder.setRoomUser(null);
+                roomUserRepository.delete(roomUser); // GameOrder 삭제
+            }
+            gameOrderRepository.delete(gameOrder); // RoomUser 삭제
+        }
     }
 }

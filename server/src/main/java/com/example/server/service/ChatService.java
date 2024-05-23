@@ -225,7 +225,12 @@ public class ChatService {
             gameRecordRepository.save(gameRecord);
             room.setGameStatus(false);
             roomRepository.save(room);
-            gameOrderRepository.deleteAll(room.getGameOrders());
+
+            // 모든 gameOrder 삭제
+            for (GameOrder go : room.getGameOrders()) {
+                go.setRoomUser(null);
+                gameOrderRepository.delete(go);
+            }
 
             chatGameMessage = makeEndChatGameMessage(chatMessage, room);
             chatGameMessage.setMessageType(ChatMessage.MessageType.END);
