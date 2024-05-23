@@ -76,6 +76,15 @@ public class WebSocketEventListener {
                 roomRepository.delete(room);
                 return;
             }
+            else if(room.getUserCount() == 1){  // 나간 사람이 마지막 사람이라면 방 삭제
+                ChatGameMessage chatGameMessage;
+                chatGameMessage = new ChatGameMessage();
+                chatGameMessage.setMessageType(ChatMessage.MessageType.END);
+                String destination = "/topic/public/"+room.getId();
+                messagingTemplate.convertAndSend(destination, chatGameMessage);
+
+                return;
+            }
             else if(roomUser.isCaptain()){   // 나간 사람이 방장이라면 방장 위임
                 RoomUser nextCaption = roomUserRepository.findNextCaptinByRandom(roomId)
                         .orElseThrow(() -> new NoSuchRoomUserException(roomId));
