@@ -185,7 +185,6 @@ public class ChatService {
     }
 
     public ChatGameMessage correctAnswer(ChatMessage chatMessage) {   // 정답 맞추기
-        ChatGameMessage chatGameMessage = new ChatGameMessage();
         RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatMessage.getRoomId())
                 .orElseThrow(()->new NoSuchRoomUserException(chatMessage.getRoomId()));
         GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
@@ -195,12 +194,14 @@ public class ChatService {
         GameRecord gameRecord = gameRecordRepository.findFirstByRoomIdOrderByDateDesc(room.getId())
                 .orElseThrow(()->new NoSuchGameRecordException(room.getId()));
 
+        gameOrder.setHaveAnswerChance(false); // 정답기회 없애기
+        gameOrderRepository.save(gameOrder);
+
         if(gameOrder.getAnswerName().equals(chatMessage.getContent())){ // 정답
             Room newRoom = roomRepository.findById(chatMessage.getRoomId())
                     .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
             newRoom.setCorrectMemberCnt(newRoom.getCorrectMemberCnt()+1);
             gameOrder.setRanking(newRoom.getCorrectMemberCnt());
-            gameOrder.setHaveAnswerChance(false);
 
             // gameRecord 처리 로직
             if (roomUser.getUser() != null) {
@@ -210,46 +211,42 @@ public class ChatService {
                     + roomUser.getRoomNickname();
             gameRecord.setRankingNicknameSet(rankingNicknameSet);
 
-            gameOrderRepository.save(gameOrder);
             gameRecordRepository.save(gameRecord);
 
-            chatGameMessage = makeChatGameMessage(chatMessage, room);
-            chatGameMessage.setMessageType(ChatMessage.MessageType.CORRECT);
+            if(room.getCorrectMemberCnt() >= 3 || room.getUserCount()-1 <= room.getCorrectMemberCnt()){ // 게임 끝나는 경우
+                // 기존 저장되어 있던 순위권 닉네임 리스트에 순위권에 들지 못한 나머지 닉네임 추가
+                StringBuilder rankingNicknameSet2 = new StringBuilder(gameRecord.getRankingNicknameSet());
+                rankingNicknameSet2.append(" / ");
+                List<String> allNicknames = roomUserRepository.findNickNameByRoomId(room.getId());
+                for (String nickname : allNicknames) {
+                    if(!rankingNicknameSet2.toString().contains(nickname)) rankingNicknameSet2.append(" ").append(nickname);
+                }
+                gameRecord.setRankingNicknameSet(rankingNicknameSet2.toString());
+                gameRecordRepository.save(gameRecord);
+                room.setGameStatus(false);
+                roomRepository.save(room);
+                ChatGameMessage chatGameMessage = makeEndChatGameMessage(chatMessage, room);
+                chatGameMessage.setMessageType(ChatMessage.MessageType.END);
+                // 모든 gameOrder 삭제
+                List<GameOrder> gameOrders = gameOrderRepository.findAnswerNotMe(room.getId());
+
+                for (GameOrder go : gameOrders) {
+                    gameOrderRepository.delete(go);
+                }
+
+                return  chatGameMessage;
+            }
+            else {
+                ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
+                chatGameMessage.setMessageType(ChatMessage.MessageType.CORRECT);
+                return chatGameMessage;
+            }
         }
         else{ // 오답
-            ChatGameMessage cgm = makeWrongAnswerChatGameMessage(chatMessage, room);
-            cgm.setMessageType(ChatMessage.MessageType.CORRECT);
-            gameOrder.setHaveAnswerChance(false); // 정답기회 없애기
-            gameOrderRepository.save(gameOrder);
-            return cgm;
+            ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
+            chatGameMessage.setMessageType(ChatMessage.MessageType.CORRECT);
+            return chatGameMessage;
         }
-
-        if(room.getCorrectMemberCnt() >= 3 || room.getUserCount()-1 <= room.getCorrectMemberCnt()){ // 게임 끝나는 경우
-            // 기존 저장되어 있던 순위권 닉네임 리스트에 순위권에 들지 못한 나머지 닉네임 추가
-            StringBuilder rankingNicknameSet = new StringBuilder(gameRecord.getRankingNicknameSet());
-            rankingNicknameSet.append(" / ");
-            List<String> allNicknames = roomUserRepository.findNickNameByRoomId(room.getId());
-            for (String nickname : allNicknames) {
-                if(!rankingNicknameSet.toString().contains(nickname)) rankingNicknameSet.append(" ").append(nickname);
-            }
-            gameRecord.setRankingNicknameSet(rankingNicknameSet.toString());
-            gameRecordRepository.save(gameRecord);
-            room.setGameStatus(false);
-            roomRepository.save(room);
-
-            chatGameMessage = makeEndChatGameMessage(chatMessage, room);
-            chatGameMessage.setMessageType(ChatMessage.MessageType.END);
-
-            // 모든 gameOrder 삭제
-            for (GameOrder go : room.getGameOrders()) {
-                gameOrderRepository.delete(go);
-            }
-        }
-//        else{
-//            chatGameMessage = makeChatGameMessage(chatMessage, room);
-//            chatGameMessage.setMessageType(ChatMessage.MessageType.CORRECT);
-//        }
-        return chatGameMessage;
     }
 
     public void makeGameOrder(Long roomId){  // 게임 순서 & 정답어 설정
@@ -278,33 +275,6 @@ public class ChatService {
         gameOrder.setPenalty(0);
         gameOrder.setHaveAnswerChance(true);
         return gameOrder;
-    }
-    public ChatGameMessage makeWrongAnswerChatGameMessage(ChatMessage chatMessage, Room room){
-        ChatGameMessage chatGameMessage = new ChatGameMessage();
-        chatGameMessage.setContent(chatMessage.getContent());
-        chatGameMessage.setSender(chatMessage.getSender());
-        chatGameMessage.setRoomId(chatMessage.getRoomId());
-        chatGameMessage.setGameEnd(room.isGameStatus());
-        chatGameMessage.setCycle(room.getCycle());
-        chatGameMessage.setGameUserDtos(makeWrongGameUserDtos(chatMessage.getRoomId(), chatMessage.getSender()));
-        chatGameMessage.setMessageType(chatMessage.getMessageType());
-        return chatGameMessage;
-    }
-
-    public List<GameUserDto> makeWrongGameUserDtos(Long roomId, String sender){ // GameUserDtos 생성 메소드
-        List<RoomUser> roomUsers = roomUserRepository.findByRoomId(roomId);
-
-        List<GameUserDto> gameUserDtos = new ArrayList<>();
-        for(RoomUser roomUser : roomUsers){
-            GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
-                    .orElseThrow(NoSuchGameOrderException::new);
-            if(gameOrder.getRoomUser().getRoomNickname().equals(sender)){
-                gameOrder.setRanking(0);
-            }
-            GameUserDto gameUserDto = GameUserDto.of(gameOrder, roomUser);
-            gameUserDtos.add(gameUserDto);
-        }
-        return gameUserDtos;
     }
 
     public ChatGameMessage makeChatGameMessage(ChatMessage chatMessage, Room room){
@@ -348,8 +318,8 @@ public class ChatService {
     }
 
     public List<GameUserDto> makeEndGameUserDtos(Long roomId){ // GameUserDtos(순위 기준 정렬) 생성 메소드
-        List<RoomUser> roomUsers = roomUserRepository.findByRoomIdOrderByRanking(roomId);
-        List<RoomUser> secondRoomUsers = roomUserRepository.findByZeroOrderByRanking(roomId);
+        List<RoomUser> roomUsers = gameOrderRepository.findByRoomIdOrderByRanking(roomId);
+        List<RoomUser> secondRoomUsers = gameOrderRepository.findByZeroOrderByRanking(roomId);
 
         List<GameUserDto> gameUserDtos = new ArrayList<>();
         for(RoomUser roomUser : roomUsers){
