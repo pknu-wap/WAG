@@ -196,7 +196,6 @@ public class ChatService {
                 .orElseThrow(()->new NoSuchGameRecordException(room.getId()));
 
         if(gameOrder.getAnswerName().equals(chatMessage.getContent())){ // 정답
-            System.out.println("정답이오");
             Room newRoom = roomRepository.findById(chatMessage.getRoomId())
                     .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
             newRoom.setCorrectMemberCnt(newRoom.getCorrectMemberCnt()+1);
@@ -218,16 +217,14 @@ public class ChatService {
             chatGameMessage.setMessageType(ChatMessage.MessageType.CORRECT);
         }
         else{ // 오답
-            ChatGameMessage cgm = makeChatGameMessage(chatMessage, room);
+            ChatGameMessage cgm = makeWrongAnswerChatGameMessage(chatMessage, room);
             cgm.setMessageType(ChatMessage.MessageType.CORRECT);
-            System.out.println("오답이오");
             gameOrder.setHaveAnswerChance(false); // 정답기회 없애기
             gameOrderRepository.save(gameOrder);
             return cgm;
         }
 
         if(room.getCorrectMemberCnt() >= 3 || room.getUserCount()-1 <= room.getCorrectMemberCnt()){ // 게임 끝나는 경우
-            System.out.println("게임이 끝났소");
             // 기존 저장되어 있던 순위권 닉네임 리스트에 순위권에 들지 못한 나머지 닉네임 추가
             StringBuilder rankingNicknameSet = new StringBuilder(gameRecord.getRankingNicknameSet());
             rankingNicknameSet.append(" / ");
@@ -240,7 +237,7 @@ public class ChatService {
             room.setGameStatus(false);
             roomRepository.save(room);
 
-            chatGameMessage = makeChatGameMessage(chatMessage, room);
+            chatGameMessage = makeEndChatGameMessage(chatMessage, room);
             chatGameMessage.setMessageType(ChatMessage.MessageType.END);
 
             // 모든 gameOrder 삭제
@@ -281,6 +278,33 @@ public class ChatService {
         gameOrder.setPenalty(0);
         gameOrder.setHaveAnswerChance(true);
         return gameOrder;
+    }
+    public ChatGameMessage makeWrongAnswerChatGameMessage(ChatMessage chatMessage, Room room){
+        ChatGameMessage chatGameMessage = new ChatGameMessage();
+        chatGameMessage.setContent(chatMessage.getContent());
+        chatGameMessage.setSender(chatMessage.getSender());
+        chatGameMessage.setRoomId(chatMessage.getRoomId());
+        chatGameMessage.setGameEnd(room.isGameStatus());
+        chatGameMessage.setCycle(room.getCycle());
+        chatGameMessage.setGameUserDtos(makeWrongGameUserDtos(chatMessage.getRoomId(), chatMessage.getSender()));
+        chatGameMessage.setMessageType(chatMessage.getMessageType());
+        return chatGameMessage;
+    }
+
+    public List<GameUserDto> makeWrongGameUserDtos(Long roomId, String sender){ // GameUserDtos 생성 메소드
+        List<RoomUser> roomUsers = roomUserRepository.findByRoomId(roomId);
+
+        List<GameUserDto> gameUserDtos = new ArrayList<>();
+        for(RoomUser roomUser : roomUsers){
+            GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
+                    .orElseThrow(NoSuchGameOrderException::new);
+            if(gameOrder.getRoomUser().getRoomNickname().equals(sender)){
+                gameOrder.setRanking(0);
+            }
+            GameUserDto gameUserDto = GameUserDto.of(gameOrder, roomUser);
+            gameUserDtos.add(gameUserDto);
+        }
+        return gameUserDtos;
     }
 
     public ChatGameMessage makeChatGameMessage(ChatMessage chatMessage, Room room){
@@ -333,14 +357,12 @@ public class ChatService {
                     .orElseThrow(NoSuchGameOrderException::new);
             GameUserDto gameUserDto = GameUserDto.of(gameOrder, roomUser);
             gameUserDtos.add(gameUserDto);
-            System.out.println(gameUserDto.getRoomNickname());
         }
         for(RoomUser roomUser : secondRoomUsers){
             GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
                     .orElseThrow(NoSuchGameOrderException::new);
             GameUserDto gameUserDto = GameUserDto.of(gameOrder, roomUser);
             gameUserDtos.add(gameUserDto);
-            System.out.println(gameUserDto.getRoomNickname());
         }
 
         return gameUserDtos;
