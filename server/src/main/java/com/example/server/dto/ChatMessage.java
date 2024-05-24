@@ -20,6 +20,7 @@ public class ChatMessage {
         END,
         PENALTY,
         OUT,
+        RESET,
         CHANGE,
     }
 }
