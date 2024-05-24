@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import IconButton from "../components/button/IconButton";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import FullLayout from "../components/layout/FullLayout";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import {
   captainReadyToGameModalState,
@@ -25,7 +25,6 @@ import {
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import ChatRoom from "../components/chatRoom/ChatRoom";
-import { useLocation } from "react-router-dom";
 import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
 import RadioButton from "../components/radioButton/RadioButton";
 import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
@@ -300,6 +299,7 @@ const ReadyToGame = () => {
     } else if (message.messageType === "ANSWER") {
       console.log("ANSWER로 온 메세지", message);
     } else if (message.messageType === "CORRECT") {
+      handleCorrectAnswer(message);
       console.log("CORRECT로 온 메세지", message);
     } else if (message.messageType === "START") {
       console.log("START로 온 메세지", message);
@@ -313,13 +313,13 @@ const ReadyToGame = () => {
             GameLogic(); // 5초 후에 GameLogic 실행
           }, 5000);
     } else if (message.messageType === "PENALTY") {
-      setPenaltyCount(message.gameUserDtos);
+      setGameUserDto(message.gameUserDtos);
       console.log("PENALTY로 온 메세지", message);
     } else if(message.messageType === "END"){
       stopTimer();
       Toast({ message: "정답자가 모두 나와 게임이 종료됩니다!", type: "success" });
       setTimeout(() => {
-        navigate("/"); 
+        navigate("/Ranking"); 
       }, 5000);
       
       console.log("END로 온 메세지", message);
@@ -526,31 +526,13 @@ const ReadyToGame = () => {
         Toast({ message: '정답 맞추기는 2라운드부터!', type: 'error' });
         return;
       }
-
-      else Toast({ message: '2명 이상 모여야 게임 시작 가능!', type: 'error' });
+      setIsCORRECTMode(true);
     };
-
-      // 정답 입력 모드로 전환하는 함수
-      const switchToCORRECT = () => {
-        if(currentCycle === 1)
-          {
-            Toast({ message: '정답 맞추기는 2라운드부터!', type: 'error' });
-            return;
-          }
-        setIsCORRECTMode(true);
-      };
     
   // 채팅 모드로 전환하는 함수
   const switchToASK = () => {
     setIsCORRECTMode(false);
   };
-
-      //게임중 작동 함수를 넣는 함수
-      const GameLogic = async () => { // async 추가
-        Toast({ message: "게임을 시작합니다!", type: "success" });
-        handleTimerEnd();
-      };
-
 
   //게임중 작동 함수를 넣는 함수
   const GameLogic = async () => { // async 추가
