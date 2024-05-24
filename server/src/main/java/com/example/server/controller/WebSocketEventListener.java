@@ -172,12 +172,8 @@ public class WebSocketEventListener {
 
     public void deleteRoomUser(RoomUser roomUser) {
         if (roomUser != null) {
-            GameOrder gameOrder = roomUser.getGameOrder();
+            GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser).get();
             if (gameOrder != null) {
-                roomUser.setGameOrder(null);
-                gameOrder.setRoomUser(null);
-                gameOrderRepository.save(gameOrder);  // 관계를 제거한 후 업데이트
-                roomUserRepository.save(roomUser);    // 관계를 제거한 후 업데이트
                 gameOrderRepository.delete(gameOrder); // GameOrder 삭제
             }
             roomUserRepository.delete(roomUser); // RoomUser 삭제
