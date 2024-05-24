@@ -17,7 +17,7 @@ function App() {
         <Route path="/JoinGame" element={<JoinGame />} />
         <Route path="/ReadyToGame/:roomId" element={<ReadyToGame />} />
         <Route path="/GamePlaying" element={<GamePlaying />} />
-        <Route path="/Ranking" element={<Ranking/>} />
+        <Route path="/Ranking/:roomId" element={<Ranking/>} />
         <Route path="/*" element={<WrongUrl />} />
       </Routes>
     </FullLayout>

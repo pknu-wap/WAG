@@ -3,8 +3,11 @@ import FullLayout from "../components/layout/FullLayout";
 import Button from "../components/button/Button";
 import { Realistic } from "../components/party/Realistic";
 import RankingUser from "../components/ingameComponents/RankingUser";
-import { useNavigate} from "react-router-dom";
+import { useLocation, useNavigate, useParams} from "react-router-dom";
 function Ranking() {
+    const params = useParams();
+    const location = useLocation();
+    const roomInfo = { ...location.state };
     const [size, setSize] = useState(window.innerWidth);
     const myName = localStorage.getItem("nickName");
     const [showConfetti, setShowConfetti] = useState(false);
@@ -27,7 +30,7 @@ function Ranking() {
                 ranking: 1
             },
             {
-                roomNickname: "gd",
+                roomNickname: "테스트",
                 profileImage: "d",
                 answerName: "string",
                 ranking: 2
@@ -58,7 +61,7 @@ function Ranking() {
             },
         ]
     }
-
+    console.log(roomInfo)
     const haveParty = () => {
         gameResultDummyData.resultUserDtos.forEach((user) => {
             if (user.roomNickname === myName) {

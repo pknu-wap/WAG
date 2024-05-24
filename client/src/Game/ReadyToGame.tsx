@@ -300,6 +300,7 @@ const ReadyToGame = () => {
       console.log("ANSWER로 온 메세지", message);
     } else if (message.messageType === "CORRECT") {
       handleCorrectAnswer(message);
+      setGameUserDto(message.gameUserDtos);
       console.log("CORRECT로 온 메세지", message);
     } else if (message.messageType === "START") {
       console.log("START로 온 메세지", message);
@@ -319,7 +320,8 @@ const ReadyToGame = () => {
       stopTimer();
       Toast({ message: "게임이 끝났습니다!", type: "success" });
       setTimeout(() => {
-        navigate("/Ranking"); 
+        const roomId = localStorage.getItem("roomId")
+        navigate(`/Ranking/${roomId}`, { state: message }); 
       }, 5000);
       
       console.log("END로 온 메세지", message);
@@ -623,6 +625,7 @@ const ReadyToGame = () => {
                 gameStart={gameStart}
                 className={""}
                 gameUserDto={gameUserDto}
+                isMyTurn={isMyTurn}
                 children={
                   gameStart ? (
                     <div className={`p-1 shadow-lg rounded-lg absolute top-1/2 left-0`}>
