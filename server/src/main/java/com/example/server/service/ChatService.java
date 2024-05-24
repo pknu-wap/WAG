@@ -243,7 +243,6 @@ public class ChatService {
             }
         }
         else{ // 오답
-            System.out.println("오답입니다");
             ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
             chatGameMessage.setMessageType(ChatMessage.MessageType.CORRECT);
             return chatGameMessage;
@@ -301,7 +300,6 @@ public class ChatService {
             GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
                     .orElseThrow(NoSuchGameOrderException::new);
             GameUserDto gameUserDto = GameUserDto.of(gameOrder, roomUser);
-            System.out.println(gameOrder.getRanking() + " ");
             gameUserDtos.add(gameUserDto);
         }
         return gameUserDtos;
