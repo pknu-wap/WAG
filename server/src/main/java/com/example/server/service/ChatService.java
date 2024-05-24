@@ -240,9 +240,6 @@ public class ChatService {
                 go.setRoomUser(null);
                 gameOrderRepository.delete(go);
             }
-
-            chatGameMessage = makeEndChatGameMessage(chatMessage, room);
-            chatGameMessage.setMessageType(ChatMessage.MessageType.END);
         }
         else{
             chatGameMessage = makeChatGameMessage(chatMessage, room);
