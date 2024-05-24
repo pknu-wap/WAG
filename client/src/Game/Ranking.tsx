@@ -3,12 +3,13 @@ import FullLayout from "../components/layout/FullLayout";
 import Button from "../components/button/Button";
 import { Realistic } from "../components/party/Realistic";
 import RankingUser from "../components/ingameComponents/RankingUser";
-
+import { useNavigate} from "react-router-dom";
 function Ranking() {
     const [size, setSize] = useState(window.innerWidth);
     const myName = localStorage.getItem("nickName");
     const [showConfetti, setShowConfetti] = useState(false);
     const [myRank, setMyRank] = useState<number>()
+    const navigate = useNavigate();
 
     const gameResultDummyData = {
         messageType: "END",
@@ -69,6 +70,10 @@ function Ranking() {
         });
     }
 
+    const exitOnClick = () => {
+        navigate("/");
+      };
+
     useEffect(() => {
         haveParty();
     }, []);
@@ -126,8 +131,8 @@ function Ranking() {
                 })}
             </div>
             <div className="m-auto grid-cols-1 md:grid-cols-2 mt-5 gap-2">
-                <Button className="mr-5 mb-5" size="sm">재시작</Button>
-                <Button className="mr-5 mb-5" size="sm">게임 종료</Button>
+                <Button className="mr-5 mb-5" size="sm">재시작하기</Button>
+                <Button className="mr-5 mb-5" size="sm" onClick={exitOnClick}>메인페이지로 가기</Button>
             </div>
         </FullLayout>
     )

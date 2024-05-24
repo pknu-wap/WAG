@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import IconButton from "../components/button/IconButton";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import FullLayout from "../components/layout/FullLayout";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import {
   captainReadyToGameModalState,
@@ -25,7 +25,6 @@ import {
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import ChatRoom from "../components/chatRoom/ChatRoom";
-import { useLocation } from "react-router-dom";
 import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
 import RadioButton from "../components/radioButton/RadioButton";
 import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
@@ -230,17 +229,11 @@ const ReadyToGame = () => {
   function sendMessageToSocket(socketURL: string, messageType: string) {
     const roomId = localStorage.getItem("roomId");
     const nickName = localStorage.getItem("nickName");
-    let contentToSend = myChatMessages; // 기본적으로 myChatMessages 값을 사용합니다.
-
+    let contentToSend = myChatMessages; // 기본적으로 myChatMessages 값을 사용합니다. 
     // messageType이 'JOIN', 'START', 'CHANGE' 중 하나라면, contentToSend를 빈 문자열로 보냄
     if (["JOIN", "START", "CHANGE"].includes(messageType)) {
-      contentToSend = "";
-    } else {
-      if (contentToSend === "") {
-        Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
-        return;
-      }
-    }
+      contentToSend = "1";
+    } 
     stompClient.send(
       socketURL,
       {},
@@ -301,28 +294,37 @@ const ReadyToGame = () => {
       Toast({ message: message.privateRoom ? '방이 비공개로 설정되었습니다.' : '방이 공개로 설정되었습니다.', type: 'info' });
     } else if (message.messageType === "ASK") {
       console.log("ASK로 온 메세지", message);
+      getGameCycle(message);
       getNextTurnInfo(message);
     } else if (message.messageType === "ANSWER") {
       console.log("ANSWER로 온 메세지", message);
-      getGameCycle(message);
     } else if (message.messageType === "CORRECT") {
+      handleCorrectAnswer(message);
       console.log("CORRECT로 온 메세지", message);
-
     } else if (message.messageType === "START") {
       console.log("START로 온 메세지", message);
       setCountdown(5);
       getGameAnswer();
-          // API 응답을 받은 후에 3초를 기다립니다.
+          // API 응답을 받은 후에 5초를 기다립니다.
           setTimeout(() => {
             getGameCycle(message);
             getNextTurnInfo(message);
             setgameStart(true);
-            GameLogic(); // 3초 후에 GameLogic 실행
+            GameLogic(); // 5초 후에 GameLogic 실행
           }, 5000);
     } else if (message.messageType === "PENALTY") {
-      console.log("PENALTY로 온 메세지", message);
       setGameUserDto(message.gameUserDtos);
-    } else {
+      console.log("PENALTY로 온 메세지", message);
+    } else if(message.messageType === "END"){
+      stopTimer();
+      Toast({ message: "게임이 끝났습니다!", type: "success" });
+      setTimeout(() => {
+        navigate("/Ranking"); 
+      }, 5000);
+      
+      console.log("END로 온 메세지", message);
+    } 
+    else {
       console.log(message);
     }
   }
@@ -432,46 +434,81 @@ const ReadyToGame = () => {
     console.log("content: ", recipient, ", sender: ", nickName);
   }
   /*====================== 게임 중 코드 ====================== */
-  const exitOnClick = () => {
-    navigate("/");
-  };
-  const {
-    time,
-    startTimer,
-    stopTimer,
-    resetTimer,
-  }: TimerHookProps = useTimer();
+      const exitOnClick = () => {
+        navigate("/");
+      };
+      const {
+        time,
+        startTimer,
+        stopTimer,
+        resetTimer,
+      }: TimerHookProps = useTimer();
 
-  useEffect(() => {
-    if (time < 0) {
-      stopTimer();
-      resetTimer();
-      handleTimerEnd();
-    }
-  }, [stopTimer, resetTimer, time]);
-  
-  //타이머 30초 종료 후 로직
-  const handleTimerEnd = () => {
-    const nickname = localStorage.getItem("nickName"); // getItem으로 수정
-    startTimer();
-    setHasSentCorrect(false); // 턴이 끝나면 다시 보낼 수 있도록 초기화
-    setHasSentAsk(false);    // 턴이 끝나면 다시 보낼 수 있도록 초기화
-    const nextUserNickname = nextTurnUserRef.current?.roomNickname;// 다음 턴 유저 정보 업데이트
-    setIsMyTurn(nextUserNickname === nickname); //다음턴이 나라면 isMyTurn
-    setCurrentUserAnswer(currentAnswerRef.current); //다음 턴 유저의 정답어를 화면에 띄운다.
-    if (gameCycleRef.current !== currentCycle) { // 사이클 수가 바뀌었다면 게임턴수 재랜더링
-      setCurrentCycle(gameCycleRef.current);
-    }
-    if(nextUserNickname === nickname)
-    {
-      Toast({ message: '당신은 질문자입니다.', type: 'info' });
-    }
-    else
-    {
-      Toast({ message: '당신은 답변자입니다.', type: 'info' });
-    }
-  };
+      useEffect(() => {
+        if (time < 0) {
+          stopTimer();
+          resetTimer();
+          if(!hasSentAsk) //질문을 30초 안에 하지 않는다면 강제로 턴을 넘긴다
+          {
+            if(isMyTurn){
+              const roomId = localStorage.getItem("roomId");
+              const nickName = localStorage.getItem("nickName");
+              stompClient.send(
+                "/app/chat.sendGameMessage",
+                {},
+                JSON.stringify({
+                  sender: nickName,
+                  content: "",
+                  messageType: "ASK",
+                  roomId: roomId,
+                }));
+            }    
+          }
+          setTimeout(() => {  //잠깐 대기후 다음 진행 : 위 강제 ASK를 받고 나서 초기화 진행
+            handleTimerEnd();
+            setChatMessages([]);
+          }, 500);
+        }
+      }, [stopTimer, resetTimer, time]);
+    
+      //타이머 30초 종료 후 로직
+      const handleTimerEnd = () => {
+        const nickname = localStorage.getItem("nickName");
+        startTimer();
+        setHasSentCorrect(false); // 턴이 끝나면 다시 보낼 수 있도록 초기화
+        setHasSentAsk(false);    // 턴이 끝나면 다시 보낼 수 있도록 초기화
+        const nextUserNickname = nextTurnUserRef.current?.roomNickname;// 다음 턴 유저 정보 업데이트
+        setIsMyTurn(nextUserNickname === nickname); //다음턴이 나라면 isMyTurn
+        setCurrentUserAnswer(currentAnswerRef.current); //다음 턴 유저의 정답어를 화면에 띄운다.
+        if (gameCycleRef.current !== currentCycle) { // 사이클 수가 바뀌었다면 게임턴수 재랜더링
+          setCurrentCycle(gameCycleRef.current);
+        }
+        if(nextUserNickname === nickname)
+        {
+          Toast({ message: '당신은 질문자입니다.', type: 'info' });
+        }
+        else
+        {
+          Toast({ message: '당신은 답변자입니다.', type: 'info' });
+        }
+        setChatMessages([]);
+      };
 
+    //정답자 처리 함수
+    let currentAnswererIndex = 1; // 현재 정답자 인덱스
+
+    function handleCorrectAnswer(message:any) {
+      const sender = message.sender;
+      const gameUserDtos = message.gameUserDtos;
+      const senderIndex = gameUserDtos.findIndex((user:any) => user.roomNickname === sender);
+      
+      if (senderIndex !== -1) {
+        gameUserDtos[senderIndex].ranking = currentAnswererIndex; // 1부터 시작
+        Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
+        currentAnswererIndex++;
+      }
+    }
+    
     //게임시작 버튼 클릭 이벤트
   const clickGameStart = () => {
     if(joinUsers.length > 1)
@@ -489,14 +526,13 @@ const ReadyToGame = () => {
         Toast({ message: '정답 맞추기는 2라운드부터!', type: 'error' });
         return;
       }
-    setIsCORRECTMode(true);
-  };
+      setIsCORRECTMode(true);
+    };
     
   // 채팅 모드로 전환하는 함수
   const switchToASK = () => {
     setIsCORRECTMode(false);
   };
-
 
   //게임중 작동 함수를 넣는 함수
   const GameLogic = async () => { // async 추가
@@ -684,10 +720,16 @@ const ReadyToGame = () => {
           ></input>
 
           <IconButton
-            className="shadow-none hover:shadow-none dark:shadow-none top-1 right-0 absolute"
-            size="sm"
-            onClick={sendMessage}
-          >
+              className="shadow-none hover:shadow-none dark:shadow-none top-1 right-0 absolute"
+              size="sm"
+              onClick={() => {  // onClick 핸들러 수정
+                if (myChatMessages.trim() !== "") { 
+                  sendMessage();
+                } else {
+                  Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
+                }
+              }}
+            >
             <FontAwesomeIcon className="text-[#000000]" icon={faPaperPlane} />
           </IconButton>
         </div>
