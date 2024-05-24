@@ -229,10 +229,10 @@ public class ChatService {
                 chatGameMessage.setMessageType(ChatMessage.MessageType.END);
 
                 // 모든 gameOrder 삭제
-                List<GameOrder> gameOrders = gameOrderRepository.findAnswerNotMe(room.getId());
-                for (GameOrder go : gameOrders) {
+                for (GameOrder go : room.getGameOrders()) {
                     gameOrderRepository.delete(go);
                 }
+
 
                 return  chatGameMessage;
             }
