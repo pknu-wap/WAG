@@ -218,12 +218,11 @@ public class ChatService {
             chatGameMessage.setMessageType(ChatMessage.MessageType.CORRECT);
         }
         else{ // 오답
+            ChatGameMessage cgm = makeChatGameMessage(chatMessage, room);
+            cgm.setMessageType(ChatMessage.MessageType.CORRECT);
             System.out.println("오답이오");
             gameOrder.setHaveAnswerChance(false); // 정답기회 없애기
             gameOrderRepository.save(gameOrder);
-
-            ChatGameMessage cgm = makeChatGameMessage(chatMessage, room);
-            cgm.setMessageType(ChatMessage.MessageType.CORRECT);
             return cgm;
         }
 
@@ -241,7 +240,7 @@ public class ChatService {
             room.setGameStatus(false);
             roomRepository.save(room);
 
-            chatGameMessage = makeEndChatGameMessage(chatMessage, room);
+            chatGameMessage = makeChatGameMessage(chatMessage, room);
             chatGameMessage.setMessageType(ChatMessage.MessageType.END);
 
             // 모든 gameOrder 삭제
