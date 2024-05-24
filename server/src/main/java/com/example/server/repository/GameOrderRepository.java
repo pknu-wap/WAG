@@ -29,9 +29,9 @@ public interface GameOrderRepository extends JpaRepository<GameOrder, Long> {
     @Query("SELECT go FROM GameOrder go WHERE go.room.id = :roomId and go.userOrder BETWEEN :start AND :end")
     List<GameOrder> findBackUser(@Param("roomId") Long roomId, @Param("start") int start, @Param("end") int end);
 
-    @Query("SELECT ru FROM GameOrder go JOIN go.roomUser ru WHERE ru.room.id = :roomId AND ru.gameOrder.ranking > 0 ORDER BY ru.gameOrder.ranking ASC")
-    List<RoomUser> findByRoomIdOrderByRanking(@Param("roomId") Long roomId);
-
-    @Query("SELECT ru FROM GameOrder go JOIN go.roomUser ru WHERE ru.room.id = :roomId AND ru.gameOrder.ranking = 0 ")
-    List<RoomUser> findByZeroOrderByRanking(@Param("roomId") Long roomId);
+//    @Query("SELECT ru FROM GameOrder go JOIN go.roomUser ru WHERE ru.room.id = :roomId AND ru.gameOrder.ranking > 0 ORDER BY ru.gameOrder.ranking ASC")
+//    List<RoomUser> findByRoomIdOrderByRanking(@Param("roomId") Long roomId);
+//
+//    @Query("SELECT ru FROM GameOrder go JOIN go.roomUser ru WHERE ru.room.id = :roomId AND ru.gameOrder.ranking = 0 ")
+//    List<RoomUser> findByZeroOrderByRanking(@Param("roomId") Long roomId);
 }
