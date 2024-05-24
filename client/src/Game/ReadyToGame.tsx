@@ -503,9 +503,15 @@ const ReadyToGame = () => {
       const senderIndex = gameUserDtos.findIndex((user:any) => user.roomNickname === sender);
       
       if (senderIndex !== -1) {
-        gameUserDtos[senderIndex].ranking = currentAnswererIndex; // 1부터 시작
-        Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
-        currentAnswererIndex++;
+        if(gameUserDtos[senderIndex].ranking != 0){
+          gameUserDtos[senderIndex].ranking = currentAnswererIndex; // 1부터 시작
+          Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
+          currentAnswererIndex++;
+        }
+        else{
+          Toast({ message: `${sender}가 정답을 맞추지 못했습니다!`, type: 'info' });
+        }
+
       }
     }
     
