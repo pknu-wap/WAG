@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
+//@Transactional
 @RequiredArgsConstructor
 public class ChatService {
     private final RoomRepository roomRepository;
@@ -212,7 +212,7 @@ public class ChatService {
 
             gameOrderRepository.save(gameOrder);
             gameRecordRepository.save(gameRecord);
-            
+
             chatGameMessage = makeChatGameMessage(chatMessage, room);
             chatGameMessage.setMessageType(ChatMessage.MessageType.CORRECT);
         }
