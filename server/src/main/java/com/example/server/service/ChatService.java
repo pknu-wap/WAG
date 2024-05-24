@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-//@Transactional
+@Transactional
 @RequiredArgsConstructor
 public class ChatService {
     private final RoomRepository roomRepository;
@@ -196,6 +196,7 @@ public class ChatService {
                 .orElseThrow(()->new NoSuchGameRecordException(room.getId()));
 
         if(gameOrder.getAnswerName().equals(chatMessage.getContent())){ // 정답
+            System.out.println("정답이오");
             Room newRoom = roomRepository.findById(chatMessage.getRoomId())
                     .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
             newRoom.setCorrectMemberCnt(newRoom.getCorrectMemberCnt()+1);
@@ -217,6 +218,7 @@ public class ChatService {
             chatGameMessage.setMessageType(ChatMessage.MessageType.CORRECT);
         }
         else{ // 오답
+            System.out.println("오답이오");
             gameOrder.setHaveAnswerChance(false); // 정답기회 없애기
             gameOrderRepository.save(gameOrder);
 
@@ -225,6 +227,7 @@ public class ChatService {
         }
 
         if(room.getCorrectMemberCnt() >= 3 || room.getUserCount()-1 <= room.getCorrectMemberCnt()){ // 게임 끝나는 경우
+            System.out.println("게임이 끝났소");
             // 기존 저장되어 있던 순위권 닉네임 리스트에 순위권에 들지 못한 나머지 닉네임 추가
             StringBuilder rankingNicknameSet = new StringBuilder(gameRecord.getRankingNicknameSet());
             rankingNicknameSet.append(" / ");
@@ -242,7 +245,6 @@ public class ChatService {
 
             // 모든 gameOrder 삭제
             for (GameOrder go : room.getGameOrders()) {
-                go.setRoomUser(null);
                 gameOrderRepository.delete(go);
             }
         }
