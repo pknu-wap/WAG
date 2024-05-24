@@ -324,7 +324,7 @@ public class ChatService {
     }
 
     public List<GameUserDto> makeEndGameUserDtos(Long roomId){ // GameUserDtos(순위 기준 정렬) 생성 메소드
-        List<RoomUser> roomUsers = roomUserRepository.findByRoomIdOrderByRanking(roomId);
+        List<RoomUser> roomUsers = gameOrderRepository.findByRoomIdOrderByRanking(roomId);
         return getGameUserDtos(roomUsers);
     }
 
