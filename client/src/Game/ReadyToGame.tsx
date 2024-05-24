@@ -317,7 +317,7 @@ const ReadyToGame = () => {
       console.log("PENALTY로 온 메세지", message);
     } else if(message.messageType === "END"){
       stopTimer();
-      Toast({ message: "정답자가 모두 나와 게임이 종료됩니다!", type: "success" });
+      Toast({ message: "게임이 끝났습니다!", type: "success" });
       setTimeout(() => {
         navigate("/Ranking"); 
       }, 5000);
