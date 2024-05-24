@@ -499,18 +499,20 @@ const ReadyToGame = () => {
 
 
     //정답자 처리 함수
-    let currentAnswererIndex = 0; // 현재 정답자 인덱스
-    function handleCorrectAnswer(message : any)
-    {
+    let currentAnswererIndex = 1; // 현재 정답자 인덱스
+
+    function handleCorrectAnswer(message:any) {
       const sender = message.sender;
       const gameUserDtos = message.gameUserDtos;
-      const senderIndex = gameUserDtos.findIndex((user: any)=> user.roomNickname === sender);
+      const senderIndex = gameUserDtos.findIndex((user:any) => user.roomNickname === sender);
+      
       if (senderIndex !== -1) {
-        gameUserDtos[senderIndex].ranking = currentAnswererIndex + 1; // 1부터 시작
+        gameUserDtos[senderIndex].ranking = currentAnswererIndex; // 1부터 시작
+        Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
+        currentAnswererIndex++;
       }
+    }
     
-      currentAnswererIndex++;
-    } 
     //게임시작 버튼 클릭 이벤트
     const clickGameStart = () => {
       if(joinUsers.length > 1)
