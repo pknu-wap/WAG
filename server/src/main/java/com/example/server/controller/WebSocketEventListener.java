@@ -62,7 +62,7 @@ public class WebSocketEventListener {
                     .orElseThrow(()-> new NoSuchRoomException(roomId));
 
             if(room.getUserCount() == 1){  // 나간 사람이 마지막 사람이라면 방 삭제
-                deleteRoomUser(roomUser);
+                roomUserRepository.delete(roomUser); // RoomUser 삭제
                 roomRepository.delete(room);
                 return;
             }
@@ -113,7 +113,7 @@ public class WebSocketEventListener {
                 messagingTemplate.convertAndSend("/topic/public/"+roomId, chatGameMessage);
             }
 
-            deleteRoomUser(roomUser);
+            roomUserRepository.delete(roomUser); // RoomUser 삭제
 
             roomRepository.save(room);  // 룸 정보 저장.
             List <RoomUser> roomUsers = roomUserRepository.findByRoomId(roomId);
