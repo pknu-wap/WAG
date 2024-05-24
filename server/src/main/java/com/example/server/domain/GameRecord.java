@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Entity
@@ -32,7 +33,7 @@ public class GameRecord {
 
     @PrePersist
     protected void onCreate() {
-        date = LocalDateTime.now();
+        date = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
     }
 
 }

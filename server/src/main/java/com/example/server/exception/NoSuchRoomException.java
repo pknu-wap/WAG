@@ -6,7 +6,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class NoSuchRoomException extends RuntimeException{
 
-    public NoSuchRoomException() {
-        super("no such room");
+    public NoSuchRoomException(Long roomId) {
+        super("no such room, roomId : " + roomId);
+
     }
 }
