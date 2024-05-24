@@ -324,8 +324,8 @@ public class ChatService {
     }
 
     public List<GameUserDto> makeEndGameUserDtos(Long roomId){ // GameUserDtos(순위 기준 정렬) 생성 메소드
-        List<RoomUser> roomUsers = gameOrderRepository.findByRoomIdOrderByRanking(roomId);
-        List<RoomUser> secondRoomUsers = gameOrderRepository.findByZeroOrderByRanking(roomId);
+        List<RoomUser> roomUsers = roomUserRepository.findByRoomIdOrderByRanking(roomId);
+        List<RoomUser> secondRoomUsers = roomUserRepository.findByZeroOrderByRanking(roomId);
 
         List<GameUserDto> gameUserDtos = new ArrayList<>();
         for(RoomUser roomUser : roomUsers){
@@ -333,12 +333,14 @@ public class ChatService {
                     .orElseThrow(NoSuchGameOrderException::new);
             GameUserDto gameUserDto = GameUserDto.of(gameOrder, roomUser);
             gameUserDtos.add(gameUserDto);
+            System.out.println(gameUserDto.getRoomNickname());
         }
         for(RoomUser roomUser : secondRoomUsers){
             GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
                     .orElseThrow(NoSuchGameOrderException::new);
             GameUserDto gameUserDto = GameUserDto.of(gameOrder, roomUser);
             gameUserDtos.add(gameUserDto);
+            System.out.println(gameUserDto.getRoomNickname());
         }
 
         return gameUserDtos;
