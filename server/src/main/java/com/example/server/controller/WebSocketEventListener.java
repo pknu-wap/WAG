@@ -76,7 +76,8 @@ public class WebSocketEventListener {
                     String destination = "/topic/public/"+room.getId();
                     GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
                             .orElseThrow(NoSuchGameOrderException::new);
-                    deleteGameOrder(gameOrder);
+                    gameOrderRepository.delete(gameOrder);
+//                    deleteGameOrder(gameOrder);
                     //deleteRoomUser(roomUser);
                     messagingTemplate.convertAndSend(destination, chatGameMessage);
                     room.setUserCount(room.getUserCount() - 1);  // 유저 수 -1
@@ -163,8 +164,8 @@ public class WebSocketEventListener {
             go.setUserOrder(go.getUserOrder()-1);
             gameOrderRepository.save(go);
         }
-
-        deleteGameOrder(gameOrder);
+        gameOrderRepository.delete(gameOrder);
+//        deleteGameOrder(gameOrder);
 
         return isNextTuen;
     }
