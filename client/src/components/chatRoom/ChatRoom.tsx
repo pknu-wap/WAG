@@ -49,8 +49,28 @@ const ChatRoom: React.FC<{ message: ChatMessage }> = ({ message }) => {
       }
       else if (msg.messageType === 'PENALTY') //UserMessage가 아니고
       {
-            //일단 아무처리안함
+        return (
+        <div key={index} className="flex flex-col items-center">
+        <NotificationMessage message={msg} />
+      </div>
+        )
       }
+      else if (msg.messageType === 'END') // UserMessage가 아니고
+      {
+        let containerClass = isMyMessage ? "flex flex-col items-end" : "flex flex-col items-start";
+        return (
+          <>
+            <div key={index} className={containerClass}>
+              <UserMessage message={msg} />
+            </div>
+            <div key={index} className="flex flex-col items-center">
+              <NotificationMessage message={{...msg, content: "정답자가 모두 나왔습니다"}} />
+              <NotificationMessage message={{...msg, content: "5초 뒤 결과페이지로 이동합니다!"}} />
+            </div>
+          </>
+        );
+      }
+      
       else // 그 외 공지 메시지 처리
       {
         return (

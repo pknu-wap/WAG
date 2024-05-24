@@ -317,8 +317,14 @@ const ReadyToGame = () => {
           }, 5000);
     } else if (message.messageType === "PENALTY") {
       setPenaltyCount(message.gameUserDtos);
+      console.log("PENALTY로 온 메세지", message);
     } else if(message.messageType === "END"){
-      navigate("/ranking");
+      stopTimer();
+      Toast({ message: "정답자가 모두 나와 게임이 종료됩니다!", type: "success" });
+      setTimeout(() => {
+        navigate("/"); 
+      }, 5000);
+      
       console.log("END로 온 메세지", message);
     } 
     else {
@@ -477,9 +483,9 @@ const ReadyToGame = () => {
         const nextUserNickname = nextTurnUserRef.current?.roomNickname;// 다음 턴 유저 정보 업데이트
         setIsMyTurn(nextUserNickname === nickname); //다음턴이 나라면 isMyTurn
         setCurrentUserAnswer(currentAnswerRef.current); //다음 턴 유저의 정답어를 화면에 띄운다.
-        //if (gameCycleRef.current !== currentCycle) { // 사이클 수가 바뀌었다면 게임턴수 재랜더링
+        if (gameCycleRef.current !== currentCycle) { // 사이클 수가 바뀌었다면 게임턴수 재랜더링
           setCurrentCycle(gameCycleRef.current);
-        //}
+        }
         if(nextUserNickname === nickname)
         {
           Toast({ message: '당신은 질문자입니다.', type: 'info' });
