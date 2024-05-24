@@ -92,6 +92,7 @@ public class ChatService {
         Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
                         .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
         ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
+        chatGameMessage.setContent(chatMessage.getContent() + " 님이 경고를 받았습니다. ");
         chatGameMessage.setMessageType(ChatMessage.MessageType.PENALTY);
 
         return chatGameMessage;
