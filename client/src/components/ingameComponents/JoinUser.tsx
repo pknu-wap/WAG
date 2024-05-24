@@ -1,5 +1,5 @@
 import React, { ReactNode, forwardRef, useEffect, useState } from "react";
-import { faUser } from "@fortawesome/free-regular-svg-icons";
+import { faChessKing, faUser } from "@fortawesome/free-regular-svg-icons";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import IconButton from "../button/IconButton";
@@ -7,6 +7,7 @@ import { GameUserDto, IGetAnswerList } from "../../types/dto";
 
 interface JoinUserProps {
   Nickname: string;
+  userCount: number;
   gameStart: boolean;
   gameUserDto: GameUserDto[];
   className: string;
@@ -16,13 +17,12 @@ interface JoinUserProps {
 }
 
 const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
-  ({ Nickname, gameStart, gameUserDto, className, isMyTurn, onClick, children }, ref) => {
+  ({ Nickname, userCount, gameStart, gameUserDto, className, isMyTurn, onClick, children }, ref) => {
     const roomId = localStorage.getItem("roomId");
     const myName = localStorage.getItem("nickName");
     const [userRank, setUserRank] = useState<number>(0)
     const [answer, setAnswer] = useState("");
     const [penaltyCount, setPenaltyCount] = useState(0);
-    const [myTurn, setMyTurn] = useState(false);
 
     const getNicknamePossible = async () => {
       try {
@@ -41,7 +41,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
         throw error;
       }
     };
-
+    console.log(userCount)
     const findUserAnswer = async () => {
       const answerUsers = await getNicknamePossible();
       console.log(answerUsers);
@@ -74,6 +74,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
       gameUserDto.forEach((dto) => {
         if (Nickname === dto.roomNickname) {
           setPenaltyCount(dto.penalty);
+          setOpacity("opacity-0");
         }
       });
     };
@@ -90,7 +91,6 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
       checkOtherPenalty();
       checkToRank();
     }, [gameUserDto]);
-    
 
     return (
       <div
@@ -111,6 +111,11 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
         ) : (
           <div></div>
         )}
+        {userCount === 1 ? (
+          <div className="bottom-14 absolute">
+          <FontAwesomeIcon icon={faChessKing} />
+        </div>  
+        ) : (<div></div>)}
         <FontAwesomeIcon icon={faUser} size="xl" />
       </IconButton>
         ) : (

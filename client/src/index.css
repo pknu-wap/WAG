@@ -3,6 +3,10 @@
 @tailwind utilities;
 @import "./Fonts/galmuri.css";
 
+html {
+  margin: auto;
+}
+
 body {
   margin: auto;
   font-family: "Galmuri11", sans-serif;

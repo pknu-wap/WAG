@@ -62,6 +62,8 @@ function Ranking() {
         ]
     }
     console.log(roomInfo)
+
+    // 3등 이상일 때 폭죽 터지도록
     const haveParty = () => {
         gameResultDummyData.resultUserDtos.forEach((user) => {
             if (user.roomNickname === myName) {
@@ -81,6 +83,8 @@ function Ranking() {
         haveParty();
     }, []);
     console.log(myName, myRank)
+
+    // UI 동적으로 만들기
     useEffect(() => {
       const handleResize = () => {
         if (window.innerWidth <= 1024) {

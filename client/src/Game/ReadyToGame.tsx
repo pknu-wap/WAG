@@ -52,6 +52,8 @@ const ReadyToGame = () => {
   const [enterCode, setEnterCode] = useState<number>();
   const [isPrivateRoom, setIsPrivateRoom] = useState<boolean>();
   const [isMeCaptain, setIsMeCaptain] = useState(false);
+  const [userCount, setUserCount] = useState(0)
+  const [isGameEnd, setIsGameEnd] = useState(false)
 
   const location = useLocation();
   const roomInfo = { ...location.state };
@@ -278,6 +280,7 @@ const ReadyToGame = () => {
       //addJoinUser();
       setJoinUsers(message.roomResponse.userDtos);
       setRoomInfo();
+      setUserCount(message.roomResponse.userDtos.length)
       console.log("JOIN으로 온 메세지", message);
       console.log(message.sender + " joined!");
     } else if (message.messageType === "LEAVE") {
@@ -319,7 +322,9 @@ const ReadyToGame = () => {
     } else if(message.messageType === "END"){
       stopTimer();
       Toast({ message: "게임이 끝났습니다!", type: "success" });
+      setGameUserDto(message.gameUserDtos);
       setTimeout(() => {
+        setIsGameEnd(true)
         const roomId = localStorage.getItem("roomId")
         navigate(`/Ranking/${roomId}`, { state: message }); 
       }, 5000);
@@ -419,7 +424,6 @@ const ReadyToGame = () => {
     }
   }, [enterCode]);
 
-
   function socketPenaltyOnClick(recipient: string) {
     const roomId = localStorage.getItem("roomId");
     const nickName = localStorage.getItem("nickName");
@@ -433,7 +437,6 @@ const ReadyToGame = () => {
         roomId: roomId,
       })
     );
-    console.log("content: ", recipient, ", sender: ", nickName);
   }
   /*====================== 게임 중 코드 ====================== */
       const exitOnClick = () => {
@@ -622,6 +625,7 @@ const ReadyToGame = () => {
             <div key={index} className="relative">
               <JoinUser
                 Nickname={info.roomNickname}
+                userCount={userCount}
                 gameStart={gameStart}
                 className={""}
                 gameUserDto={gameUserDto}
