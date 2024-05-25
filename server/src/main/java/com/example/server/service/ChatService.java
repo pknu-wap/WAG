@@ -54,10 +54,10 @@ public class ChatService {
         Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
                 .orElseThrow(() -> new NoSuchRoomException(chatMessage.getRoomId()));
         roomInit(room);
-        GameRecord gameRecord = gameRecordInit(room);
+//        GameRecord gameRecord = gameRecordInit(room);
 
         roomRepository.save(room);
-        gameRecordRepository.save(gameRecord);
+//        gameRecordRepository.save(gameRecord);
 
         ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
         chatGameMessage.setMessageType(ChatMessage.MessageType.START);
@@ -69,7 +69,7 @@ public class ChatService {
         GameRecord gameRecord = new GameRecord();
         List<User> userRanking = new ArrayList<>();
         gameRecord.setUserRanking(userRanking);
-        gameRecord.setRoomId(room.getId());
+//        gameRecord.setRoomId(room.getId());
         return gameRecord;
     }
 
@@ -191,8 +191,8 @@ public class ChatService {
                 .orElseThrow(NoSuchGameOrderException::new);
         Room room = roomRepository.findById(chatMessage.getRoomId())
                 .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
-        GameRecord gameRecord = gameRecordRepository.findFirstByRoomIdOrderByDateDesc(room.getId())
-                .orElseThrow(()->new NoSuchGameRecordException(room.getId()));
+//        GameRecord gameRecord = gameRecordRepository.findFirstByRoomIdOrderByDateDesc(room.getId())
+//                .orElseThrow(()->new NoSuchGameRecordException(room.getId()));
 
         gameOrder.setHaveAnswerChance(false); // 정답기회 없애기
         gameOrderRepository.save(gameOrder);
@@ -204,25 +204,25 @@ public class ChatService {
             gameOrder.setRanking(newRoom.getCorrectMemberCnt());
 
             // gameRecord 처리 로직
-            if (roomUser.getUser() != null) {
-                gameRecord.getUserRanking().add(roomUser.getUser());
-            }
-            String rankingNicknameSet = gameRecord.getRankingNicknameSet() + " "
-                    + roomUser.getRoomNickname();
-            gameRecord.setRankingNicknameSet(rankingNicknameSet);
-
-            gameRecordRepository.save(gameRecord);
+//            if (roomUser.getUser() != null) {
+//                gameRecord.getUserRanking().add(roomUser.getUser());
+//            }
+//            String rankingNicknameSet = gameRecord.getRankingNicknameSet() + " "
+//                    + roomUser.getRoomNickname();
+//            gameRecord.setRankingNicknameSet(rankingNicknameSet);
+//
+//            gameRecordRepository.save(gameRecord);
 
             if(room.getCorrectMemberCnt() >= 3 || room.getUserCount()-1 <= room.getCorrectMemberCnt()){ // 게임 끝나는 경우
                 // 기존 저장되어 있던 순위권 닉네임 리스트에 순위권에 들지 못한 나머지 닉네임 추가
-                StringBuilder rankingNicknameSet2 = new StringBuilder(gameRecord.getRankingNicknameSet());
-                rankingNicknameSet2.append(" / ");
-                List<String> allNicknames = roomUserRepository.findNickNameByRoomId(room.getId());
-                for (String nickname : allNicknames) {
-                    if(!rankingNicknameSet2.toString().contains(nickname)) rankingNicknameSet2.append(" ").append(nickname);
-                }
-                gameRecord.setRankingNicknameSet(rankingNicknameSet2.toString());
-                gameRecordRepository.save(gameRecord);
+//                StringBuilder rankingNicknameSet2 = new StringBuilder(gameRecord.getRankingNicknameSet());
+//                rankingNicknameSet2.append(" / ");
+//                List<String> allNicknames = roomUserRepository.findNickNameByRoomId(room.getId());
+//                for (String nickname : allNicknames) {
+//                    if(!rankingNicknameSet2.toString().contains(nickname)) rankingNicknameSet2.append(" ").append(nickname);
+//                }
+//                gameRecord.setRankingNicknameSet(rankingNicknameSet2.toString());
+//                gameRecordRepository.save(gameRecord);
                 room.setGameStatus(false);
                 roomRepository.save(room);
                 ChatGameMessage chatGameMessage = makeEndChatGameMessage(chatMessage, room);
@@ -310,14 +310,17 @@ public class ChatService {
         chatGameMessage.setRoomId(chatMessage.getRoomId());
         chatGameMessage.setGameEnd(room.isGameStatus());
         chatGameMessage.setCycle(room.getCycle());
-        chatGameMessage.setGameUserDtos(makeEndGameUserDtos(chatMessage.getRoomId()));
+        chatGameMessage.setGameUserDtos(makeEndGameUserDtos(room));
         chatGameMessage.setMessageType(chatMessage.getMessageType());
         return chatGameMessage;
     }
 
-    public List<GameUserDto> makeEndGameUserDtos(Long roomId){ // GameUserDtos(순위 기준 정렬) 생성 메소드
-        List<RoomUser> roomUsers = gameOrderRepository.findByRoomIdOrderByRanking(roomId);
-        List<RoomUser> secondRoomUsers = gameOrderRepository.findByZeroOrderByRanking(roomId);
+    public List<GameUserDto> makeEndGameUserDtos(Room room){ // GameUserDtos(순위 기준 정렬) 생성 메소드
+        List<RoomUser> roomUsers = gameOrderRepository.findByRoomIdOrderByRanking(room.getId());
+        List<RoomUser> secondRoomUsers = gameOrderRepository.findByZeroOrderByRanking(room.getId());
+
+        GameRecord gameRecord = gameRecordInit(room);
+
 
         List<GameUserDto> gameUserDtos = new ArrayList<>();
         for(RoomUser roomUser : roomUsers){
@@ -325,13 +328,30 @@ public class ChatService {
                     .orElseThrow(NoSuchGameOrderException::new);
             GameUserDto gameUserDto = GameUserDto.of(gameOrder, roomUser);
             gameUserDtos.add(gameUserDto);
+
+            // record 저장 로직
+            if (roomUser.getUser() != null) {
+                gameRecord.getUserRanking().add(roomUser.getUser());
+            }
+            String rankingNicknameSet = gameRecord.getRankingNicknameSet() + " "
+                    + roomUser.getRoomNickname();
+            gameRecord.setRankingNicknameSet(rankingNicknameSet);
         }
         for(RoomUser roomUser : secondRoomUsers){
             GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
                     .orElseThrow(NoSuchGameOrderException::new);
             GameUserDto gameUserDto = GameUserDto.of(gameOrder, roomUser);
             gameUserDtos.add(gameUserDto);
+
+            // record 저장 로직
+            if (roomUser.getUser() != null) {
+                gameRecord.getUserRanking().add(roomUser.getUser());
+            }
+            String rankingNicknameSet = gameRecord.getRankingNicknameSet() + " "
+                    + roomUser.getRoomNickname();
+            gameRecord.setRankingNicknameSet(rankingNicknameSet);
         }
+        gameRecordRepository.save(gameRecord);
 
         return gameUserDtos;
     }
