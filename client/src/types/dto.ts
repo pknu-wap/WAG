@@ -74,12 +74,14 @@ export interface JoinUser {
 }
 
 export interface GameUserDto {
-  Captain: boolean;
+  captain: boolean;
   roomNickname: string;
   profileImage: string;
   penalty: number;
-  MyTurn: boolean;
-  haveAnswerChange: boolean;
+  myTurn: boolean;
+  answername?: string;
+  nextTurn: boolean;
+  haveAnswerChance: boolean;
   ranking: number;
 }
 // 게임 중 채팅 객체

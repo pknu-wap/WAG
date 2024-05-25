@@ -21,6 +21,7 @@ import {
   URL,
   UserAnswerDto,
   AnswerUserDto,
+  GameMessage,
 } from "../types/dto";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
@@ -88,6 +89,8 @@ const ReadyToGame = () => {
   const [currentCycle, setCurrentCycle] = useState<number>(0);
   const [hasSentCorrect, setHasSentCorrect] = useState(false);  //정답을 외쳤는지 
   const [hasSentAsk, setHasSentAsk] = useState(false);  //질문을 했는지 
+  const [whoseTurn, setWhoseTurn] = useState<GameMessage>()
+
 
   const answerListRef = useRef<any>(null); //정답어 리스트가 도착하면 상태를 바꾸어줌
   const currentAnswerRef = useRef<any>(null); 
@@ -236,7 +239,7 @@ const ReadyToGame = () => {
     let contentToSend = myChatMessages; // 기본적으로 myChatMessages 값을 사용합니다. 
     // messageType이 'JOIN', 'START', 'CHANGE' 중 하나라면, contentToSend를 빈 문자열로 보냄
     if (["JOIN", "START", "CHANGE"].includes(messageType)) {
-      contentToSend = "1";
+      contentToSend = "";
     } 
     stompClient.send(
       socketURL,
@@ -299,9 +302,11 @@ const ReadyToGame = () => {
       Toast({ message: message.privateRoom ? '방이 비공개로 설정되었습니다.' : '방이 공개로 설정되었습니다.', type: 'info' });
     } else if (message.messageType === "ASK") {
       console.log("ASK로 온 메세지", message);
+      setWhoseTurn(message)
       getGameCycle(message);
       getNextTurnInfo(message);
     } else if (message.messageType === "ANSWER") {
+      setWhoseTurn(message)
       console.log("ANSWER로 온 메세지", message);
     } else if (message.messageType === "CORRECT") {
       handleCorrectAnswer(message);
@@ -311,6 +316,7 @@ const ReadyToGame = () => {
       console.log("START로 온 메세지", message);
       setCountdown(5);
       getGameAnswer();
+      setWhoseTurn(message)
           // API 응답을 받은 후에 5초를 기다립니다.
           setTimeout(() => {
             getGameCycle(message);
@@ -620,14 +626,8 @@ const ReadyToGame = () => {
    const [showConfetti, setShowConfetti] = useState(false);
    const [myRank, setMyRank] = useState<number>()
    const myName = localStorage.getItem("nickName");
-   const [answerUserDtos, setAnswerUserDtos] = useState<AnswerUserDto[]>([])
-   const getAnswerUserDtos = async () => {
-    const dtos = await getGameAnswer()
-    setAnswerUserDtos(dtos.answerUserDtos)
-   }
 
    const haveParty = () => {
-    getAnswerUserDtos()
     gameUserDtos.forEach((user) => {
         if (user.roomNickname === myName) {
             setMyRank(user.ranking);
@@ -681,7 +681,11 @@ const ReadyToGame = () => {
             className="absolute text-white max-w-5xl bg-light-btn dark:bg-dark-btn overflow-hidden"
           >
             <div className="flex flex-col items-center justify-center">
-              <h1 className="text-[#ffffff] pt-0 text-3xl font-bold">{myRank}등</h1>
+              {myRank !== 0 ? (
+                <h1 className="text-[#ffffff] pt-0 text-3xl font-bold">{myRank}등</h1>
+              ) : (
+                <h1 className="text-[#ffffff] pt-0 text-3xl font-bold">순위권에 들지 못했습니다</h1>
+              )}
               <p className="text-[#ffffff] text-xl">{myName}</p>
             </div>
           </div>
@@ -696,7 +700,7 @@ const ReadyToGame = () => {
                     <RankingUser 
                     key={index}
                     roomNickname={user.roomNickname} 
-                    answerDtos={answerUserDtos} 
+                    answer={user.answername} 
                     ranking={user.ranking}/>
                 )
             })}
@@ -716,9 +720,9 @@ const ReadyToGame = () => {
                   Nickname={info.roomNickname}
                   userCount={userCount}
                   gameStart={gameStart}
-                  gameEnd={isGameEnd}
                   className={""}
                   gameUserDto={gameUserDtos}
+                  whoseTurn={currentUserAnswer?.nickname}
                   isMyTurn={isMyTurn}
                   children={
                     gameStart ? (

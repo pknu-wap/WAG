@@ -9,8 +9,8 @@ interface JoinUserProps {
   Nickname: string;
   userCount: number;
   gameStart: boolean;
-  gameEnd: boolean;
   gameUserDto: GameUserDto[];
+  whoseTurn?: string;
   className: string;
   isMyTurn: boolean;
   onClick?: () => void;
@@ -18,7 +18,7 @@ interface JoinUserProps {
 }
 
 const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
-  ({ Nickname, userCount, gameStart, gameEnd, gameUserDto, className, isMyTurn, onClick, children }, ref) => {
+  ({ Nickname, userCount, gameStart, gameUserDto, whoseTurn, className, isMyTurn, onClick, children }, ref) => {
     const roomId = localStorage.getItem("roomId");
     const myName = localStorage.getItem("nickName");
     const [userRank, setUserRank] = useState<number>(0)
@@ -87,6 +87,9 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
       }
      }) 
     }
+
+    // 누구 턴인지 확인
+
     useEffect(() => {
       checkOtherPenalty();
       checkToRank();
@@ -97,13 +100,13 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
         ref={ref}
         className={`${className} flex flex-col items-center relative`}
       >
-        {(isMyTurn && (myName === Nickname)) ? (
+        {Nickname === whoseTurn ? (
         <IconButton
         size="lg"
         className="items-center bg-[#FFA500] dark:bg-[#FFA500] relative"
         onClick={openTollTip}
-        disabled={gameStart && myName !== Nickname ? false : true}
-      >
+        disabled={gameStart && myName !== Nickname && userRank === 0 ? false : true}
+        >
         {gameStart ? (
           <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-14 absolute">
             {answer}
@@ -139,14 +142,14 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
         {penaltyCount === 0 ? (
           <div></div>
         ) : penaltyCount === 1 ? (
-          <div className="w-3 h-5 rounded absolute top-12 left-12 border-slate-950 bg-[#FFFF00]"></div>
+          <div className="w-3 h-5 rounded absolute top-12 left-12 border-[1px] border-[#000000] bg-[#FFFF00]"></div>
         ) : penaltyCount === 2 ? (
           <div className="absolute top-12 left-12 flex flex-column">
-            <div className="w-3 h-5 rounded border-slate-950 bg-[#FFFF00]"></div>
-            <div className="w-3 h-5 rounded border-slate-950 bg-[#FFFF00]"></div>
+            <div className="w-3 h-5 rounded border-[1px] border-[#000000] rotate-[160deg] bg-[#FFFF00] relative"></div>
+            <div className="w-3 h-5 rounded border-[1px] border-[#000000] rotate-[20deg] bg-[#FFFF00] left-[8px] top-[1px] absolute"></div>
           </div>
         ) : (
-          <div className="w-3 h-5 rounded absolute top-12 left-12 border-slate-950 bg-[#FF0000]"></div>
+          <div className="w-3 h-5 rounded absolute top-12 left-12 border-[1px] border-[#000000] bg-[#FF0000]"></div>
         )}
         {userRank === 1 ? (
           <div className="w-12 h-12 rounded absolute top-11 left-11 z-10">
