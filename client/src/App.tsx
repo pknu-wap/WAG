@@ -6,7 +6,6 @@ import JoinGame from "./Game/JoinGame";
 import CreateRoom from "./CreateRoom/CreateRoom";
 import ReadyToGame from "./Game/ReadyToGame";
 import WrongUrl from "./components/layout/404";
-import Ranking from "./Game/Ranking";
 
 function App() {
   return (
@@ -17,7 +16,6 @@ function App() {
         <Route path="/JoinGame" element={<JoinGame />} />
         <Route path="/ReadyToGame/:roomId" element={<ReadyToGame />} />
         <Route path="/GamePlaying" element={<GamePlaying />} />
-        <Route path="/Ranking" element={<Ranking/>} />
         <Route path="/*" element={<WrongUrl />} />
       </Routes>
     </FullLayout>
