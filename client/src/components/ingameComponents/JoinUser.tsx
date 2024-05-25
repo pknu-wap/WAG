@@ -9,6 +9,7 @@ interface JoinUserProps {
   Nickname: string;
   userCount: number;
   gameStart: boolean;
+  gameEnd: boolean;
   gameUserDto: GameUserDto[];
   className: string;
   isMyTurn: boolean;
@@ -17,14 +18,14 @@ interface JoinUserProps {
 }
 
 const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
-  ({ Nickname, userCount, gameStart, gameUserDto, className, isMyTurn, onClick, children }, ref) => {
+  ({ Nickname, userCount, gameStart, gameEnd, gameUserDto, className, isMyTurn, onClick, children }, ref) => {
     const roomId = localStorage.getItem("roomId");
     const myName = localStorage.getItem("nickName");
     const [userRank, setUserRank] = useState<number>(0)
     const [answer, setAnswer] = useState("");
     const [penaltyCount, setPenaltyCount] = useState(0);
 
-    const getNicknamePossible = async () => {
+    const getGameAnswer = async () => {
       try {
         const response = await axios.get<IGetAnswerList>(
           "http://wwwag-backend.co.kr/answer/list",
@@ -41,9 +42,8 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
         throw error;
       }
     };
-    console.log(userCount)
     const findUserAnswer = async () => {
-      const answerUsers = await getNicknamePossible();
+      const answerUsers = await getGameAnswer();
       console.log(answerUsers);
       answerUsers.answerUserDtos.forEach((dto) => {
         if (Nickname === dto.nickname) {

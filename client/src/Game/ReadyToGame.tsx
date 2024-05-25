@@ -33,6 +33,8 @@ import { history } from "../util/history";
 import JoinUser from "../components/ingameComponents/JoinUser";
 import Timer from "./timer/Timer";
 import useTimer, { TimerHookProps } from './timer/useTimer';
+import { Realistic } from "../components/party/Realistic";
+import RankingUser from "../components/ingameComponents/RankingUser";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -73,7 +75,7 @@ const ReadyToGame = () => {
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
   const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]); // 입장 유저
-  const [gameUserDto, setGameUserDto] = useState<GameUserDto[]>([]);
+  const [gameUserDtos, setGameUserDtos] = useState<GameUserDto[]>([]); // 게임 중 유저 dto
 
   //게임 중
   const [countdown, setCountdown] = useState<number | null>(null); //게임 시작전 3초대기
@@ -303,7 +305,7 @@ const ReadyToGame = () => {
       console.log("ANSWER로 온 메세지", message);
     } else if (message.messageType === "CORRECT") {
       handleCorrectAnswer(message);
-      setGameUserDto(message.gameUserDtos);
+      setGameUserDtos(message.gameUserDtos);
       console.log("CORRECT로 온 메세지", message);
     } else if (message.messageType === "START") {
       console.log("START로 온 메세지", message);
@@ -317,16 +319,14 @@ const ReadyToGame = () => {
             GameLogic(); // 5초 후에 GameLogic 실행
           }, 5000);
     } else if (message.messageType === "PENALTY") {
-      setGameUserDto(message.gameUserDtos);
+      setGameUserDtos(message.gameUserDtos);
       console.log("PENALTY로 온 메세지", message);
     } else if(message.messageType === "END"){
       stopTimer();
       Toast({ message: "게임이 끝났습니다!", type: "success" });
-      setGameUserDto(message.gameUserDtos);
+      setGameUserDtos(message.gameUserDtos);
       setTimeout(() => {
         setIsGameEnd(true)
-        const roomId = localStorage.getItem("roomId")
-        navigate(`/Ranking/${roomId}`, { state: message }); 
       }, 5000);
       
       console.log("END로 온 메세지", message);
@@ -595,7 +595,6 @@ const ReadyToGame = () => {
           },
         }
       );
-      console.log(response.data);
       const answerList = response.data
       answerListRef.current = answerList;
       return response.data;
@@ -616,131 +615,224 @@ const ReadyToGame = () => {
     return () => clearInterval(countdownInterval); // 컴포넌트 언마운트 시 setInterval 정리
   }, [countdown]);
 
+   /*====================== 게임 결과 코드 ====================== */
+   const [size, setSize] = useState(window.innerWidth);
+   const [showConfetti, setShowConfetti] = useState(false);
+   const [myRank, setMyRank] = useState<number>()
+   const myName = localStorage.getItem("nickName");
+   const [answerUserDtos, setAnswerUserDtos] = useState<AnswerUserDto[]>([])
+   const getAnswerUserDtos = async () => {
+    const dtos = await getGameAnswer()
+    setAnswerUserDtos(dtos.answerUserDtos)
+   }
+
+   const haveParty = () => {
+    getAnswerUserDtos()
+    gameUserDtos.forEach((user) => {
+        if (user.roomNickname === myName) {
+            setMyRank(user.ranking);
+            if (user.ranking <= 3 && user.ranking !== 0) {
+                setShowConfetti(true);
+            }
+        }
+    });
+    }
+    useEffect(() => {
+      haveParty();
+  }, [isGameEnd]);
+
+  const restartOnClick = () => {
+    setIsGameEnd(false);
+    setgameStart(false);
+    setIsMyTurn(false)
+    setChatMessages([]);
+    setGameUserDtos([])
+  }
+    useEffect(() => {
+      const handleResize = () => {
+        if (window.innerWidth <= 1024) {
+            setSize(window.innerWidth);
+        } else {
+            setSize(1024)
+        }
+      };
+  
+      window.addEventListener('resize', handleResize);
+  
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
+    }, []);
 
   return (
     <FullLayout>
-      <div className="flex flex-row justify-around items-center mt-10 mx-7">
-        {joinUsers.map((info, index) => {
-          return (
-            <div key={index} className="relative">
-              <JoinUser
-                Nickname={info.roomNickname}
-                userCount={userCount}
-                gameStart={gameStart}
-                className={""}
-                gameUserDto={gameUserDto}
-                isMyTurn={isMyTurn}
-                children={
-                  gameStart ? (
-                    <div className={`p-1 shadow-lg rounded-lg absolute top-1/2 left-0`}>
-                      <Button size="sm"
-                        onClick={() => { socketPenaltyOnClick(info.roomNickname); }}>
-                        경고 주기
-                      </Button>
-                    </div>
-                  ) : (
-                    <div></div>
-                  )}
-              />
+      {isGameEnd ? (
+      <div>
+        <div className="relative">
+          {/* Bottom section with purple semi-circle */}
+          <div className="w-full h-[96px] absolute -top-[96px] bg-light-btn dark:bg-dark-btn"></div>
+          <div 
+            style={{
+                width: '100%',
+                height: `${size/2}px`,
+                maxHeight: '1024px',
+                clipPath: 'ellipse(50% 50% at 50% 0%)'
+            }} 
+            className="absolute text-white max-w-5xl bg-light-btn dark:bg-dark-btn overflow-hidden"
+          >
+            <div className="flex flex-col items-center justify-center">
+              <h1 className="text-[#ffffff] pt-0 text-3xl font-bold">{myRank}등</h1>
+              <p className="text-[#ffffff] text-xl">{myName}</p>
             </div>
-          );
-        })}
+          </div>
+        </div>
+
+          {/* List of players */}
+          <div style={{height: `${size/3}px`}}></div>
+          <div className="m-auto w-3/4">
+            {showConfetti && <div className="flex text-[#FF0000] justify-center"><Realistic /></div>}
+            {gameUserDtos.map((user, index) => {
+                return (
+                    <RankingUser 
+                    key={index}
+                    roomNickname={user.roomNickname} 
+                    answerDtos={answerUserDtos} 
+                    ranking={user.ranking}/>
+                )
+            })}
+          </div>
+          <div className="m-auto grid-cols-1 md:grid-cols-2 mt-5 gap-2">
+            <Button className="mr-5 mb-5" size="sm" onClick={restartOnClick}>재시작하기</Button>
+            <Button className="mr-5 mb-5" size="sm" onClick={exitOnClick}>메인페이지로 가기</Button>
+          </div>
       </div>
+      ) : (
+      <div>
+        <div className="flex flex-row justify-around items-center mt-10 mx-7">
+          {joinUsers.map((info, index) => {
+            return (
+              <div key={index} className="relative">
+                <JoinUser
+                  Nickname={info.roomNickname}
+                  userCount={userCount}
+                  gameStart={gameStart}
+                  gameEnd={isGameEnd}
+                  className={""}
+                  gameUserDto={gameUserDtos}
+                  isMyTurn={isMyTurn}
+                  children={
+                    gameStart ? (
+                      <div className={`p-1 shadow-lg rounded-lg absolute top-1/2 left-0`}>
+                        <Button size="sm"
+                          onClick={() => { socketPenaltyOnClick(info.roomNickname); }}>
+                          경고 주기
+                        </Button>
+                      </div>
+                    ) : (
+                      <div></div>
+                    )}
+                />
+              </div>
+            );
+          })}
+        </div>
 
 
-      {gameStart&&(
-      <div className="flex justify-center items-center">
-        <Timer time={time} />
-      </div>)
-      }
-      <div className="m-auto mt-8 flex justify-center items-center relative">
-        {!gameStart &&(
-        <div className="mr-5">
-          <div className="text-base">입장코드</div>
-          <div className="text-xl">{enterCode}</div>
-        </div>)}
-        {gameStart &&(
-        <div className="mr-5">
-          <div className="text-base">현재 라운드</div>
-          <div className="text-xl">{currentCycle}</div>
-        </div>)}
-        <div className="w-1/2 h-16 shadow-lg text-[#353535] flex justify-center items-center rounded-lg bg-[#FFCCFF] shadow-xl">
-          {countdown !== null ? ( // 카운트다운 중일 때
-            <div className="text-xl font-semibold">{countdown}</div>
-          ) : gameStart ? ( // 게임 시작 후
-            <div className="text-xl font-semibold">
-              현재 질문자 : <span className="text-[#5b33de]"> {currentUserAnswer?.nickname}</span>
-              <br />
-              정답어 : <span className="text-[#c93290]"> {currentUserAnswer?.answer}</span>
-            </div>
-          ) : ( // 게임 시작 전
-            <div className="text-xl font-semibold">게임 대기 중</div>
+        {gameStart&&(
+        <div className="flex justify-center items-center">
+          <Timer time={time} />
+        </div>)
+        }
+        <div className="m-auto mt-8 flex justify-center items-center relative">
+          {!gameStart &&(
+          <div className="mr-5">
+            <div className="text-base">입장코드</div>
+            <div className="text-xl">{enterCode}</div>
+          </div>)}
+          {gameStart &&(
+          <div className="mr-5">
+            <div className="text-base">현재 라운드</div>
+            <div className="text-xl">{currentCycle}</div>
+          </div>)}
+          <div className="w-1/2 h-16 shadow-lg text-[#353535] flex justify-center items-center rounded-lg bg-[#FFCCFF] shadow-xl">
+            {countdown !== null ? ( // 카운트다운 중일 때
+              <div className="text-xl font-semibold">{countdown}</div>
+            ) : gameStart ? ( // 게임 시작 후
+              <div className="text-xl font-semibold">
+                현재 질문자 : <span className="text-[#5b33de]"> {currentUserAnswer?.nickname}</span>
+                <br />
+                정답어 : <span className="text-[#c93290]"> {currentUserAnswer?.answer}</span>
+              </div>
+            ) : ( // 게임 시작 전
+              <div className="text-xl font-semibold">게임 대기 중</div>
+            )}
+          </div>
+          <div className="ml-5 text-base">
+            방 인원
+            <div className="text-lg">{joinUsers.length}/6</div>
+          </div>
+        </div>
+        <div className="m-auto w-3/4 h-96 mt-10 overflow-y-hidden rounded-3xl shadow-xl flex flex-col tracking-wider bg-[#A072BC]">
+          {chatMessages.map((m, index) => (
+            <ChatRoom key={index} message={m} />
+          ))}
+        </div>
+
+        <div className="mt-10 flex flex-row justify-center algin-center">
+          {!gameStart && (
+            <IconButton size="md" className="mr-10" onClick={captainOpenModal}>
+              <FontAwesomeIcon icon={faGear} />
+            </IconButton>
           )}
-        </div>
-        <div className="ml-5 text-base">
-          방 인원
-          <div className="text-lg">{joinUsers.length}/6</div>
-        </div>
-      </div>
-      <div className="m-auto w-3/4 h-96 mt-10 overflow-y-hidden rounded-3xl shadow-xl flex flex-col tracking-wider bg-[#A072BC]">
-        {chatMessages.map((m, index) => (
-          <ChatRoom key={index} message={m} />
-        ))}
-      </div>
+          <div>
+          {gameStart && (<GameActionButton isMyTurn={isMyTurn} isAnswerMode={isCORRECTMode} />)}
+          </div>
 
-      <div className="mt-10 flex flex-row justify-center algin-center">
-        {!gameStart && (
-          <IconButton size="md" className="mr-10" onClick={captainOpenModal}>
-            <FontAwesomeIcon icon={faGear} />
-          </IconButton>
-        )}
-        <div>
-        {gameStart && (<GameActionButton isMyTurn={isMyTurn} isAnswerMode={isCORRECTMode} />)}
-        </div>
-
-        <div className="w-5/12 flex flex-row justify-center algin-center relative">
-          <input
-            className="w-full rounded-2xl shadow-md pl-5 text-[#000000]"
-            type="text"
-            placeholder={
-              gameStart // gameStart가 true인 경우에만 조건부 렌더링
-                ? isMyTurn
-                  ? isCORRECTMode
-                    ? "정답을 입력하세요"
-                    : "질문을 시작하세요" // isMyTurn이 true일 때
-                  : "답변을 시작하세요" // isMyTurn이 false일 때
-                : "채팅 메세지를 입력해주세요" // gameStart가 false일 때
-            }
-            value={myChatMessages}
-            onKeyDown={(e) => {
-              if (e.nativeEvent.isComposing) return; 
-
-              if (e.key === "Enter" && myChatMessages.trim() !== "") {
-                sendMessage();
-              } else if (e.key === "Enter" && myChatMessages.trim() === "") {
-                Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
+          <div className="w-5/12 flex flex-row justify-center algin-center relative">
+            <input
+              className="w-full rounded-2xl shadow-md pl-5 text-[#000000]"
+              type="text"
+              placeholder={
+                gameStart // gameStart가 true인 경우에만 조건부 렌더링
+                  ? isMyTurn
+                    ? isCORRECTMode
+                      ? "정답을 입력하세요"
+                      : "질문을 시작하세요" // isMyTurn이 true일 때
+                    : "답변을 시작하세요" // isMyTurn이 false일 때
+                  : "채팅 메세지를 입력해주세요" // gameStart가 false일 때
               }
-            }}
-            onChange={(e) => {
-              setMyChatMessages(e.target.value);
-            }}
-          ></input>
+              value={myChatMessages}
+              onKeyDown={(e) => {
+                if (e.nativeEvent.isComposing) return; 
 
-          <IconButton
-              className="shadow-none hover:shadow-none dark:shadow-none top-1 right-0 absolute"
-              size="sm"
-              onClick={() => {  // onClick 핸들러 수정
-                if (myChatMessages.trim() !== "") { 
+                if (e.key === "Enter" && myChatMessages.trim() !== "") {
                   sendMessage();
-                } else {
+                } else if (e.key === "Enter" && myChatMessages.trim() === "") {
                   Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
                 }
               }}
-            >
-            <FontAwesomeIcon className="text-[#000000]" icon={faPaperPlane} />
-          </IconButton>
+              onChange={(e) => {
+                setMyChatMessages(e.target.value);
+              }}
+            ></input>
+
+            <IconButton
+                className="shadow-none hover:shadow-none dark:shadow-none top-1 right-0 absolute"
+                size="sm"
+                onClick={() => {  // onClick 핸들러 수정
+                  if (myChatMessages.trim() !== "") { 
+                    sendMessage();
+                  } else {
+                    Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
+                  }
+                }}
+              >
+              <FontAwesomeIcon className="text-[#000000]" icon={faPaperPlane} />
+            </IconButton>
+          </div>
         </div>
       </div>
+    )}
 
       {/* 방장 제외 입장 시 닉네임 설정 모달 */}
       <ReadyToGameModal onRequestClose={closeModal}>
