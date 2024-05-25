@@ -26,8 +26,8 @@ public class GameRecord {
 
     private String rankingNicknameSet = "";
 
-    @Column(unique = true)
-    private Long roomId;
+//    @Column(unique = true)
+//    private Long roomId;
 
     private LocalDateTime date;
 
