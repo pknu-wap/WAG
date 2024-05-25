@@ -327,6 +327,7 @@ public class ChatService {
             GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
                     .orElseThrow(NoSuchGameOrderException::new);
             GameUserDto gameUserDto = GameUserDto.of(gameOrder, roomUser);
+            gameUserDto.setAnswername(gameOrder.getAnswerName());  // 정답어 추가로 전송
             gameUserDtos.add(gameUserDto);
 
             // record 저장 로직
@@ -341,6 +342,7 @@ public class ChatService {
             GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
                     .orElseThrow(NoSuchGameOrderException::new);
             GameUserDto gameUserDto = GameUserDto.of(gameOrder, roomUser);
+            gameUserDto.setAnswername(gameOrder.getAnswerName());  // 정답어 추가로 전송
             gameUserDtos.add(gameUserDto);
 
             // record 저장 로직
