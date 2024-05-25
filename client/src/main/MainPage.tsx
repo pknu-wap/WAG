@@ -77,14 +77,19 @@ function MainPage({ dark }: ComponentProps) {
     }
   };
 
+  
   //코드입장시 버튼 클릭
   const buttonCheckHandler = async () => {
     const roomId = await getRoomIdCode();
 
-    if (roomId !== "invalid enterCode") {
+    if (roomId === "invalid enterCode") {
+      Toast({ message: "존재하지 않는 입장코드 입니다!", type: "error" })
+    } else if (roomId === "already started") {
+      Toast({ message: "이미 게임이 시작되었습니다!", type: "error" });
+    } else {
       localStorage.setItem("roomId", roomId);
       navigate(`/ReadyToGame/${roomId}`);
-    } else Toast({ message: "존재하지 않는 입장코드 입니다!", type: "error" });
+    }
   };
 
   const handleCreateRoomClick = () => {
