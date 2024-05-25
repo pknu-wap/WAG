@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import IconButton from "../components/button/IconButton";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import FullLayout from "../components/layout/FullLayout";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import {
   captainReadyToGameModalState,
@@ -21,7 +21,6 @@ import {
   URL,
   UserAnswerDto,
   AnswerUserDto,
-  GameMessage,
 } from "../types/dto";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
@@ -40,7 +39,6 @@ import RankingUser from "../components/ingameComponents/RankingUser";
 var stompClient: any = null; //웹소켓 변수 선언
 
 const ReadyToGame = () => {
-  const navigate = useNavigate();
   const params = useParams(); // params를 상수에 할당
   const [, setIsOpen] = useRecoilState(readyToGameModalState);
   const [, setCaptainIsOpen] = useRecoilState(captainReadyToGameModalState);
@@ -89,8 +87,6 @@ const ReadyToGame = () => {
   const [currentCycle, setCurrentCycle] = useState<number>(0);
   const [hasSentCorrect, setHasSentCorrect] = useState(false);  //정답을 외쳤는지 
   const [hasSentAsk, setHasSentAsk] = useState(false);  //질문을 했는지 
-  const [whoseTurn, setWhoseTurn] = useState<GameMessage>()
-
 
   const answerListRef = useRef<any>(null); //정답어 리스트가 도착하면 상태를 바꾸어줌
   const currentAnswerRef = useRef<any>(null); 
@@ -302,11 +298,9 @@ const ReadyToGame = () => {
       Toast({ message: message.privateRoom ? '방이 비공개로 설정되었습니다.' : '방이 공개로 설정되었습니다.', type: 'info' });
     } else if (message.messageType === "ASK") {
       console.log("ASK로 온 메세지", message);
-      setWhoseTurn(message)
       getGameCycle(message);
       getNextTurnInfo(message);
     } else if (message.messageType === "ANSWER") {
-      setWhoseTurn(message)
       console.log("ANSWER로 온 메세지", message);
     } else if (message.messageType === "CORRECT") {
       handleCorrectAnswer(message);
@@ -316,7 +310,6 @@ const ReadyToGame = () => {
       console.log("START로 온 메세지", message);
       setCountdown(5);
       getGameAnswer();
-      setWhoseTurn(message)
           // API 응답을 받은 후에 5초를 기다립니다.
           setTimeout(() => {
             getGameCycle(message);
@@ -446,7 +439,7 @@ const ReadyToGame = () => {
   }
   /*====================== 게임 중 코드 ====================== */
       const exitOnClick = () => {
-        navigate("/");
+        window.location.replace("/")
       };
       const {
         time,
@@ -514,7 +507,7 @@ const ReadyToGame = () => {
       const senderIndex = gameUserDtos.findIndex((user:any) => user.roomNickname === sender);
       
       if (senderIndex !== -1) {
-        if(gameUserDtos[senderIndex].ranking != 0){
+        if(gameUserDtos[senderIndex].ranking !== 0){
           gameUserDtos[senderIndex].ranking = currentAnswererIndex; // 1부터 시작
           Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
           currentAnswererIndex++;
@@ -653,6 +646,10 @@ const ReadyToGame = () => {
     setIsMyTurn(false)
     setChatMessages([]);
     setGameUserDtos([])
+    setCurrentUserAnswer({
+      nickname: "",
+      answer: "",
+    })
   }
     useEffect(() => {
       const handleResize = () => {
@@ -784,7 +781,7 @@ const ReadyToGame = () => {
         </div>
         <div className="m-auto w-3/4 h-96 mt-10 overflow-y-hidden rounded-3xl shadow-xl flex flex-col tracking-wider bg-[#A072BC]">
           {chatMessages.map((m, index) => (
-            <ChatRoom key={index} message={m} />
+            <ChatRoom key={index} message={m} whoseTurn={currentUserAnswer?.nickname} />
           ))}
         </div>
 
