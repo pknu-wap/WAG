@@ -20,6 +20,7 @@ public class GameUserDto {
     private boolean isNextTurn;
     private boolean haveAnswerChance;
     private int ranking;
+    private String answername;
 
     public static GameUserDto of(GameOrder gameOrder, RoomUser roomUser){
         return new GameUserDto(
@@ -30,7 +31,8 @@ public class GameUserDto {
                 gameOrder.isNowTurn(),
                 gameOrder.isNextTurn(),
                 gameOrder.isHaveAnswerChance(),
-                gameOrder.getRanking()
+                gameOrder.getRanking(),
+                null
         );
     }
 

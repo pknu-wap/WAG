@@ -4,6 +4,7 @@ import com.example.server.domain.Room;
 import com.example.server.domain.RoomUser;
 import com.example.server.domain.User;
 import com.example.server.dto.UserDto;
+import com.example.server.exception.AlreadyStartedRoomException;
 import com.example.server.exception.MaxUserCountExceededException;
 import com.example.server.exception.NoSuchRoomException;
 import com.example.server.payload.request.RoomCreateRequest;
@@ -62,6 +63,10 @@ public class RoomService {
 
     public RoomResponse enterRoomByRoomId(String nickName, Long roomId, UserPrincipal userPrincipal){ // 소켓 + roomId로 방 입장.
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new NoSuchRoomException(roomId));
+        if(room.isGameStatus()){
+            throw new AlreadyStartedRoomException();  // 이미 시작된 방 예외 처리
+        }
+
         boolean isCaptain = false;
         if (room.getUserCount() >= 6) {
             throw new MaxUserCountExceededException();  // 최대 인원 예외 처리.
@@ -102,7 +107,11 @@ public class RoomService {
         Optional<Room> room = roomRepository.findRoomByCode(enterCode);
         if(room.isEmpty()){
             return "invalid enterCode";
-        }else{
+        }
+        else if (room.get().isGameStatus()) {
+            return "already started";
+        }
+        else{
             return String.valueOf(room.get().getId());
         }
     }
