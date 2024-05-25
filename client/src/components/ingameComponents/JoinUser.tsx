@@ -44,7 +44,6 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
     };
     const findUserAnswer = async () => {
       const answerUsers = await getGameAnswer();
-      console.log(answerUsers);
       answerUsers.answerUserDtos.forEach((dto) => {
         if (Nickname === dto.nickname) {
           setAnswer(dto.answer);
