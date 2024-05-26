@@ -58,6 +58,15 @@ public class ChatController {
         return chatRoomModeMessage;
     }
 
+    @MessageMapping("/chat.ready")
+    public ChatMessage setReady(@Payload ChatMessage chatMessage) {
+        String destination = "/topic/public/"+chatMessage.getRoomId();
+        ChatMessage rechatMessage = chatService.setReady(chatMessage);
+        rechatMessage.setMessageType(ChatMessage.MessageType.READY);
+        messagingTemplate.convertAndSend(destination, rechatMessage);
+        return rechatMessage;
+    }
+
     @MessageMapping("/chat.addUser")
     public ChatRoomInfoMessage addUser(@Payload ChatMessage chatMessage,
                                        SimpMessageHeaderAccessor headerAccessor,
