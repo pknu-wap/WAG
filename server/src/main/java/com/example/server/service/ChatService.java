@@ -50,14 +50,11 @@ public class ChatService {
     }
 
     public ChatGameMessage startGame(ChatMessage chatMessage) {
-        makeGameOrder(chatMessage.getRoomId());
+        makeGameOrder(chatMessage);
         Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
                 .orElseThrow(() -> new NoSuchRoomException(chatMessage.getRoomId()));
         roomInit(room);
-//        GameRecord gameRecord = gameRecordInit(room);
-
         roomRepository.save(room);
-//        gameRecordRepository.save(gameRecord);
 
         ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
         chatGameMessage.setMessageType(ChatMessage.MessageType.START);
@@ -69,7 +66,6 @@ public class ChatService {
         GameRecord gameRecord = new GameRecord();
         List<User> userRanking = new ArrayList<>();
         gameRecord.setUserRanking(userRanking);
-//        gameRecord.setRoomId(room.getId());
         return gameRecord;
     }
 
@@ -191,8 +187,6 @@ public class ChatService {
                 .orElseThrow(NoSuchGameOrderException::new);
         Room room = roomRepository.findById(chatMessage.getRoomId())
                 .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
-//        GameRecord gameRecord = gameRecordRepository.findFirstByRoomIdOrderByDateDesc(room.getId())
-//                .orElseThrow(()->new NoSuchGameRecordException(room.getId()));
 
         gameOrder.setHaveAnswerChance(false); // 정답기회 없애기
         gameOrderRepository.save(gameOrder);
@@ -203,26 +197,7 @@ public class ChatService {
             newRoom.setCorrectMemberCnt(newRoom.getCorrectMemberCnt()+1);
             gameOrder.setRanking(newRoom.getCorrectMemberCnt());
 
-            // gameRecord 처리 로직
-//            if (roomUser.getUser() != null) {
-//                gameRecord.getUserRanking().add(roomUser.getUser());
-//            }
-//            String rankingNicknameSet = gameRecord.getRankingNicknameSet() + " "
-//                    + roomUser.getRoomNickname();
-//            gameRecord.setRankingNicknameSet(rankingNicknameSet);
-//
-//            gameRecordRepository.save(gameRecord);
-
             if(room.getCorrectMemberCnt() >= 3 || room.getUserCount()-1 <= room.getCorrectMemberCnt()){ // 게임 끝나는 경우
-                // 기존 저장되어 있던 순위권 닉네임 리스트에 순위권에 들지 못한 나머지 닉네임 추가
-//                StringBuilder rankingNicknameSet2 = new StringBuilder(gameRecord.getRankingNicknameSet());
-//                rankingNicknameSet2.append(" / ");
-//                List<String> allNicknames = roomUserRepository.findNickNameByRoomId(room.getId());
-//                for (String nickname : allNicknames) {
-//                    if(!rankingNicknameSet2.toString().contains(nickname)) rankingNicknameSet2.append(" ").append(nickname);
-//                }
-//                gameRecord.setRankingNicknameSet(rankingNicknameSet2.toString());
-//                gameRecordRepository.save(gameRecord);
                 room.setGameStatus(false);
                 roomRepository.save(room);
                 ChatGameMessage chatGameMessage = makeEndChatGameMessage(chatMessage, room);
@@ -247,12 +222,32 @@ public class ChatService {
         }
     }
 
-    public void makeGameOrder(Long roomId){  // 게임 순서 & 정답어 설정
+    public void makeGameOrder(ChatMessage chatMessage){  // 게임 순서 & 정답어 설정
+        Long roomId = chatMessage.getRoomId();
         List<RoomUser> roomUsers = roomUserRepository.findRandomByRoomId(roomId);
-        List<AnswerList> answerLists = answerListRepository.findAnswerListBy();
+        List<AnswerList> answerLists;
+        if(chatMessage.getContent().equals("")) {  // 전체 분야로 설정
+            answerLists = answerListRepository.findAnswerListBy();
+        }
+        else{   // 원하는 분야의 정답어만 설정
+            answerLists = answerListRepository.findAnswerListByGroup(chatMessage.getContent());
+        }
         Room room = roomRepository.findById(roomId).orElseThrow(()->new NoSuchRoomException(roomId));
         int order = 1;
+
+
+        for(RoomUser roomUser : roomUsers){ // 레디하지 않은 유저가 있다면 예외처리.
+            if(!roomUser.isReady()){
+                throw new CantStartGameException();
+            }
+        }
+
         for(RoomUser roomUser : roomUsers){
+//            if(!roomUser.isCaptain()){
+//                roomUser.setReady(false);                 //TODO 프론트 레디 기능 추가 시 4줄 주석 해제
+//                roomUserRepository.save(roomUser);
+//            }
+
             GameOrder gameOrder = gameOrderInit(roomUser, room);
 
             gameOrder.setNextTurn(order == 1);
@@ -382,6 +377,21 @@ public class ChatService {
         ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
         chatGameMessage.setMessageType(ChatMessage.MessageType.RESET);
         return chatGameMessage;
+    }
+
+    public ChatMessage setReady(ChatMessage chatMessage){
+        RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomUserException(chatMessage.getRoomId()));
+        if(roomUser.isReady()){
+            roomUser.setReady(false);
+            chatMessage.setContent(chatMessage.getSender() + " 님이 " + "레디를 해제하셨습니다. ");
+        }
+        else {
+            roomUser.setReady(true);
+            chatMessage.setContent(chatMessage.getSender() + " 님이 " + "레디 하셨습니다. ");
+        }
+        roomUserRepository.save(roomUser);
+        return chatMessage;
     }
 
 }

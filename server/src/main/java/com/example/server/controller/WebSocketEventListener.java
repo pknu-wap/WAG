@@ -99,6 +99,7 @@ public class WebSocketEventListener {
                 RoomUser nextCaption = roomUserRepository.findNextCaptinByRandom(roomId)
                         .orElseThrow(() -> new NoSuchRoomUserException(roomId));
                 nextCaption.setCaptain(true);
+                nextCaption.setReady(true);
                 roomUserRepository.save(nextCaption);
                 chatRoomInfoMessage.setContent(username + " 님이 방을 떠나 " + nextCaption.getRoomNickname() + " 님이 방장이 되었습니다.");
             }
