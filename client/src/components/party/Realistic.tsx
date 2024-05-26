@@ -1,5 +1,3 @@
-import { faFire } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { CreateTypes } from "canvas-confetti";
 import { Component } from "react";
 import ReactCanvasConfetti from "./Party";

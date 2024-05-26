@@ -7,8 +7,6 @@ const ChatRoom: React.FC<{ message: ChatMessage; whoseTurn?: string }> = ({ mess
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const myName = localStorage.getItem("nickName");
 
-  console.log(message.sender, whoseTurn)
-
   // 새 메시지가 도착할 때마다 채팅창 스크롤을 아래로 이동합니다.
   useEffect(() => {
     const chatContainer = document.getElementById("chat-container");
@@ -39,6 +37,14 @@ const ChatRoom: React.FC<{ message: ChatMessage; whoseTurn?: string }> = ({ mess
           </div>
         );
       } 
+      else if (msg.messageType === "CATEGORY")
+        {
+          return (
+            <div key={index} className="flex flex-col items-center">
+              <NotificationMessage message={{...msg, content: `${msg.content}로 카테고리가 변경되었습니다.`}} />
+            </div>
+          )
+        }
       else if (msg.messageType === 'START') //UserMessage가 아니고
         {
         return (
