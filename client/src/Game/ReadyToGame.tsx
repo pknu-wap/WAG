@@ -238,7 +238,7 @@ const ReadyToGame = () => {
     const nickName = localStorage.getItem("nickName");
     let contentToSend = myChatMessages; // 기본적으로 myChatMessages 값을 사용합니다. 
     // messageType이 'JOIN', 'START', 'CHANGE' 중 하나라면, contentToSend를 빈 문자열로 보냄
-    if (["JOIN", "START", "CHANGE"].includes(messageType)) {
+    if (["JOIN", "START", "CHANGE", "RESET"].includes(messageType)) {
       contentToSend = "";
     } 
     stompClient.send(
@@ -336,7 +336,11 @@ const ReadyToGame = () => {
       }, 5000);
       
       console.log("END로 온 메세지", message);
-    } 
+    } else if (message.messageType === "RESET") {
+      handleTimerEnd();
+      setChatMessages([]);
+      console.log("RESET으로 온 메세지", message);
+  }
     else {
       console.log(message);
     }
@@ -459,9 +463,10 @@ const ReadyToGame = () => {
         if (time < 0) {
           stopTimer();
           resetTimer();
-          if(!hasSentAsk) //질문을 30초 안에 하지 않는다면 강제로 턴을 넘긴다
+          if(isMyTurn) //질문을 30초 안에 하지 않는다면 강제로 턴을 넘긴다
           {
-            if(isMyTurn){
+            if(!hasSentAsk){
+              console.log("질문을 하지 않아 강제로 ASK")
               const roomId = localStorage.getItem("roomId");
               const nickName = localStorage.getItem("nickName");
               stompClient.send(
@@ -473,12 +478,11 @@ const ReadyToGame = () => {
                   messageType: "ASK",
                   roomId: roomId,
                 }));
-            }    
+            }
+            setTimeout(() => {
+            sendMessageToSocket("/app/chat.sendGameMessage", "RESET"); 
+            }, 200);
           }
-          setTimeout(() => {  //잠깐 대기후 다음 진행 : 위 강제 ASK를 받고 나서 초기화 진행
-            handleTimerEnd();
-            setChatMessages([]);
-          }, 500);
         }
       }, [stopTimer, resetTimer, time]);
     
