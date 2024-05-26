@@ -22,6 +22,7 @@ public class ChatMessage {
         OUT,
         RESET,
         READY,
+        CATEGORY,
         CHANGE,
     }
 }

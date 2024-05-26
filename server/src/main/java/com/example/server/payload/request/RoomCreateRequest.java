@@ -7,4 +7,5 @@ import lombok.Setter;
 public class RoomCreateRequest {
     private boolean isPrivateRoom;
     private String userNickName;
+    private String category;
 }
