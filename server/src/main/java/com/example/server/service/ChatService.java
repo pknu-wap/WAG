@@ -412,7 +412,6 @@ public class ChatService {
                     .orElseThrow(()->new NoSuchCategoryException(chatMessage.getContent()));
         }
         room.setCategory(chatMessage.getContent());
-        chatMessage.setContent("주제어 장르가 " + room.getCategory() + " 로 변경되었습니다. ");
         roomRepository.save(room);
         return chatMessage;
     }
