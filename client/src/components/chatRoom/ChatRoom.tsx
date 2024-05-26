@@ -35,7 +35,7 @@ const ChatRoom: React.FC<{ message: ChatMessage; whoseTurn?: string }> = ({ mess
         let containerClass = isMyMessage ? "flex flex-col items-end" : "flex flex-col items-start";
         return (
           <div key={index} className={containerClass}>
-            <UserMessage message={msg} isMyMessage={isMyMessage}/> 
+            <UserMessage message={msg} isMyMessage={isMyMessage} askerMessage={msg.sender === whoseTurn}/> 
           </div>
         );
       } 
