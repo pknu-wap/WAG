@@ -30,6 +30,7 @@ export interface IUserDto {
   captain: boolean;
   roomNickname: string;
   profileImage: string;
+  isReady: boolean;
 }
 
 // 방 정보 get response
@@ -39,6 +40,7 @@ export interface IRoomResponseInfo {
   roomEnterCode: number;
   gameStatus: boolean;
   userCount: number;
+  category: string;
   userDtos: IUserDto[];
 }
 
