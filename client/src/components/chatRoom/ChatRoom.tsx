@@ -3,9 +3,11 @@ import { ChatMessage } from "../../types/dto";
 import UserMessage from "./UserMessage";
 import NotificationMessage from "./NotificationMessage";
 
-const ChatRoom: React.FC<{ message: ChatMessage }> = ({ message }) => {
+const ChatRoom: React.FC<{ message: ChatMessage; whoseTurn?: string }> = ({ message, whoseTurn }) => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const myName = localStorage.getItem("nickName");
+
+  console.log(message.sender, whoseTurn)
 
   // 새 메시지가 도착할 때마다 채팅창 스크롤을 아래로 이동합니다.
   useEffect(() => {
@@ -33,7 +35,7 @@ const ChatRoom: React.FC<{ message: ChatMessage }> = ({ message }) => {
         let containerClass = isMyMessage ? "flex flex-col items-end" : "flex flex-col items-start";
         return (
           <div key={index} className={containerClass}>
-            <UserMessage message={msg} /> 
+            <UserMessage message={msg} isMyMessage={isMyMessage} askerMessage={msg.sender === whoseTurn}/> 
           </div>
         );
       } 
@@ -61,7 +63,7 @@ const ChatRoom: React.FC<{ message: ChatMessage }> = ({ message }) => {
         return (
           <>
             <div key={index} className={containerClass}>
-              <UserMessage message={msg} />
+              <UserMessage message={msg} isMyMessage={isMyMessage}/>
             </div>
             <div key={index} className="flex flex-col items-center">
               <NotificationMessage message={{...msg, content: "정답자가 모두 나왔습니다"}} />

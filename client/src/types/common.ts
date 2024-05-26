@@ -19,6 +19,7 @@ export interface ButtonProps {
   onClick?: () => void;
   children: ReactNode; // children 속성에는 string 뿐만 아니라 <svg> 요소가 포함될 수도 있어서 ReactNode 타입을 사용했다.
   disabled?: boolean | undefined;
+  isInput?: boolean; // input 옆 스타일 지정을 위해 만들었음
 }
 
 //Timer

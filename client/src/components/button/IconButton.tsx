@@ -7,9 +7,11 @@ const IconButton = ({
   disabled,
   onClick,
   children,
+  isInput,
 }: ButtonProps) => {
   let combinedClassName =
-    "p-2 px-3 rounded-full flex justify-center items-center text-light-text dark:text-dark-text bg-transparent shadow-xl hover:shadow-sm dark:shadow-xl dark:bg-transparent"; // 이 변수에 className을 중첩시킨다.
+    isInput ? "p-2 px-3 rounded-full flex justify-center items-center text-light-text dark:text-dark-text bg-transparent shadow-none hover:shadow-none dark:shadow-none dark:bg-transparent" 
+    : "p-2 px-3 rounded-full flex justify-center items-center text-light-text dark:text-dark-text bg-transparent shadow-xl hover:shadow-sm dark:shadow-xl dark:bg-transparent"; // 이 변수에 className을 중첩시킨다.
 
   switch (size) {
     case "sm": {
