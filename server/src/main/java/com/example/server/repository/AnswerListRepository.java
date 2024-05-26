@@ -11,11 +11,11 @@ import java.util.Optional;
 
 @Repository
 public interface AnswerListRepository extends JpaRepository<AnswerList, Long> {
-    @Query("SELECT al FROM AnswerList al WHERE al.answerGroup = : group order by RAND() limit 6")
+    @Query("SELECT al FROM AnswerList al WHERE al.answerGroup = :group order by RAND() limit 6")
     List<AnswerList> findAnswerListByGroup(@Param("group") String group);
 
     @Query("SELECT al FROM AnswerList al order by RAND() limit 6")
     List<AnswerList> findAnswerListBy();
-    @Query("SELECT al FROM AnswerList al WHERE al.answerGroup = : group order by al.id asc limit 1")
+    @Query("SELECT al FROM AnswerList al WHERE al.answerGroup = :group order by al.id asc limit 1")
     Optional<AnswerList> haveCategory(@Param("group") String group);
 }
