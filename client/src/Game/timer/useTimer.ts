@@ -7,7 +7,7 @@ export interface TimerHookProps {
   resetTimer: () => void;
 }
 
-export const INITIAL_TIME = 10;
+export const INITIAL_TIME = 30;
 export const ONE_SECOND = 1000; // ms
 
 function useTimer(): TimerHookProps {

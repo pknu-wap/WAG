@@ -226,13 +226,15 @@ public class ChatService {
         Long roomId = chatMessage.getRoomId();
         List<RoomUser> roomUsers = roomUserRepository.findRandomByRoomId(roomId);
         List<AnswerList> answerLists;
-        if(chatMessage.getContent().equals("")) {  // 전체 분야로 설정
+        Room room = roomRepository.findById(roomId).orElseThrow(()->new NoSuchRoomException(roomId));
+
+        if(room.getCategory().equals("전체")) {  // 전체 분야로 설정
             answerLists = answerListRepository.findAnswerListBy();
         }
         else{   // 원하는 분야의 정답어만 설정
-            answerLists = answerListRepository.findAnswerListByGroup(chatMessage.getContent());
+            answerLists = answerListRepository.findAnswerListByGroup(room.getCategory());
         }
-        Room room = roomRepository.findById(roomId).orElseThrow(()->new NoSuchRoomException(roomId));
+
         int order = 1;
 
 
@@ -244,7 +246,7 @@ public class ChatService {
 
         for(RoomUser roomUser : roomUsers){
 //            if(!roomUser.isCaptain()){
-//                roomUser.setReady(false);                 //TODO 프론트 레디 기능 추가 시 4줄 주석 해제
+//                roomUser.setReady(false);                 //TODO 프론트 레디 기능 추가 시 4줄 주석 해제 필요
 //                roomUserRepository.save(roomUser);
 //            }
 
@@ -384,13 +386,34 @@ public class ChatService {
                 .orElseThrow(()->new NoSuchRoomUserException(chatMessage.getRoomId()));
         if(roomUser.isReady()){
             roomUser.setReady(false);
-            chatMessage.setContent(chatMessage.getSender() + " 님이 " + "레디를 해제하셨습니다. ");
+            chatMessage.setContent(chatMessage.getSender() + " 님이 레디를 해제하셨습니다. ");
         }
         else {
             roomUser.setReady(true);
-            chatMessage.setContent(chatMessage.getSender() + " 님이 " + "레디 하셨습니다. ");
+            chatMessage.setContent(chatMessage.getSender() + " 님이 레디 하셨습니다. ");
         }
         roomUserRepository.save(roomUser);
+        return chatMessage;
+    }
+
+    public ChatMessage setCategory(ChatMessage chatMessage){
+        Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
+        RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomUserException(chatMessage.getRoomId()));
+        if(!roomUser.isCaptain()){  // 방장이 아닌 사람이 변경 시도할 경우
+            throw new CategoryException("카테고리 변경 권한이 없습니다. ");
+        }
+        if(room.getCategory().equals(chatMessage.getContent())){  // 기존의 카테고리와 같은 카테고리로 변경할 경우
+            throw new CategoryException("기존의 카테고리와 같은 카테고리입니다. ");
+        }
+        if(!chatMessage.getContent().equals("전체")){    // 카테고리가 전체인 경우를 제외하고 검사
+            answerListRepository.haveCategory(chatMessage.getContent())   // 존재하는 카테고리인지 확인 여부
+                    .orElseThrow(()->new NoSuchCategoryException(chatMessage.getContent()));
+        }
+        room.setCategory(chatMessage.getContent());
+        chatMessage.setContent("주제어 장르가 " + room.getCategory() + " 로 변경되었습니다. ");
+        roomRepository.save(room);
         return chatMessage;
     }
 
