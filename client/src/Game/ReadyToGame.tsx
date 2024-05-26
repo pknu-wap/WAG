@@ -1,8 +1,6 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import IconButton from "../components/button/IconButton";
-import { faGear } from "@fortawesome/free-solid-svg-icons";
 import FullLayout from "../components/layout/FullLayout";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import {
   captainReadyToGameModalState,
@@ -21,14 +19,12 @@ import {
   URL,
   UserAnswerDto,
   AnswerUserDto,
-  GameMessage,
 } from "../types/dto";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import ChatRoom from "../components/chatRoom/ChatRoom";
 import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
 import RadioButton from "../components/radioButton/RadioButton";
-import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 import Toast from "../components/toast/Toast";
 import { history } from "../util/history";
 import JoinUser from "../components/ingameComponents/JoinUser";
@@ -40,7 +36,6 @@ import RankingUser from "../components/ingameComponents/RankingUser";
 var stompClient: any = null; //웹소켓 변수 선언
 
 const ReadyToGame = () => {
-  const navigate = useNavigate();
   const params = useParams(); // params를 상수에 할당
   const [, setIsOpen] = useRecoilState(readyToGameModalState);
   const [, setCaptainIsOpen] = useRecoilState(captainReadyToGameModalState);
@@ -89,8 +84,6 @@ const ReadyToGame = () => {
   const [currentCycle, setCurrentCycle] = useState<number>(0);
   const [hasSentCorrect, setHasSentCorrect] = useState(false);  //정답을 외쳤는지 
   const [hasSentAsk, setHasSentAsk] = useState(false);  //질문을 했는지 
-  const [whoseTurn, setWhoseTurn] = useState<GameMessage>()
-
 
   const answerListRef = useRef<any>(null); //정답어 리스트가 도착하면 상태를 바꾸어줌
   const currentAnswerRef = useRef<any>(null); 
@@ -302,11 +295,9 @@ const ReadyToGame = () => {
       Toast({ message: message.privateRoom ? '방이 비공개로 설정되었습니다.' : '방이 공개로 설정되었습니다.', type: 'info' });
     } else if (message.messageType === "ASK") {
       console.log("ASK로 온 메세지", message);
-      setWhoseTurn(message)
       getGameCycle(message);
       getNextTurnInfo(message);
     } else if (message.messageType === "ANSWER") {
-      setWhoseTurn(message)
       console.log("ANSWER로 온 메세지", message);
     } else if (message.messageType === "CORRECT") {
       handleCorrectAnswer(message);
@@ -316,7 +307,6 @@ const ReadyToGame = () => {
       console.log("START로 온 메세지", message);
       setCountdown(5);
       getGameAnswer();
-      setWhoseTurn(message)
           // API 응답을 받은 후에 5초를 기다립니다.
           setTimeout(() => {
             getGameCycle(message);
@@ -450,7 +440,7 @@ const ReadyToGame = () => {
   }
   /*====================== 게임 중 코드 ====================== */
       const exitOnClick = () => {
-        navigate("/");
+        window.location.replace("/")
       };
       const {
         time,
@@ -518,7 +508,7 @@ const ReadyToGame = () => {
       const senderIndex = gameUserDtos.findIndex((user:any) => user.roomNickname === sender);
       
       if (senderIndex !== -1) {
-        if(gameUserDtos[senderIndex].ranking != 0){
+        if(gameUserDtos[senderIndex].ranking !== 0){
           gameUserDtos[senderIndex].ranking = currentAnswererIndex; // 1부터 시작
           Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
           currentAnswererIndex++;
@@ -657,6 +647,10 @@ const ReadyToGame = () => {
     setIsMyTurn(false)
     setChatMessages([]);
     setGameUserDtos([])
+    setCurrentUserAnswer({
+      nickname: "",
+      answer: "",
+    })
   }
     useEffect(() => {
       const handleResize = () => {
@@ -704,7 +698,7 @@ const ReadyToGame = () => {
           {/* List of players */}
           <div style={{height: `${size/3}px`}}></div>
           <div className="m-auto w-3/4">
-            {showConfetti && <div className="flex text-[#FF0000] justify-center"><Realistic /></div>}
+            {showConfetti && <div className="flex justify-center"><Realistic /></div>}
             {gameUserDtos.map((user, index) => {
                 return (
                     <RankingUser 
@@ -728,12 +722,11 @@ const ReadyToGame = () => {
               <div key={index} className="relative">
                 <JoinUser
                   Nickname={info.roomNickname}
-                  userCount={userCount}
+                  isCaptain={info.captain}
                   gameStart={gameStart}
                   className={""}
                   gameUserDto={gameUserDtos}
                   whoseTurn={currentUserAnswer?.nickname}
-                  isMyTurn={isMyTurn}
                   children={
                     gameStart ? (
                       <div className={`p-1 shadow-lg rounded-lg absolute top-1/2 left-0`}>
@@ -741,10 +734,7 @@ const ReadyToGame = () => {
                           onClick={() => { socketPenaltyOnClick(info.roomNickname); }}>
                           경고 주기
                         </Button>
-                      </div>
-                    ) : (
-                      <div></div>
-                    )}
+                      </div> ) : ( <div></div> )}
                 />
               </div>
             );
@@ -788,14 +778,17 @@ const ReadyToGame = () => {
         </div>
         <div className="m-auto w-3/4 h-96 mt-10 overflow-y-hidden rounded-3xl shadow-xl flex flex-col tracking-wider bg-[#A072BC]">
           {chatMessages.map((m, index) => (
-            <ChatRoom key={index} message={m} />
+            <ChatRoom key={index} message={m} whoseTurn={currentUserAnswer?.nickname} />
           ))}
         </div>
 
         <div className="mt-10 flex flex-row justify-center algin-center">
           {!gameStart && (
             <IconButton size="md" className="mr-10" onClick={captainOpenModal}>
-              <FontAwesomeIcon icon={faGear} />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              </svg>
             </IconButton>
           )}
           <div>
@@ -804,7 +797,9 @@ const ReadyToGame = () => {
 
           <div className="w-5/12 flex flex-row justify-center algin-center relative">
             <input
-              className="w-full rounded-2xl shadow-md pl-5 text-[#000000]"
+              className={`${isCORRECTMode && isMyTurn ? 
+                "w-full rounded-2xl shadow-md pl-5 text-[#000000] focus:shadow-2xl border-[4px] border-[#A072BC]" 
+                : "w-full h-[48px] rounded-2xl shadow-md pl-5 text-[#000000]"}`}
               type="text"
               placeholder={
                 gameStart // gameStart가 true인 경우에만 조건부 렌더링
@@ -831,7 +826,7 @@ const ReadyToGame = () => {
             ></input>
 
             <IconButton
-                className="shadow-none hover:shadow-none dark:shadow-none top-1 right-0 absolute"
+                className="right-0 absolute"
                 size="sm"
                 onClick={() => {  // onClick 핸들러 수정
                   if (myChatMessages.trim() !== "") { 
@@ -840,8 +835,17 @@ const ReadyToGame = () => {
                     Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
                   }
                 }}
+                isInput={true}
               >
-              <FontAwesomeIcon className="text-[#000000]" icon={faPaperPlane} />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none" viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="size-6 text-[#000000]">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+              </svg>
+
             </IconButton>
           </div>
         </div>

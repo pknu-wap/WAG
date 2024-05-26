@@ -1,6 +1,5 @@
 import { faUser } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
 
 interface RankingUserProps {
     roomNickname: string;
