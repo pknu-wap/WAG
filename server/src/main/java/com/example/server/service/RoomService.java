@@ -124,7 +124,7 @@ public class RoomService {
     }
 
     public String getRandomRoomId(){
-        Optional<Long> randomRoomId = roomRepository.findRandomRoomId();
+        Optional<Long> randomRoomId = roomUserRepository.findRandomRoomId();
         if(randomRoomId.isEmpty()){
             return "no available room";
         }else{
