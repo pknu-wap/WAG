@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { IRoomResponseInfo } from "../types/dto";
 import Toast from "../components/toast/Toast";
+import DropdownSelect from "../components/dropDown/DropDown";
+import { Option } from "react-dropdown";
 
 function CreateRoom() {
   const [isPrivate, setIsPrivate] = useState<boolean | null>(false); //일단은 공개방을 default로
@@ -25,6 +27,7 @@ function CreateRoom() {
         {
           privateRoom: isPrivate,
           userNickName: nickName,
+          category: selectedOption,
         }
       );
 
@@ -46,26 +49,12 @@ function CreateRoom() {
     }
   };
 
-  // //웹소켓 만들기
-  // const socketConnect = () => {
-  //   const socket = new SockJS("http://wwwag-backend.co.kr/ws");
-  //   stompClient = Stomp.over(socket);
-  //   stompClient.connect({}, onConnected);
-  // };
-
-  // //STOMP 소켓 구독
-  // async function onConnected() {
-  //   const roomId = localStorage.getItem("roomId");
-  //   const nickName = localStorage.getItem("nickName");
-  //   console.log(nickName);
-  //   console.log(roomId);
-  //   stompClient.subscribe(`/topic/public/${roomId}`);
-  //   stompClient.send(
-  //     "/app/chat.addCaptinUser",
-  //     {},
-  //     JSON.stringify({ sender: nickName, type: "JOIN", roomId: roomId })
-  //   );
-  // }
+  // 카테고리 select
+  const [selectedOption, setSelectedOption] = useState<string>("전체");
+  const handleOptionSelect = (option: Option) => {
+    setSelectedOption(option.value);
+    console.log('Selected option:', option.value);
+  };
 
   const renderButton = () => {
     if (isPrivate === null) {
@@ -92,7 +81,7 @@ function CreateRoom() {
         <div className="rounded-xl font-extrabold min-w-44 ">
           방 공개 / 비공개 여부 선택
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 mt-5 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 mt-5 mb-8 gap-2">
           <RadioButton
             id="public"
             label="공개"
@@ -108,6 +97,10 @@ function CreateRoom() {
             name="roomType"
             onChange={() => setIsPrivate(true)}
           />
+        </div>
+        <div>
+          <div className="rounded-xl font-extrabold min-w-44 mb-3">게임 카테고리 설정</div>
+          <DropdownSelect onOptionSelect={handleOptionSelect} defaultValue="전체" />
         </div>
         <input
           className="w-3/4 h-12 mb-5 mt-5 rounded shadow-md pl-5 text-[#000000]"

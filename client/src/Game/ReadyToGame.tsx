@@ -32,6 +32,8 @@ import Timer from "./timer/Timer";
 import useTimer, { TimerHookProps } from './timer/useTimer';
 import { Realistic } from "../components/party/Realistic";
 import RankingUser from "../components/ingameComponents/RankingUser";
+import DropdownSelect from "../components/dropDown/DropDown";
+import { Option } from "react-dropdown";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -50,6 +52,7 @@ const ReadyToGame = () => {
   const [enterCode, setEnterCode] = useState<number>();
   const [isPrivateRoom, setIsPrivateRoom] = useState<boolean>();
   const [isMeCaptain, setIsMeCaptain] = useState(false);
+  const [category, setCategory] = useState("")
   const [userCount, setUserCount] = useState(0)
   const [isGameEnd, setIsGameEnd] = useState(false)
 
@@ -183,6 +186,7 @@ const ReadyToGame = () => {
           },
         }
       );
+      console.log("방 정보 get api : ", response.data)
       return response.data;
     } catch (error) {
       console.error("방 정보 get api 오류 발생 : ", error);
@@ -196,6 +200,7 @@ const ReadyToGame = () => {
     setEnterCode(roomInfo.roomEnterCode);
     setIsPrivateRoom(roomInfo.privateRoom);
     setChangeIsPrivate(roomInfo.privateRoom);
+    setCategory(roomInfo.category);
     let userDtos = roomInfo.userDtos;
     userDtos.forEach((dto) => {
       const nickName = localStorage.getItem("nickName");
@@ -233,7 +238,11 @@ const ReadyToGame = () => {
     // messageType이 'JOIN', 'START', 'CHANGE' 중 하나라면, contentToSend를 빈 문자열로 보냄
     if (["JOIN", "START", "CHANGE", "RESET"].includes(messageType)) {
       contentToSend = "";
-    } 
+    } else if (messageType === "CATEGORY") {
+      // nickname은 방장 이름으로만 send
+      contentToSend = selectedOption;
+    }
+    console.log(contentToSend, messageType)
     stompClient.send(
       socketURL,
       {},
@@ -289,6 +298,9 @@ const ReadyToGame = () => {
     } else if (message.messageType === "CHAT") {
       console.log("CHAT으로 온 메세지", message);
       setRoomInfo();
+    } else if (message.messageType === "CATEGORY") {
+      console.log("CATEGORY로 온 메세지", message);
+      setCategory(message.content)
     } else if (message.messageType === "CHANGE") {
       console.log("CHANGE로 온 메세지", message);
       setRoomInfo();
@@ -335,11 +347,6 @@ const ReadyToGame = () => {
       console.log(message);
     }
   }
-
-  // // 유저 입장 시 상단에 프로필 추가
-  // const addJoinUser = (message: ChatMessageJoin) => {
-  //   setJoinUsers(message.roomResponse.userDtos);
-  // };
 
   const receiveChatMessage = (message: ChatMessage) => {
     setChatMessages([...chatMessages, message]); // 채팅 데이터 상태 업데이트
@@ -389,6 +396,20 @@ const ReadyToGame = () => {
       );
     }
   };
+
+  // 카테고리 select
+  const [selectedOption, setSelectedOption] = useState<string>("");
+  const handleOptionSelect = (option: Option) => {
+    setSelectedOption(option.value);
+    console.log('Selected option:', option.value);
+  };
+  const sendCategoryOnClick = () => {
+    if (category === selectedOption) {
+      Toast({ message: "기존 카테고리 입니다!", type: "warn" });
+    } else {
+      sendMessageToSocket("/app/chat.setCategory", "CATEGORY")
+    }
+  }
 
   // 새로고침 방지
   const usePreventRefresh = () => {
@@ -768,7 +789,10 @@ const ReadyToGame = () => {
                 정답어 : <span className="text-[#c93290]"> {currentUserAnswer?.answer}</span>
               </div>
             ) : ( // 게임 시작 전
-              <div className="text-xl font-semibold">게임 대기 중</div>
+              <div>
+                <div className="text-xl font-semibold">게임 대기 중</div>
+                <div className="text-xl font-semibold">카테고리 : {category}</div>
+              </div>
             )}
           </div>
           <div className="ml-5 text-base">
@@ -925,6 +949,13 @@ const ReadyToGame = () => {
             </div>
             <div className="flex flex-col justify-center items-center">
               <div className="mt-5">{renderButton()}</div>
+              <div>
+          <div className="rounded-xl font-extrabold min-w-44 mb-3">게임 카테고리 설정</div>
+          <div>
+            <DropdownSelect onOptionSelect={handleOptionSelect} defaultValue={selectedOption}/>
+            <Button size="sm" disabled={false} onClick={sendCategoryOnClick}>변경</Button>
+          </div>
+        </div>
               <div><Button className="mt-2" size="md" disabled={false} onClick={clickGameStart}>GAME START</Button></div>
               <div><Button className="mt-2" size="sm" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>
             </div>
