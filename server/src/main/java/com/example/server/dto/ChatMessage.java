@@ -21,6 +21,7 @@ public class ChatMessage {
         PENALTY,
         OUT,
         RESET,
+        READY,
         CHANGE,
     }
 }

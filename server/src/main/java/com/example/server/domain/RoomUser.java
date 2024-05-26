@@ -22,6 +22,9 @@ public class RoomUser {
 
     private String profileImage;
 
+    @NotNull
+    private boolean isReady;
+
     @OneToOne(fetch = FetchType.LAZY)
     private User user;
 

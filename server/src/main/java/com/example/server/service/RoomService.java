@@ -96,6 +96,13 @@ public class RoomService {
         roomUser.setCaptain(isCaptain);
         roomUser.setRoom(room);
         roomUser.setRoomNickname(nickName);
+        if(isCaptain){
+            roomUser.setReady(true);
+        }
+        else{
+            roomUser.setReady(true);                                     //TODO 프론트 레디 기능 추가 시 기본 값 false로 변경 후 배포해야함
+        }
+
         return roomUser;
     }
 
