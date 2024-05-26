@@ -3,8 +3,6 @@ import { connect, ConnectedProps } from "react-redux";
 import { RootState } from "../../modules/index";
 import { toggleDarkMode } from "../../modules/darkSlice";
 import IconButton from "../button/IconButton";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMoon, faSun } from "@fortawesome/free-regular-svg-icons";
 const { useEffect } = React;
 
 type Props = {

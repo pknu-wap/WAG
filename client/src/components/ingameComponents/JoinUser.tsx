@@ -1,5 +1,5 @@
-import React, { ReactNode, forwardRef, useEffect, useState } from "react";
-import { faChessKing, faUser } from "@fortawesome/free-regular-svg-icons";
+import { ReactNode, forwardRef, useEffect, useState } from "react";
+import { faUser } from "@fortawesome/free-regular-svg-icons";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import IconButton from "../button/IconButton";

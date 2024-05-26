@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Button from "../components/button/Button";
 import RadioButton from "../components/radioButton/RadioButton";
 import FullLayout from "../components/layout/FullLayout";

@@ -1,6 +1,4 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import IconButton from "../components/button/IconButton";
-import { faGear } from "@fortawesome/free-solid-svg-icons";
 import FullLayout from "../components/layout/FullLayout";
 import { useParams, useLocation } from "react-router-dom";
 import { useRecoilState } from "recoil";
@@ -27,7 +25,6 @@ import SockJS from "sockjs-client";
 import ChatRoom from "../components/chatRoom/ChatRoom";
 import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
 import RadioButton from "../components/radioButton/RadioButton";
-import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 import Toast from "../components/toast/Toast";
 import { history } from "../util/history";
 import JoinUser from "../components/ingameComponents/JoinUser";
