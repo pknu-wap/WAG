@@ -22,6 +22,8 @@ public class Room {
     private int roomEnterCode;
     @NotNull
     private int userCount;
+    @NotNull
+    private String category;
 
     private int cycle;
     private int currentOrder;

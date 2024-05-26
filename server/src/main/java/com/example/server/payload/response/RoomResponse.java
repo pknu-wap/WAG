@@ -19,15 +19,17 @@ public class RoomResponse {
     private int roomEnterCode; // 랜덤 4자리 생성
     private boolean gameStatus;
     private int userCount;
+    private String category;
     private List<UserDto> UserDtos;
 
 
-    public RoomResponse(Long roomId, boolean isPrivateRoom, int roomEnterCode, boolean gameStatus, int userCount) {
+    public RoomResponse(Long roomId, boolean isPrivateRoom, int roomEnterCode, boolean gameStatus, int userCount, String category) {
         this.roomId = roomId;
         this.isPrivateRoom = isPrivateRoom;
         this.roomEnterCode = roomEnterCode;
         this.gameStatus = gameStatus;
         this.userCount = userCount;
+        this.category = category;
     }
 
     public static RoomResponse create(Room room, List<UserDto> userDtos){
@@ -37,6 +39,7 @@ public class RoomResponse {
                 room.getRoomEnterCode(),
                 room.isGameStatus(),
                 room.getUserCount(),
+                room.getCategory(),
                 userDtos
         );
     }
@@ -47,7 +50,8 @@ public class RoomResponse {
                 room.isPrivateRoom(),
                 room.getRoomEnterCode(),
                 room.isGameStatus(),
-                room.getUserCount()
+                room.getUserCount(),
+                room.getCategory()
         );
     }
 }

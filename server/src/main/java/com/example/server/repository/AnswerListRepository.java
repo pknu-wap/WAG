@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AnswerListRepository extends JpaRepository<AnswerList, Long> {
@@ -15,4 +16,6 @@ public interface AnswerListRepository extends JpaRepository<AnswerList, Long> {
 
     @Query("SELECT al FROM AnswerList al order by RAND() limit 6")
     List<AnswerList> findAnswerListBy();
+    @Query("SELECT al FROM AnswerList al WHERE al.answerGroup = : group order by al.id asc limit 1")
+    Optional<AnswerList> haveCategory(@Param("group") String group);
 }
