@@ -721,12 +721,11 @@ const ReadyToGame = () => {
               <div key={index} className="relative">
                 <JoinUser
                   Nickname={info.roomNickname}
-                  userCount={userCount}
+                  isCaptain={info.captain}
                   gameStart={gameStart}
                   className={""}
                   gameUserDto={gameUserDtos}
                   whoseTurn={currentUserAnswer?.nickname}
-                  isMyTurn={isMyTurn}
                   children={
                     gameStart ? (
                       <div className={`p-1 shadow-lg rounded-lg absolute top-1/2 left-0`}>
@@ -734,10 +733,7 @@ const ReadyToGame = () => {
                           onClick={() => { socketPenaltyOnClick(info.roomNickname); }}>
                           경고 주기
                         </Button>
-                      </div>
-                    ) : (
-                      <div></div>
-                    )}
+                      </div> ) : ( <div></div> )}
                 />
               </div>
             );
@@ -797,7 +793,9 @@ const ReadyToGame = () => {
 
           <div className="w-5/12 flex flex-row justify-center algin-center relative">
             <input
-              className="w-full rounded-2xl shadow-md pl-5 text-[#000000]"
+              className={`${isCORRECTMode && isMyTurn ? 
+                "w-full rounded-2xl shadow-md pl-5 text-[#000000] focus:shadow-2xl border-[4px] border-[#A072BC]" 
+                : "w-full h-[48px] rounded-2xl shadow-md pl-5 text-[#000000]"}`}
               type="text"
               placeholder={
                 gameStart // gameStart가 true인 경우에만 조건부 렌더링
@@ -824,7 +822,7 @@ const ReadyToGame = () => {
             ></input>
 
             <IconButton
-                className="shadow-none hover:shadow-none dark:shadow-none top-1 right-0 absolute"
+                className="right-0 absolute"
                 size="sm"
                 onClick={() => {  // onClick 핸들러 수정
                   if (myChatMessages.trim() !== "") { 
@@ -833,6 +831,7 @@ const ReadyToGame = () => {
                     Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
                   }
                 }}
+                isInput={true}
               >
               <FontAwesomeIcon className="text-[#000000]" icon={faPaperPlane} />
             </IconButton>

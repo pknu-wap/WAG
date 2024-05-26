@@ -5,6 +5,7 @@ import FullLayout from "../components/layout/FullLayout";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { IRoomResponseInfo } from "../types/dto";
+import Toast from "../components/toast/Toast";
 
 function CreateRoom() {
   const [isPrivate, setIsPrivate] = useState<boolean | null>(false); //일단은 공개방을 default로
@@ -115,6 +116,14 @@ function CreateRoom() {
           placeholder={"닉네임을 입력해주세요"}
           onChange={(e) => {
             setNickname(e.target.value);
+          }}
+          onKeyDown={(e) => {
+            if (e.nativeEvent.isComposing) return ;
+            if (e.key === "Enter" && nickName?.trim() !== "") {
+              createRoom();
+            } else if (e.key === "Enter" && nickName?.trim() === "") {
+              Toast({ message: "이름을 입력해주세요!", type: "warn" });
+            }
           }}
         ></input>
 

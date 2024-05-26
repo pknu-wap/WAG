@@ -35,7 +35,7 @@ const ChatRoom: React.FC<{ message: ChatMessage; whoseTurn?: string }> = ({ mess
         let containerClass = isMyMessage ? "flex flex-col items-end" : "flex flex-col items-start";
         return (
           <div key={index} className={containerClass}>
-            <UserMessage message={msg} myTurn={isMyMessage}/> 
+            <UserMessage message={msg} isMyMessage={isMyMessage}/> 
           </div>
         );
       } 
@@ -63,7 +63,7 @@ const ChatRoom: React.FC<{ message: ChatMessage; whoseTurn?: string }> = ({ mess
         return (
           <>
             <div key={index} className={containerClass}>
-              <UserMessage message={msg} myTurn={isMyMessage}/>
+              <UserMessage message={msg} isMyMessage={isMyMessage}/>
             </div>
             <div key={index} className="flex flex-col items-center">
               <NotificationMessage message={{...msg, content: "정답자가 모두 나왔습니다"}} />

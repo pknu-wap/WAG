@@ -4,21 +4,21 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import IconButton from "../button/IconButton";
 import { GameUserDto, IGetAnswerList } from "../../types/dto";
+import { faCrown } from "@fortawesome/free-solid-svg-icons";
 
 interface JoinUserProps {
   Nickname: string;
-  userCount: number;
+  isCaptain: boolean;
   gameStart: boolean;
   gameUserDto: GameUserDto[];
   whoseTurn?: string;
   className: string;
-  isMyTurn: boolean;
   onClick?: () => void;
   children: ReactNode;
 }
 
 const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
-  ({ Nickname, userCount, gameStart, gameUserDto, whoseTurn, className, isMyTurn, onClick, children }, ref) => {
+  ({ Nickname, isCaptain, gameStart, gameUserDto, whoseTurn, className, onClick, children }, ref) => {
     const roomId = localStorage.getItem("roomId");
     const myName = localStorage.getItem("nickName");
     const [userRank, setUserRank] = useState<number>(0)
@@ -110,14 +110,11 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
           <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-14 absolute">
             {answer}
           </div>
+        ) : !gameStart && isCaptain ? (
+          <FontAwesomeIcon className="text-[#FFFF00] bottom-14 absolute" icon={faCrown} />
         ) : (
           <div></div>
         )}
-        {userCount === 1 ? (
-          <div className="bottom-14 absolute">
-          <FontAwesomeIcon icon={faChessKing} />
-        </div>  
-        ) : (<div></div>)}
         <FontAwesomeIcon icon={faUser} size="xl" />
       </IconButton>
         ) : (
@@ -131,6 +128,8 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
             <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-14 absolute">
               {answer}
             </div>
+          ) : !gameStart && isCaptain ? (
+            <FontAwesomeIcon className="text-[#FFFF00] bottom-14 absolute" icon={faCrown} />
           ) : (
             <div></div>
           )}
