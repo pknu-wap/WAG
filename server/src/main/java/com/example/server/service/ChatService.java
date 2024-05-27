@@ -370,7 +370,51 @@ public class ChatService {
     }
 
     public AnswerListResponse getAnswerList(Long roomId, String nickname){
-        return new AnswerListResponse(gameOrderRepository.findAnswerNotMe(roomId), nickname);
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(()->new NoSuchRoomException(roomId));
+        int round = room.getCycle();
+        String myRealAnswer = gameOrderRepository.findByNickName(nickname, roomId).get().getAnswerName();
+        String myAnswer;
+        if(round < 3){
+            myAnswer = "???";
+        }
+        else if (round < 5){
+            myAnswer = getLength(myRealAnswer);
+        }
+        else if (round < 7){
+            myAnswer = setHint(0,myRealAnswer);
+        }
+        else {
+            myAnswer = setHint(1,myRealAnswer);
+        }
+        return new AnswerListResponse(gameOrderRepository.findAnswerNotMe(roomId), nickname, myAnswer);
+    }
+
+    public String setHint(int idx,String myRealAnswer){
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < myRealAnswer.length(); i++){
+            char ch = myRealAnswer.charAt(i);
+            if(i <= idx){
+                if (ch >= 0xAC00 && ch <= 0xD7A3) { // 한글 음절 범위 확인
+                    int unicode = ch - 0xAC00;
+                    int initialConsonantIndex = unicode / (21 * 28);
+                    char initialConsonant = (char) (initialConsonantIndex + 0x1100); // 초성 유니코드 범위 시작: 0x1100
+                    sb.append(" " + initialConsonant);
+                }
+            }
+            else{
+                sb.append(" _");
+            }
+        }
+        return sb.toString();
+    }
+
+    public String getLength(String myRealAnswer){
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < myRealAnswer.length(); i++){
+            sb.append(" _");
+        }
+        return sb.toString();
     }
 
     public ChatGameMessage resetTimer(ChatMessage chatMessage){
