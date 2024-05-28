@@ -746,6 +746,7 @@ const ReadyToGame = () => {
                   isCaptain={info.captain}
                   gameStart={gameStart}
                   className={""}
+                  currentCycle={currentCycle}
                   gameUserDto={gameUserDtos}
                   whoseTurn={currentUserAnswer?.nickname}
                   children={
