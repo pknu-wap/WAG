@@ -1,10 +1,7 @@
 package com.example.server.service;
 
 import com.example.server.domain.*;
-import com.example.server.dto.ChatGameMessage;
-import com.example.server.dto.ChatMessage;
-import com.example.server.dto.ChatRoomModeMessage;
-import com.example.server.dto.GameUserDto;
+import com.example.server.dto.*;
 import com.example.server.exception.*;
 import com.example.server.payload.response.AnswerListResponse;
 import com.example.server.payload.response.ResultResponse;
@@ -425,7 +422,9 @@ public class ChatService {
         return chatGameMessage;
     }
 
-    public ChatMessage setReady(ChatMessage chatMessage){
+    public ChatReadyMessage setReady(ChatMessage chatMessage){
+        Room room = roomRepository.findById(chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
         RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatMessage.getRoomId())
                 .orElseThrow(()->new NoSuchRoomUserException(chatMessage.getRoomId()));
         if(roomUser.isReady()){
@@ -437,7 +436,7 @@ public class ChatService {
             chatMessage.setContent(chatMessage.getSender() + " 님이 레디 하셨습니다. ");
         }
         roomUserRepository.save(roomUser);
-        return chatMessage;
+        return new ChatReadyMessage(chatMessage, UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId())));
     }
 
     public ChatMessage setCategory(ChatMessage chatMessage){
