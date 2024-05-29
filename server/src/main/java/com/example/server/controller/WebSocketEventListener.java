@@ -87,7 +87,7 @@ public class WebSocketEventListener {
                     room.setGameStatus(false);
                     roomRepository.save(room);
 
-                    RoomUser nextCaption = roomUserRepository.findNextCaptinByRandom(roomId)
+                    RoomUser nextCaption = roomUserRepository.findLastOne(roomId)
                                 .orElseThrow(() -> new NoSuchRoomUserException(roomId));
                     nextCaption.setCaptain(true);
                     nextCaption.setReady(true);

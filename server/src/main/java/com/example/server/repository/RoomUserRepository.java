@@ -38,6 +38,9 @@ public interface RoomUserRepository extends JpaRepository<RoomUser, Long> {
     @Query("SELECT ru FROM RoomUser ru WHERE ru.room.id = :roomId AND ru.isCaptain = false order by RAND() limit 1")
     Optional<RoomUser> findNextCaptinByRandom(@Param("roomId") Long roomId);
 
+    @Query("SELECT ru FROM RoomUser ru WHERE ru.room.id = :roomId order by RAND() limit 1")
+    Optional<RoomUser> findLastOne(@Param("roomId") Long roomId);
+
     @Query("SELECT ru.roomNickname FROM RoomUser ru WHERE ru.room.id = :roomId")
     List<String> findNickNameByRoomId(@Param("roomId") Long roomId);
 
