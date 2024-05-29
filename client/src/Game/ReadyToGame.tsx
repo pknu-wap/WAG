@@ -4,8 +4,10 @@ import { useParams, useLocation } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import {
   captainReadyToGameModalState,
+  ingameTimerCount,
   readyToGameModalState,
-} from "../recoil/modal";
+  timerCount,
+} from "../recoil/recoil";
 import { useEffect, useState, useRef } from "react";
 import ReadyToGameModal from "../components/modal/ReadyModal";
 import Button from "../components/button/Button";
@@ -35,6 +37,8 @@ import RankingUser from "../components/ingameComponents/RankingUser";
 import DropdownSelect from "../components/dropDown/DropDown";
 import { Option } from "react-dropdown";
 import ReadyStartButton from "./RedayStartButton";
+import SliderComponent from "../components/slider/Slider";
+
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -56,6 +60,7 @@ const ReadyToGame = () => {
   const [category, setCategory] = useState("")
   const [userCount, setUserCount] = useState(0)
   const [isGameEnd, setIsGameEnd] = useState(false)
+  const [timer, setTimer] = useState(0)
 
   const location = useLocation();
   const roomInfo = { ...location.state };
@@ -92,6 +97,7 @@ const ReadyToGame = () => {
   const [isMyTurn, setIsMyTurn] = useState(false);
   const gameCycleRef = useRef<number>(0);
   const [currentCycle, setCurrentCycle] = useState<number>(0);
+  const [nowTurnAnswer, setNowTurnAnswer] = useState("")
   const [hasSentCorrect, setHasSentCorrect] = useState(false);  //정답을 외쳤는지 
   const [hasSentAsk, setHasSentAsk] = useState(false);  //질문을 했는지 
 
@@ -211,6 +217,7 @@ const ReadyToGame = () => {
     setIsPrivateRoom(roomInfo.privateRoom);
     setChangeIsPrivate(roomInfo.privateRoom);
     setCategory(roomInfo.category);
+    setIngameTimerRecoil(roomInfo.timer)
     let userDtos = roomInfo.userDtos;
     userDtos.forEach((dto) => {
       const nickName = localStorage.getItem("nickName");
@@ -251,6 +258,10 @@ const ReadyToGame = () => {
     } else if (messageType === "CATEGORY") {
       // nickname은 방장 이름으로만 send
       contentToSend = selectedOption;
+    } else if (messageType === "TIMER") {
+      // nickname은 방장 이름으로만 send
+      contentToSend = sliderValue.toString()
+      console.log(sliderValue)
     }
     console.log(contentToSend, messageType)
     stompClient.send(
@@ -303,6 +314,7 @@ const ReadyToGame = () => {
     } else if (message.messageType === "LEAVE") {
       //addJoinUser();
       setJoinUsers(message.roomResponse.userDtos);
+      setUserCount(message.roomResponse.userDtos.length)
       setRoomInfo();
       console.log("LEAVE으로 온 메세지", message);
     } else if (message.messageType === "CHAT") {
@@ -311,7 +323,11 @@ const ReadyToGame = () => {
     } else if (message.messageType === "CATEGORY") {
       console.log("CATEGORY로 온 메세지", message);
       setCategory(message.content)
-    } else if (message.messageType === "CHANGE") {
+    } else if (message.messageType === "TIMER") {
+      console.log("TIMER로 온 메세지", message);
+      setIngameTimerRecoil(parseInt(message.content))
+    }
+    else if (message.messageType === "CHANGE") {
       console.log("CHANGE로 온 메세지", message);
       setRoomInfo();
       Toast({ message: message.privateRoom ? '방이 비공개로 설정되었습니다.' : '방이 공개로 설정되었습니다.', type: 'info' });
@@ -332,13 +348,13 @@ const ReadyToGame = () => {
       console.log("START로 온 메세지", message);
       setCountdown(5);
       getGameAnswer();
-          // API 응답을 받은 후에 5초를 기다립니다.
-          setTimeout(() => {
-            getGameCycle(message);
-            getNextTurnInfo(message);
-            setgameStart(true);
-            GameLogic(); // 5초 후에 GameLogic 실행
-          }, 5000);
+      // API 응답을 받은 후에 5초를 기다립니다.
+      setTimeout(() => {
+        getGameCycle(message);
+        getNextTurnInfo(message);
+        setgameStart(true);
+        GameLogic(); // 5초 후에 GameLogic 실행
+      }, 5000);
     } else if (message.messageType === "PENALTY") {
       setGameUserDtos(message.gameUserDtos);
       console.log("PENALTY로 온 메세지", message);
@@ -424,6 +440,20 @@ const ReadyToGame = () => {
     }
   }
 
+  // 타이머 세팅
+  const [timerRecoil, ] = useRecoilState(timerCount) // 방 만들기에서 가져온 recoil
+  const [sliderValue, setSliderValue] = useState(timerRecoil); // 슬라이더 변경 값
+  const [, setIngameTimerRecoil] = useRecoilState(ingameTimerCount) // 게임 중 타이메 recoil
+
+  const handleSliderChange = (value: number) => {
+    setSliderValue(value);
+    console.log('Slider value changed:', value);
+  };
+
+  const sendSliderChange = () => {
+    sendMessageToSocket("/app/chat.setTimer", "TIMER")
+  }
+
   // 새로고침 방지
   const usePreventRefresh = () => {
     const preventClose = (e: any) => {
@@ -496,6 +526,7 @@ const ReadyToGame = () => {
   };
 
   /*====================== 게임 중 코드 ====================== */
+
       const exitOnClick = () => {
         window.location.replace("/")
       };
@@ -505,8 +536,6 @@ const ReadyToGame = () => {
         stopTimer,
         resetTimer,
       }: TimerHookProps = useTimer();
-
-
 
       useEffect(() => {
         if(time === 5){
@@ -534,50 +563,51 @@ const ReadyToGame = () => {
             sendMessageToSocket("/app/chat.sendGameMessage", "RESET"); 
           }
       }, [stopTimer, resetTimer, time]);
+
     
-      //타이머 30초 종료 후 로직
-      const handleTimerEnd = () => {
-        const nickname = localStorage.getItem("nickName");
-        startTimer();
-        setHasSentCorrect(false); // 턴이 끝나면 다시 보낼 수 있도록 초기화
-        setHasSentAsk(false);    // 턴이 끝나면 다시 보낼 수 있도록 초기화
-        const nextUserNickname = nextTurnUserRef.current?.roomNickname;// 다음 턴 유저 정보 업데이트
-        setIsMyTurn(nextUserNickname === nickname); //다음턴이 나라면 isMyTurn
-        setCurrentUserAnswer(currentAnswerRef.current); //다음 턴 유저의 정답어를 화면에 띄운다.
-        if (gameCycleRef.current !== currentCycle) { // 사이클 수가 바뀌었다면 게임턴수 재랜더링
-          setCurrentCycle(gameCycleRef.current);
-        }
-        if(nextUserNickname === nickname)
-        {
-          Toast({ message: '당신은 질문자입니다.', type: 'info' });
-        }
-        else
-        {
-          Toast({ message: '당신은 답변자입니다.', type: 'info' });
-        }
-        setChatMessages([]);
-      };
-
-    //정답자 처리 함수
-    let currentAnswererIndex = 1; // 현재 정답자 인덱스
-
-    function handleCorrectAnswer(message:any) {
-      const sender = message.sender;
-      const gameUserDtos = message.gameUserDtos;
-      const senderIndex = gameUserDtos.findIndex((user:any) => user.roomNickname === sender);
-      
-      if (senderIndex !== -1) {
-        if(gameUserDtos[senderIndex].ranking !== 0){
-          gameUserDtos[senderIndex].ranking = currentAnswererIndex; // 1부터 시작
-          Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
-          currentAnswererIndex++;
-        }
-        else{
-          Toast({ message: `${sender}가 정답을 맞추지 못했습니다!`, type: 'info' });
-        }
-
-      }
+  //타이머 30초 종료 후 로직
+  const handleTimerEnd = () => {
+    const nickname = localStorage.getItem("nickName");
+    startTimer();
+    setHasSentCorrect(false); // 턴이 끝나면 다시 보낼 수 있도록 초기화
+    setHasSentAsk(false);    // 턴이 끝나면 다시 보낼 수 있도록 초기화
+    const nextUserNickname = nextTurnUserRef.current?.roomNickname;// 다음 턴 유저 정보 업데이트
+    setIsMyTurn(nextUserNickname === nickname); //다음턴이 나라면 isMyTurn
+    setCurrentUserAnswer(currentAnswerRef.current); //다음 턴 유저의 정답어를 화면에 띄운다.
+    if (gameCycleRef.current !== currentCycle) { // 사이클 수가 바뀌었다면 게임턴수 재랜더링
+      setCurrentCycle(gameCycleRef.current);
     }
+    if(nextUserNickname === nickname)
+    {
+      Toast({ message: '당신은 질문자입니다.', type: 'info' });
+    }
+    else
+    {
+      Toast({ message: '당신은 답변자입니다.', type: 'info' });
+    }
+    setChatMessages([]);
+  };
+
+  //정답자 처리 함수
+  let currentAnswererIndex = 1; // 현재 정답자 인덱스
+
+  function handleCorrectAnswer(message:any) {
+    const sender = message.sender;
+    const gameUserDtos = message.gameUserDtos;
+    const senderIndex = gameUserDtos.findIndex((user:any) => user.roomNickname === sender);
+    
+    if (senderIndex !== -1) {
+      if(gameUserDtos[senderIndex].ranking !== 0){
+        gameUserDtos[senderIndex].ranking = currentAnswererIndex; // 1부터 시작
+        Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
+        currentAnswererIndex++;
+      }
+      else{
+        Toast({ message: `${sender}가 정답을 맞추지 못했습니다!`, type: 'info' });
+      }
+
+    }
+  }
     
     //게임시작 버튼 클릭 이벤트
   const clickGameStart = () => {
@@ -662,12 +692,27 @@ const ReadyToGame = () => {
       );
       const answerList = response.data
       answerListRef.current = answerList;
+      console.log("answerList : ", answerList)
+      console.log("answerListRef.current : ", answerListRef.current)
       return response.data;
     } catch (error) {
       console.error("정답 리스트 get api 오류 발생 : ", error);
       throw error;
     }
   };
+  const findUserAnswer = async () => {
+    const userAnswer = await getGameAnswer();
+    userAnswer.answerUserDtos.forEach((dto) => {
+      if (dto.nickname === currentUserAnswer?.nickname) {
+        setNowTurnAnswer(dto.answer)
+      }
+    })
+  }
+  useEffect(() => {
+    if (gameStart) {
+      getGameAnswer();
+    }
+  }, [currentCycle]);
   useEffect(() => {
     let countdownInterval: NodeJS.Timeout;
     if (countdown !== null && countdown > 0) {
@@ -785,6 +830,7 @@ const ReadyToGame = () => {
                   isCaptain={info.captain}
                   gameStart={gameStart}
                   className={""}
+                  currentCycle={currentCycle}
                   gameUserDto={gameUserDtos}
                   whoseTurn={currentUserAnswer?.nickname}
                   children={
@@ -1002,12 +1048,17 @@ const ReadyToGame = () => {
             </div>
             <div className="flex flex-col justify-center items-center">
               <div className="mt-5">{renderButton()}</div>
-              <div>
+            <div>
           <div className="rounded-xl font-extrabold min-w-44 mb-3">게임 카테고리 설정</div>
           <div>
             <DropdownSelect onOptionSelect={handleOptionSelect} defaultValue={selectedOption}/>
             <Button size="sm" disabled={false} onClick={sendCategoryOnClick}>변경</Button>
           </div>
+        <div>
+          <div className="rounded-xl font-extrabold min-w-44 mb-3">턴 당 진행시간</div>
+          <SliderComponent value={sliderValue} onChange={handleSliderChange} />
+          <Button size="sm" disabled={false} onClick={sendSliderChange}>변경</Button>
+        </div>
         </div>
             </div>
           </div>

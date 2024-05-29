@@ -38,3 +38,9 @@ export interface ReadyStartButtonProps {
   handleStart: () => void;
   handleReady: () => void;
 }
+
+export interface ProgressTimerProps {
+  time: number;
+  fulltime: number;
+}
+

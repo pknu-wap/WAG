@@ -44,4 +44,11 @@ public interface RoomUserRepository extends JpaRepository<RoomUser, Long> {
     @Query(value = "SELECT ru.room.id FROM RoomUser ru JOIN ru.room r WHERE r.isPrivateRoom = false AND r.gameStatus = false AND r.userCount <= 5 ORDER BY RAND() LIMIT 1")
     Optional<Long> findRandomRoomId();
 
+    @Query(value="SELECT ru.id FROM RoomUser ru WHERE ru.room.id = :roomId AND ru.gameOrder.userOrder=:gameOrder")
+    Optional<Long> findByGameOrder(@Param("gameOrder") int gameOrder, @Param("roomId") Long roomId);
+
+//    @Query(value="SELECT ru.id FROM RoomUser ru WHERE ru.room.id = :roomId AND ru.gameOrder.nextTurn = true")
+//    Optional<Long> findNextOrderByRoomId(@Param("roomId") Long roomId);
+
+
 }

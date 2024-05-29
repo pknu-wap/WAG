@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { TimerProps } from "../../types/common";
+import { ProgressTimerProps, TimerProps } from "../../types/common";
 
 export const Container = styled.div<TimerProps>`
   animation: ${(props) =>
@@ -62,9 +62,9 @@ export const Background = styled.div`
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
 `;
 
-export const Progress = styled.div<TimerProps>`
+export const Progress = styled.div<ProgressTimerProps>`
   transition: 0.3s width ease;
-  width: ${(props) => (props.time / 30) * 100}%;
+  width: ${(props) => (props.time / props.fulltime) * 100}%;
   height: 100%;
   position: absolute;
   background-color: #8377c9;

@@ -23,6 +23,7 @@ public class ChatMessage {
         RESET,
         READY,
         CATEGORY,
+        TIMER,
         CHANGE,
     }
 }

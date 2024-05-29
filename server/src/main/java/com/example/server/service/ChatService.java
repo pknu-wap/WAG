@@ -1,13 +1,9 @@
 package com.example.server.service;
 
 import com.example.server.domain.*;
-import com.example.server.dto.ChatGameMessage;
-import com.example.server.dto.ChatMessage;
-import com.example.server.dto.ChatRoomModeMessage;
-import com.example.server.dto.GameUserDto;
+import com.example.server.dto.*;
 import com.example.server.exception.*;
 import com.example.server.payload.response.AnswerListResponse;
-import com.example.server.payload.response.ResultResponse;
 import com.example.server.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -54,6 +49,7 @@ public class ChatService {
         Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
                 .orElseThrow(() -> new NoSuchRoomException(chatMessage.getRoomId()));
         roomInit(room);
+
         roomRepository.save(room);
 
         ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
@@ -69,7 +65,7 @@ public class ChatService {
         return gameRecord;
     }
 
-    private static void roomInit(Room room) {
+    private void roomInit(Room room) {
         room.setGameStatus(true);
         room.setCycle(1);
         room.setCurrentOrder(1);
@@ -245,18 +241,21 @@ public class ChatService {
         }
 
         for(RoomUser roomUser : roomUsers){
-//            if(!roomUser.isCaptain()){
-//                roomUser.setReady(false);                 //TODO 프론트 레디 기능 추가 시 4줄 주석 해제 필요
-//                roomUserRepository.save(roomUser);
-//            }
+            if(!roomUser.isCaptain()){
+                roomUser.setReady(false);
+                roomUserRepository.save(roomUser);
+            }
 
             GameOrder gameOrder = gameOrderInit(roomUser, room);
-
             gameOrder.setNextTurn(order == 1);
+            if (order == 1) {
+                room.setNowTurnUserId(roomUser.getId());
+                roomRepository.save(room);
+            }
             gameOrder.setAnswerName(answerLists.get(order-1).getName());
             gameOrder.setUserOrder(order);
             order += 1;
-
+            roomUser.setGameOrder(gameOrder);   // TODO 여기 수정
             gameOrderRepository.save(gameOrder);
         }
     }
@@ -370,30 +369,80 @@ public class ChatService {
     }
 
     public AnswerListResponse getAnswerList(Long roomId, String nickname){
-        return new AnswerListResponse(gameOrderRepository.findAnswerNotMe(roomId), nickname);
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(()->new NoSuchRoomException(roomId));
+        int round = room.getCycle();
+        String myRealAnswer = gameOrderRepository.findByNickName(nickname, roomId).get().getAnswerName();
+        String myAnswer;
+        if(round < 3){
+            myAnswer = "???";
+        }
+        else if (round < 5){
+            myAnswer = getLength(myRealAnswer);
+        }
+        else if (round < 7){
+            myAnswer = setHint(0,myRealAnswer);
+        }
+        else {
+            myAnswer = setHint(1,myRealAnswer);
+        }
+        return new AnswerListResponse(gameOrderRepository.findAnswerNotMe(roomId), nickname, myAnswer);
+    }
+
+    public String setHint(int idx,String myRealAnswer){
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < myRealAnswer.length(); i++){
+            char ch = myRealAnswer.charAt(i);
+            if(i <= idx){
+                if (ch >= 0xAC00 && ch <= 0xD7A3) { // 한글 음절 범위 확인
+                    int unicode = ch - 0xAC00;
+                    int initialConsonantIndex = unicode / (21 * 28);
+                    char initialConsonant = (char) (initialConsonantIndex + 0x1100); // 초성 유니코드 범위 시작: 0x1100
+                    sb.append(" " + initialConsonant);
+                }
+            }
+            else{
+                sb.append(" _");
+            }
+        }
+        return sb.toString();
+    }
+
+    public String getLength(String myRealAnswer){
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < myRealAnswer.length(); i++){
+            sb.append(" _");
+        }
+        return sb.toString();
     }
 
     public ChatGameMessage resetTimer(ChatMessage chatMessage){
         Room room = roomRepository.findById(chatMessage.getRoomId())
                 .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
+        room.setNowTurnUserId(gameOrderRepository.findNextOrderByRoomId(room.getId())
+                .orElseThrow(()->new NoSuchRoomUserException(room.getId())));
+        roomRepository.save(room);
         ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
         chatGameMessage.setMessageType(ChatMessage.MessageType.RESET);
         return chatGameMessage;
     }
 
-    public ChatMessage setReady(ChatMessage chatMessage){
+    public ChatReadyMessage setReady(ChatMessage chatMessage){
+        Room room = roomRepository.findById(chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
         RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatMessage.getRoomId())
                 .orElseThrow(()->new NoSuchRoomUserException(chatMessage.getRoomId()));
         if(roomUser.isReady()){
             roomUser.setReady(false);
-            chatMessage.setContent(chatMessage.getSender() + " 님이 레디를 해제하셨습니다. ");
+//            chatMessage.setContent(chatMessage.getSender() + " 님이 레디를 해제하셨습니다. ");
         }
         else {
             roomUser.setReady(true);
-            chatMessage.setContent(chatMessage.getSender() + " 님이 레디 하셨습니다. ");
+//            chatMessage.setContent(chatMessage.getSender() + " 님이 레디 하셨습니다. ");
         }
         roomUserRepository.save(roomUser);
-        return chatMessage;
+        chatMessage.setContent("");
+        return new ChatReadyMessage(chatMessage, UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId())));
     }
 
     public ChatMessage setCategory(ChatMessage chatMessage){
@@ -412,6 +461,22 @@ public class ChatService {
                     .orElseThrow(()->new NoSuchCategoryException(chatMessage.getContent()));
         }
         room.setCategory(chatMessage.getContent());
+        roomRepository.save(room);
+        return chatMessage;
+    }
+
+    public ChatMessage setTimer(ChatMessage chatMessage){
+        Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
+        RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomUserException(chatMessage.getRoomId()));
+        if(!roomUser.isCaptain()){  // 방장이 아닌 사람이 변경 시도할 경우
+            throw new CategoryException("타이머 변경 권한이 없습니다. ");
+        }
+        if(room.getCategory().equals(chatMessage.getContent())){  // 기존의 카테고리와 같은 카테고리로 변경할 경우
+            throw new CategoryException("기존의 타이머와 같은 타이머입니다. ");
+        }
+        room.setTimer(Integer.parseInt(chatMessage.getContent()));
         roomRepository.save(room);
         return chatMessage;
     }
