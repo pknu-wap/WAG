@@ -20,16 +20,18 @@ public class RoomResponse {
     private boolean gameStatus;
     private int userCount;
     private String category;
+    private int timer;
     private List<UserDto> UserDtos;
 
 
-    public RoomResponse(Long roomId, boolean isPrivateRoom, int roomEnterCode, boolean gameStatus, int userCount, String category) {
+    public RoomResponse(Long roomId, boolean isPrivateRoom, int roomEnterCode, boolean gameStatus, int userCount, String category, int timer) {
         this.roomId = roomId;
         this.isPrivateRoom = isPrivateRoom;
         this.roomEnterCode = roomEnterCode;
         this.gameStatus = gameStatus;
         this.userCount = userCount;
         this.category = category;
+        this.timer = timer;
     }
 
     public static RoomResponse create(Room room, List<UserDto> userDtos){
@@ -40,6 +42,7 @@ public class RoomResponse {
                 room.isGameStatus(),
                 room.getUserCount(),
                 room.getCategory(),
+                room.getTimer(),
                 userDtos
         );
     }
@@ -51,7 +54,8 @@ public class RoomResponse {
                 room.getRoomEnterCode(),
                 room.isGameStatus(),
                 room.getUserCount(),
-                room.getCategory()
+                room.getCategory(),
+                room.getTimer()
         );
     }
 }

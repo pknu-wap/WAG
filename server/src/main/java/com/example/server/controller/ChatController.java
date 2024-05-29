@@ -76,6 +76,15 @@ public class ChatController {
         return rechatMessage;
     }
 
+    @MessageMapping("/chat.setTimer")
+    public ChatMessage setTimer(@Payload ChatMessage chatMessage) {
+        String destination = "/topic/public/"+chatMessage.getRoomId();
+        ChatMessage rechatMessage = chatService.setTimer(chatMessage);
+        rechatMessage.setMessageType(ChatMessage.MessageType.Timer);
+        messagingTemplate.convertAndSend(destination, rechatMessage);
+        return rechatMessage;
+    }
+
     @MessageMapping("/chat.addUser")
     public ChatRoomInfoMessage addUser(@Payload ChatMessage chatMessage,
                                        SimpMessageHeaderAccessor headerAccessor,

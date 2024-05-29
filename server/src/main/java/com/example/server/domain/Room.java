@@ -24,6 +24,8 @@ public class Room {
     private int userCount;
     @NotNull
     private String category;
+    @NotNull
+    private int timer;
 
     private int cycle;
     private int currentOrder;
