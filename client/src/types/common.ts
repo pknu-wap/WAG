@@ -26,3 +26,8 @@ export interface ButtonProps {
 export interface TimerProps {
   time: number;
 }
+
+export interface ProgressTimerProps {
+  time: number;
+  fulltime: number;
+}

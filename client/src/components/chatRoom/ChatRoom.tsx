@@ -45,6 +45,14 @@ const ChatRoom: React.FC<{ message: ChatMessage; whoseTurn?: string }> = ({ mess
             </div>
           )
         }
+      else if (msg.messageType === "TIMER") 
+        {
+          return (
+            <div key={index} className="flex flex-col items-center">
+              <NotificationMessage message={{...msg, content: `${msg.content}로 타이머가 변경되었습니다.`}} />
+            </div>
+          )
+        }
       else if (msg.messageType === 'START') //UserMessage가 아니고
         {
         return (
