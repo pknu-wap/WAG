@@ -429,13 +429,14 @@ public class ChatService {
                 .orElseThrow(()->new NoSuchRoomUserException(chatMessage.getRoomId()));
         if(roomUser.isReady()){
             roomUser.setReady(false);
-            chatMessage.setContent(chatMessage.getSender() + " 님이 레디를 해제하셨습니다. ");
+//            chatMessage.setContent(chatMessage.getSender() + " 님이 레디를 해제하셨습니다. ");
         }
         else {
             roomUser.setReady(true);
-            chatMessage.setContent(chatMessage.getSender() + " 님이 레디 하셨습니다. ");
+//            chatMessage.setContent(chatMessage.getSender() + " 님이 레디 하셨습니다. ");
         }
         roomUserRepository.save(roomUser);
+        chatMessage.setContent("");
         return new ChatReadyMessage(chatMessage, UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId())));
     }
 
