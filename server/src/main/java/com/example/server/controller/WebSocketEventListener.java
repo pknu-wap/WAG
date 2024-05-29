@@ -75,28 +75,25 @@ public class WebSocketEventListener {
                     chatMessage.setContent("혼자 남았구나..");
                     chatMessage.setMessageType(ChatMessage.MessageType.END);
                     chatMessage.setSender(roomUser.getRoomNickname());
-                    chatGameMessage = chatService.makeChatGameMessage(chatMessage,room);
-                    chatGameMessage.setMessageType(ChatMessage.MessageType.END);
                     String destination = "/topic/public/"+room.getId();
                     GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
                             .orElseThrow(NoSuchGameOrderException::new);
                     gameOrderRepository.delete(gameOrder);
                     roomUserRepository.delete(roomUser);
-//                    deleteGameOrder(gameOrder);
-                    //deleteRoomUser(roomUser);
-                    messagingTemplate.convertAndSend(destination, chatGameMessage);
                     room.setUserCount(room.getUserCount() - 1);  // 유저 수 -1
-//                    room.setGameStatus(false);
+                    room.setGameStatus(false);
                     roomRepository.save(room);
 
-                    return;
-                }
-                if(room.getUserCount() == 1){
-                    GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
-                            .orElseThrow(NoSuchGameOrderException::new);
-                    gameOrderRepository.delete(gameOrder);
-                    roomUserRepository.delete(roomUser);
-                    roomRepository.delete(room);
+                    RoomUser nextCaption = roomUserRepository.findNextCaptinByRandom(roomId)
+                                .orElseThrow(() -> new NoSuchRoomUserException(roomId));
+                    nextCaption.setCaptain(true);
+                    nextCaption.setReady(true);
+                    roomUserRepository.save(nextCaption);
+
+                    chatGameMessage = chatService.makeChatGameMessage(chatMessage,room);
+                    chatGameMessage.setMessageType(ChatMessage.MessageType.END);
+                    messagingTemplate.convertAndSend(destination, chatGameMessage);
+
                     return;
                 }
                 nowUserOut = updateGameOrder(roomUser);
