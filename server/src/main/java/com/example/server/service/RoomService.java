@@ -102,7 +102,7 @@ public class RoomService {
             roomUser.setReady(true);
         }
         else{
-            roomUser.setReady(true);                                     //TODO 프론트 레디 기능 추가 시 기본 값 false로 변경 필요
+            roomUser.setReady(false);
         }
 
         return roomUser;
