@@ -80,7 +80,7 @@ public class ChatController {
     public ChatMessage setTimer(@Payload ChatMessage chatMessage) {
         String destination = "/topic/public/"+chatMessage.getRoomId();
         ChatMessage rechatMessage = chatService.setTimer(chatMessage);
-        rechatMessage.setMessageType(ChatMessage.MessageType.Timer);
+        rechatMessage.setMessageType(ChatMessage.MessageType.TIMER);
         messagingTemplate.convertAndSend(destination, rechatMessage);
         return rechatMessage;
     }
