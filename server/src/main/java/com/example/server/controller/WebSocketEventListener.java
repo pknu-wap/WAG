@@ -171,7 +171,7 @@ public class WebSocketEventListener {
                 Thread.sleep(500);
             }
 
-            int nt = getNextTurn(roomUser.getGameOrder().getUserOrder(), room.getUserCount(), room.getId());
+            int nt = getNextTurn(nowOrder, room.getUserCount(), room.getId());
             Long roomUserId = roomUserRepository.findByGameOrder(nt, room.getId())
                     .orElseThrow(()->new NoSuchRoomUserException(room.getId()));
             room.setNowTurnUserId(roomUserId);
