@@ -85,6 +85,7 @@ const ReadyToGame = () => {
   const [isMyTurn, setIsMyTurn] = useState(false);
   const gameCycleRef = useRef<number>(0);
   const [currentCycle, setCurrentCycle] = useState<number>(0);
+  const [nowTurnAnswer, setNowTurnAnswer] = useState("")
   const [hasSentCorrect, setHasSentCorrect] = useState(false);  //정답을 외쳤는지 
   const [hasSentAsk, setHasSentAsk] = useState(false);  //질문을 했는지 
 
@@ -293,6 +294,7 @@ const ReadyToGame = () => {
     } else if (message.messageType === "LEAVE") {
       //addJoinUser();
       setJoinUsers(message.roomResponse.userDtos);
+      setUserCount(message.roomResponse.userDtos.length)
       setRoomInfo();
       console.log("LEAVE으로 온 메세지", message);
     } else if (message.messageType === "CHAT") {
@@ -307,7 +309,6 @@ const ReadyToGame = () => {
       Toast({ message: message.privateRoom ? '방이 비공개로 설정되었습니다.' : '방이 공개로 설정되었습니다.', type: 'info' });
     } else if (message.messageType === "ASK") {
       console.log("ASK로 온 메세지", message);
-      getGameAnswer();
       getGameCycle(message);
       getNextTurnInfo(message);
     } else if (message.messageType === "ANSWER") {
@@ -473,7 +474,6 @@ const ReadyToGame = () => {
 
       useEffect(() => {
         if (time < 0) {
-          getGameAnswer()
           stopTimer();
           resetTimer();
           if(isMyTurn) //질문을 30초 안에 하지 않는다면 강제로 턴을 넘긴다
@@ -494,6 +494,7 @@ const ReadyToGame = () => {
             }
             setTimeout(() => {
             sendMessageToSocket("/app/chat.sendGameMessage", "RESET"); 
+            getGameAnswer()
             }, 200);
           }
         }
@@ -503,7 +504,6 @@ const ReadyToGame = () => {
       const handleTimerEnd = () => {
         const nickname = localStorage.getItem("nickName");
         startTimer();
-        getGameAnswer();
         setHasSentCorrect(false); // 턴이 끝나면 다시 보낼 수 있도록 초기화
         setHasSentAsk(false);    // 턴이 끝나면 다시 보낼 수 있도록 초기화
         const nextUserNickname = nextTurnUserRef.current?.roomNickname;// 다음 턴 유저 정보 업데이트
@@ -627,12 +627,27 @@ const ReadyToGame = () => {
       );
       const answerList = response.data
       answerListRef.current = answerList;
+      console.log("answerList : ", answerList)
+      console.log("answerListRef.current : ", answerListRef.current)
       return response.data;
     } catch (error) {
       console.error("정답 리스트 get api 오류 발생 : ", error);
       throw error;
     }
   };
+  const findUserAnswer = async () => {
+    const userAnswer = await getGameAnswer();
+    userAnswer.answerUserDtos.forEach((dto) => {
+      if (dto.nickname === currentUserAnswer?.nickname) {
+        setNowTurnAnswer(dto.answer)
+      }
+    })
+  }
+  useEffect(() => {
+    if (gameStart) {
+      getGameAnswer();
+    }
+  }, [currentCycle]);
   useEffect(() => {
     let countdownInterval: NodeJS.Timeout;
     if (countdown !== null && countdown > 0) {
