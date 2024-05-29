@@ -50,6 +50,7 @@ public class RoomService {
         room.setGameStatus(false);
         room.setUserCount(0);
         room.setCategory(roomCreateRequest.getCategory());
+        room.setTimer(roomCreateRequest.getTimer());
         room = roomRepository.save(room);  // 방 생성
         return room;
     }
