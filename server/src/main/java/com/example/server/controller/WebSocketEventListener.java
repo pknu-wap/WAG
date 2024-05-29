@@ -16,6 +16,7 @@ import com.example.server.repository.RoomRepository;
 import com.example.server.repository.RoomUserRepository;
 import com.example.server.service.ChatService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -27,12 +28,14 @@ import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class WebSocketEventListener {
-    private static final Logger logger = LoggerFactory.getLogger(WebSocketEventListener.class);
 
     private final SimpMessageSendingOperations messagingTemplate;
     private final RoomUserRepository roomUserRepository;
@@ -42,11 +45,11 @@ public class WebSocketEventListener {
 
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
-        logger.info("Received a new web socket connection");
+        log.info("Received a new web socket connection");
     }
 
     @EventListener
-    public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
+    public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) throws InterruptedException {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
         String username = (String) headerAccessor.getSessionAttributes().get("username");
@@ -54,7 +57,7 @@ public class WebSocketEventListener {
         boolean nowUserOut = false;
 
         if(username != null && roomId != null) {
-            logger.info("User Disconnected : " + username);
+            log.info("User Disconnected : " + username);
 
             RoomUser roomUser = roomUserRepository.hasNickName(username, roomId)
                     .orElseThrow(()-> new NoSuchRoomUserException(roomId));
@@ -96,6 +99,7 @@ public class WebSocketEventListener {
 
                     return;
                 }
+
                 nowUserOut = updateGameOrder(roomUser);
             }
 
@@ -135,39 +139,49 @@ public class WebSocketEventListener {
             messagingTemplate.convertAndSend("/topic/public/"+roomId, chatRoomInfoMessage);
         }
     }
-    public boolean updateGameOrder(RoomUser roomUser){
-        boolean isNextTuen = false;
+    public boolean updateGameOrder(RoomUser roomUser) throws InterruptedException {
+        boolean isNextTurn = false;
         GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
                 .orElseThrow(NoSuchGameOrderException::new);
+
         int nowOrder = gameOrder.getUserOrder();
         boolean nowTurn = gameOrder.isNowTurn();
         boolean nextTurn = gameOrder.isNextTurn();
         Room room = gameOrder.getRoom();
 
-//        deleteGameOrder(gameOrder);
+        if (room.getNowTurnUserId() == roomUser.getId()) {
+            ChatMessage chatMessage = new ChatMessage();
+            chatMessage.setContent("");
+            chatMessage.setSender(roomUser.getRoomNickname());
+            chatMessage.setRoomId(room.getId());
 
-//        if(nowTurn){
-//            GameOrder nowGo = gameOrderRepository.findByUserOrder(nowOrder, room.getId())
-//                    .orElseThrow(NoSuchGameOrderException::new);
-//            int nextOrder = chatService.getNextTurn(nowOrder, room.getCurrentOrder(), room.getId());
-//            GameOrder nextGo = gameOrderRepository.findByUserOrder(nextOrder, room.getId())
-//                    .orElseThrow(NoSuchGameOrderException::new);
-//            nowGo.setNowTurn(true);
-//            nowGo.setNextTurn(false);
-//            nextGo.setNextTurn(true);
-//            nowGo.setNowTurn(false);
-//            gameOrderRepository.save(nextGo);
-//            gameOrderRepository.save(nowGo);
-//        }
-        if(nextTurn){
-            int nextOrder = chatService.getNextTurn(nowOrder, room.getCurrentOrder(), room.getId());
-            GameOrder go = gameOrderRepository.findByUserOrder(nextOrder, room.getId())
-                    .orElseThrow(NoSuchGameOrderException::new);
-            go.setNextTurn(true);
-            go.setNowTurn(false);
-            gameOrderRepository.save(go);
-//            deleteGameOrder(gameOrder);
-            isNextTuen = true;
+            if(nextTurn){
+                int nextOrder = chatService.getNextTurn(nowOrder, room.getCurrentOrder(), room.getId());
+                GameOrder go = gameOrderRepository.findByUserOrder(nextOrder, room.getId())
+                        .orElseThrow(NoSuchGameOrderException::new);
+
+                go.setNextTurn(true);
+                go.setNowTurn(false);
+                gameOrderRepository.save(go);
+                isNextTurn = true;
+                chatMessage.setMessageType(ChatMessage.MessageType.ASK);
+                ChatGameMessage chatGameMessage = chatService.makeChatGameMessage(chatMessage, room);
+
+                messagingTemplate.convertAndSend("/topic/public/"+room.getId(), chatGameMessage);
+                Thread.sleep(500);
+            }
+
+            int nt = getNextTurn(roomUser.getGameOrder().getUserOrder(), room.getUserCount(), room.getId());
+            Long roomUserId = roomUserRepository.findByGameOrder(nt, room.getId())
+                    .orElseThrow(()->new NoSuchRoomUserException(room.getId()));
+            room.setNowTurnUserId(roomUserId);
+            chatMessage.setMessageType(ChatMessage.MessageType.RESET);
+
+            roomRepository.save(room);
+
+        ChatGameMessage chatGameMessage = chatService.makeChatGameMessage(chatMessage, room);
+        messagingTemplate.convertAndSend("/topic/public/"+room.getId(), chatGameMessage);
+
         }
 
         List<GameOrder> gameOrders = gameOrderRepository.findBackUser(gameOrder.getRoom().getId(), nowOrder+1, gameOrder.getRoom().getUserCount());
@@ -176,32 +190,25 @@ public class WebSocketEventListener {
             gameOrderRepository.save(go);
         }
         gameOrderRepository.delete(gameOrder);
-//        deleteGameOrder(gameOrder);
 
-        return isNextTuen;
+        return isNextTurn;
     }
 
-    public void deleteRoomUser(RoomUser roomUser) {
-        if (roomUser != null) {
-            GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser).get();
-            if (gameOrder != null) {
-                gameOrderRepository.delete(gameOrder); // GameOrder 삭제
+    public int getNextTurn(int currentOrder, int endOrder, long roomId){
+        int nextOrder = currentOrder + 1;
+        while(currentOrder != nextOrder){
+            if(nextOrder > endOrder){
+                nextOrder = 1;
             }
-            roomUserRepository.delete(roomUser); // RoomUser 삭제
+            GameOrder nextGameOrder = gameOrderRepository.findByUserOrder(nextOrder, roomId)
+                    .orElseThrow(NoSuchGameOrderException::new);
+
+            if(nextGameOrder.getRanking() == 0){
+                return nextOrder;
+            }
+            nextOrder++;
         }
+        return nextOrder;
     }
 
-    public void deleteGameOrder(GameOrder gameOrder) {
-        if (gameOrder != null) {
-            RoomUser roomUser = gameOrder.getRoomUser();
-            if (roomUser != null) {
-                roomUser.setGameOrder(null);
-                gameOrder.setRoomUser(null);
-                gameOrderRepository.save(gameOrder);  // 관계를 제거한 후 업데이트
-                roomUserRepository.save(roomUser);    // 관계를 제거한 후 업데이트
-                roomUserRepository.delete(roomUser); // RoomUser 삭제
-            }
-            gameOrderRepository.delete(gameOrder); // GameOrder 삭제
-        }
-    }
 }
