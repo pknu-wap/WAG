@@ -460,4 +460,20 @@ public class ChatService {
         return chatMessage;
     }
 
+    public ChatMessage setTimer(ChatMessage chatMessage){
+        Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
+        RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomUserException(chatMessage.getRoomId()));
+        if(!roomUser.isCaptain()){  // 방장이 아닌 사람이 변경 시도할 경우
+            throw new CategoryException("타이머 변경 권한이 없습니다. ");
+        }
+        if(room.getCategory().equals(chatMessage.getContent())){  // 기존의 카테고리와 같은 카테고리로 변경할 경우
+            throw new CategoryException("기존의 타이머와 같은 타이머입니다. ");
+        }
+        room.setTimer(Integer.parseInt(chatMessage.getContent()));
+        roomRepository.save(room);
+        return chatMessage;
+    }
+
 }

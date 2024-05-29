@@ -8,4 +8,5 @@ public class RoomCreateRequest {
     private boolean isPrivateRoom;
     private String userNickName;
     private String category;
+    private int timer;
 }
