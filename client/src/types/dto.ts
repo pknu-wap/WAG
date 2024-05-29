@@ -30,7 +30,7 @@ export interface IUserDto {
   captain: boolean;
   roomNickname: string;
   profileImage: string;
-  isReady: boolean;
+  ready: boolean;
 }
 
 // 방 정보 get response
@@ -86,6 +86,7 @@ export interface GameUserDto {
   nextTurn: boolean;
   haveAnswerChance: boolean;
   ranking: number;
+  ready: boolean;
 }
 // 게임 중 채팅 객체
 export interface GameMessage {

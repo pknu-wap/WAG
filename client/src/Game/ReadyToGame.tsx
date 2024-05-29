@@ -36,7 +36,9 @@ import { Realistic } from "../components/party/Realistic";
 import RankingUser from "../components/ingameComponents/RankingUser";
 import DropdownSelect from "../components/dropDown/DropDown";
 import { Option } from "react-dropdown";
+import ReadyStartButton from "./RedayStartButton";
 import SliderComponent from "../components/slider/Slider";
+
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -79,9 +81,15 @@ const ReadyToGame = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
   const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]); // 입장 유저
   const [gameUserDtos, setGameUserDtos] = useState<GameUserDto[]>([]); // 게임 중 유저 dto
+  const [isReady, setIsReady] = useState<boolean>(false); //준비상태인지 아닌지
+  const [myState, setMyState] = useState({
+    isHost: isMeCaptain, // isMeCaptain 상태를 사용하여 초기값 설정
+    isReady: isReady,
+  });
+  const [allReady, setAllReady] = useState(false);
 
   //게임 중
-  const [countdown, setCountdown] = useState<number | null>(null); //게임 시작전 3초대기
+  const [countdown, setCountdown] = useState<number | null>(null); //게임 시작전 초대기
   const [gameStart, setgameStart] = useState(false); //방장이 게임시작 눌렀는지
   const [isCORRECTMode, setIsCORRECTMode] = useState(false); //정답 입력 <-> 채팅 입력 버튼 클릭 시의 입력창 변경
 
@@ -111,7 +119,10 @@ const ReadyToGame = () => {
       }
     }
   }, []);
-
+  useEffect(() => {
+    // ... (기존 useEffect 로직)
+    setMyState({ isHost: isMeCaptain, isReady: isReady }); // 상태 업데이트
+  }, [isMeCaptain, isReady]); // isMeCaptain, isReady 변경 시 상태 업데이트
   // useEffect(() => {
   //   setNickname()
   // }, [nickname])
@@ -242,7 +253,7 @@ const ReadyToGame = () => {
     const nickName = localStorage.getItem("nickName");
     let contentToSend = myChatMessages; // 기본적으로 myChatMessages 값을 사용합니다. 
     // messageType이 'JOIN', 'START', 'CHANGE' 중 하나라면, contentToSend를 빈 문자열로 보냄
-    if (["JOIN", "START", "CHANGE", "RESET"].includes(messageType)) {
+    if (["JOIN", "START", "CHANGE", "RESET", "READY"].includes(messageType)) {
       contentToSend = "";
     } else if (messageType === "CATEGORY") {
       // nickname은 방장 이름으로만 send
@@ -330,6 +341,9 @@ const ReadyToGame = () => {
       handleCorrectAnswer(message);
       setGameUserDtos(message.gameUserDtos);
       console.log("CORRECT로 온 메세지", message);
+    } else if(message.messageType === "READY"){
+      console.log("READY로 온 메세지", message);
+      getAllReady(message);
     } else if (message.messageType === "START") {
       console.log("START로 온 메세지", message);
       setCountdown(5);
@@ -488,44 +502,68 @@ const ReadyToGame = () => {
       })
     );
   }
-  /*====================== 게임 중 코드 ====================== */
-  const exitOnClick = () => {
-    window.location.replace("/")
-  };
-  const {
-    time,
-    startTimer,
-    stopTimer,
-    resetTimer,
-  }: TimerHookProps = useTimer();
-  console.log(time)
-  useEffect(() => {
-    if (time < 0) {
-      stopTimer();
-      resetTimer();
-      if(isMyTurn) //질문을 30초 안에 하지 않는다면 강제로 턴을 넘긴다
-      {
-        if(!hasSentAsk){
-          console.log("질문을 하지 않아 강제로 ASK")
-          const roomId = localStorage.getItem("roomId");
-          const nickName = localStorage.getItem("nickName");
-          stompClient.send(
-            "/app/chat.sendGameMessage",
-            {},
-            JSON.stringify({
-              sender: nickName,
-              content: "",
-              messageType: "ASK",
-              roomId: roomId,
-            }));
-        }
-        setTimeout(() => {
-        sendMessageToSocket("/app/chat.sendGameMessage", "RESET"); 
-        getGameAnswer()
-        }, 200);
-      }
+
+  const ClickReady = () => {
+    setIsReady(isReady => !isReady);
+    sendMessageToSocket("/app/chat.ready", "READY");
+    if(isReady)
+      Toast({ message: "준비 취소 ❌", type: "error" });
+    else
+      Toast({ message: "준비 완료 ✅", type: "success" });
+  }
+
+
+  const getAllReady = (message : any) => {
+    const readyUsersCount = message.userDtos.filter((user : any) => user.ready).length;
+    const totalUsersCount = message.userDtos.length;
+
+    // 최소 두 명 이상의 사용자가 전체 준비 상태인지 확인합니다.
+    if (totalUsersCount > 1 && readyUsersCount === totalUsersCount) {
+      setAllReady(true);
+    } else {
+      setAllReady(false); // 그렇지 않으면 전체 준비 상태를 false로 설정합니다.
     }
-  }, [stopTimer, resetTimer, time]);
+  };
+
+  /*====================== 게임 중 코드 ====================== */
+
+      const exitOnClick = () => {
+        window.location.replace("/")
+      };
+      const {
+        time,
+        startTimer,
+        stopTimer,
+        resetTimer,
+      }: TimerHookProps = useTimer();
+
+      useEffect(() => {
+        if(time === 5){
+          if(isMyTurn) //질문을 30초 안에 하지 않는다면 강제로 턴을 넘긴다
+          {
+            if(!hasSentAsk){
+              const roomId = localStorage.getItem("roomId");
+              const nickName = localStorage.getItem("nickName");
+              stompClient.send(
+                "/app/chat.sendGameMessage",
+                {},
+                JSON.stringify({
+                  sender: nickName,
+                  content: "질문 시간이 종료되어 강제로 전송합니다.",
+                  messageType: "ASK",
+                  roomId: roomId,
+                }));
+            }
+          } 
+        }
+        if(time < 0) {
+          stopTimer();
+          resetTimer();
+          if(isMyTurn) //질문을 30초 안에 하지 않는다면 강제로 턴을 넘긴다
+            sendMessageToSocket("/app/chat.sendGameMessage", "RESET"); 
+          }
+      }, [stopTimer, resetTimer, time]);
+
     
   //타이머 30초 종료 후 로직
   const handleTimerEnd = () => {
@@ -687,6 +725,7 @@ const ReadyToGame = () => {
     return () => clearInterval(countdownInterval); // 컴포넌트 언마운트 시 setInterval 정리
   }, [countdown]);
 
+
    /*====================== 게임 결과 코드 ====================== */
    const [size, setSize] = useState(window.innerWidth);
    const [showConfetti, setShowConfetti] = useState(false);
@@ -710,7 +749,7 @@ const ReadyToGame = () => {
   const restartOnClick = () => {
     setIsGameEnd(false);
     setgameStart(false);
-    setIsMyTurn(false)
+    setIsMyTurn(false);
     setChatMessages([]);
     setGameUserDtos([])
     setCurrentUserAnswer({
@@ -851,8 +890,21 @@ const ReadyToGame = () => {
             <ChatRoom key={index} message={m} whoseTurn={currentUserAnswer?.nickname} />
           ))}
         </div>
+        
+        {countdown === null && !gameStart && (
+        <div className="flex justify-center algin-center mt-2">
+          <div><Button className="mr-5" size="md" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>
+          <div>
+              <ReadyStartButton
+              myState={myState}
+              allReady={allReady} // 모든 유저 준비 상태 확인
+              handleStart={clickGameStart}
+              handleReady={ClickReady}
+            />
+            </div>
+          </div>)}
 
-        <div className="mt-10 flex flex-row justify-center algin-center">
+        <div className="mt-5 flex flex-row justify-center algin-center">
           {!gameStart && (
             <IconButton size="md" className="mr-10" onClick={captainOpenModal}>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -864,6 +916,7 @@ const ReadyToGame = () => {
           <div>
           {gameStart && (<GameActionButton isMyTurn={isMyTurn} isAnswerMode={isCORRECTMode} />)}
           </div>
+
 
           <div className="w-5/12 flex flex-row justify-center algin-center relative">
             <input
@@ -1007,14 +1060,11 @@ const ReadyToGame = () => {
           <Button size="sm" disabled={false} onClick={sendSliderChange}>변경</Button>
         </div>
         </div>
-              <div><Button className="mt-2" size="md" disabled={false} onClick={clickGameStart}>GAME START</Button></div>
-              <div><Button className="mt-2" size="sm" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>
             </div>
           </div>
         ) : (
           <div className="m-auto flex flex-col justify-center items-center">
             <div className="text-md mt-5">나는 방장이 아니니깐 할 수 있는게 없어</div>
-            <div><Button className="mt-5" size="sm" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>
           </div>
         )}
         </div>
