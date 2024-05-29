@@ -85,6 +85,7 @@ const ReadyToGame = () => {
   const [isMyTurn, setIsMyTurn] = useState(false);
   const gameCycleRef = useRef<number>(0);
   const [currentCycle, setCurrentCycle] = useState<number>(0);
+  const [nowTurnAnswer, setNowTurnAnswer] = useState("")
   const [hasSentCorrect, setHasSentCorrect] = useState(false);  //정답을 외쳤는지 
   const [hasSentAsk, setHasSentAsk] = useState(false);  //질문을 했는지 
 
@@ -293,6 +294,7 @@ const ReadyToGame = () => {
     } else if (message.messageType === "LEAVE") {
       //addJoinUser();
       setJoinUsers(message.roomResponse.userDtos);
+      setUserCount(message.roomResponse.userDtos.length)
       setRoomInfo();
       console.log("LEAVE으로 온 메세지", message);
     } else if (message.messageType === "CHAT") {
@@ -319,13 +321,13 @@ const ReadyToGame = () => {
       console.log("START로 온 메세지", message);
       setCountdown(5);
       getGameAnswer();
-          // API 응답을 받은 후에 5초를 기다립니다.
-          setTimeout(() => {
-            getGameCycle(message);
-            getNextTurnInfo(message);
-            setgameStart(true);
-            GameLogic(); // 5초 후에 GameLogic 실행
-          }, 5000);
+      // API 응답을 받은 후에 5초를 기다립니다.
+      setTimeout(() => {
+        getGameCycle(message);
+        getNextTurnInfo(message);
+        setgameStart(true);
+        GameLogic(); // 5초 후에 GameLogic 실행
+      }, 5000);
     } else if (message.messageType === "PENALTY") {
       setGameUserDtos(message.gameUserDtos);
       console.log("PENALTY로 온 메세지", message);
@@ -492,6 +494,7 @@ const ReadyToGame = () => {
             }
             setTimeout(() => {
             sendMessageToSocket("/app/chat.sendGameMessage", "RESET"); 
+            getGameAnswer()
             }, 200);
           }
         }
@@ -624,12 +627,27 @@ const ReadyToGame = () => {
       );
       const answerList = response.data
       answerListRef.current = answerList;
+      console.log("answerList : ", answerList)
+      console.log("answerListRef.current : ", answerListRef.current)
       return response.data;
     } catch (error) {
       console.error("정답 리스트 get api 오류 발생 : ", error);
       throw error;
     }
   };
+  const findUserAnswer = async () => {
+    const userAnswer = await getGameAnswer();
+    userAnswer.answerUserDtos.forEach((dto) => {
+      if (dto.nickname === currentUserAnswer?.nickname) {
+        setNowTurnAnswer(dto.answer)
+      }
+    })
+  }
+  useEffect(() => {
+    if (gameStart) {
+      getGameAnswer();
+    }
+  }, [currentCycle]);
   useEffect(() => {
     let countdownInterval: NodeJS.Timeout;
     if (countdown !== null && countdown > 0) {
@@ -746,6 +764,7 @@ const ReadyToGame = () => {
                   isCaptain={info.captain}
                   gameStart={gameStart}
                   className={""}
+                  currentCycle={currentCycle}
                   gameUserDto={gameUserDtos}
                   whoseTurn={currentUserAnswer?.nickname}
                   children={

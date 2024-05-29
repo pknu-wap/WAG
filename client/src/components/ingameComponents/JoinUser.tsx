@@ -10,6 +10,7 @@ interface JoinUserProps {
   Nickname: string;
   isCaptain: boolean;
   gameStart: boolean;
+  currentCycle: number;
   gameUserDto: GameUserDto[];
   whoseTurn?: string;
   className: string;
@@ -18,7 +19,7 @@ interface JoinUserProps {
 }
 
 const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
-  ({ Nickname, isCaptain, gameStart, gameUserDto, whoseTurn, className, onClick, children }, ref) => {
+  ({ Nickname, isCaptain, gameStart, currentCycle, gameUserDto, whoseTurn, className, onClick, children }, ref) => {
     const roomId = localStorage.getItem("roomId");
     const myName = localStorage.getItem("nickName");
     const [userRank, setUserRank] = useState<number>(0)
@@ -57,7 +58,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
       } else {
         console.log("게임 시작 전");
       }
-    }, [gameStart]);
+    }, [currentCycle]);
 
     const [opacity, setOpacity] = useState("opacity-0");
     const openTollTip = () => {
