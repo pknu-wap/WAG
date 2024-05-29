@@ -1,7 +1,7 @@
 import React from "react";
 import ReactModal from "react-modal";
 import { useRecoilState } from "recoil";
-import { captainReadyToGameModalState } from "../../recoil/modal";
+import { captainReadyToGameModalState } from "../../recoil/recoil";
 
 const customModalStyles: ReactModal.Styles = {
   overlay: {
@@ -50,6 +50,7 @@ const CaptainReatyToModal: React.FC<ModalProps> = ({
 
   return (
     <ReactModal
+      className="bg-light-bg dark:bg-dark-bg"
       isOpen={isOpen}
       style={customModalStyles} // 스타일 적용
       onRequestClose={closeModal} // 모달 창 닫기 요청을 받을 때 호출

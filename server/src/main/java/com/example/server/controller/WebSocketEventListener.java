@@ -172,8 +172,7 @@ public class WebSocketEventListener {
             }
 
             int nt = getNextTurn(nowOrder, room.getUserCount(), room.getId());
-            Long roomUserId = roomUserRepository.findByGameOrder(nt, room.getId())
-                    .orElseThrow(()->new NoSuchRoomUserException(room.getId()));
+            Long roomUserId = gameOrderRepository.findByUserOrder(nt, room.getId()).get().getRoomUser().getId();
             room.setNowTurnUserId(roomUserId);
             chatMessage.setMessageType(ChatMessage.MessageType.RESET);
 

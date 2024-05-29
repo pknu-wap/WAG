@@ -4,7 +4,7 @@ import FullLayout from "../components/layout/FullLayout";
 import { ConnectedProps, connect } from "react-redux";
 import { RootState } from "../modules";
 import { useRecoilState } from "recoil";
-import { modalState } from "../recoil/modal";
+import { modalState } from "../recoil/recoil";
 import Modal from "../components/modal/Modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
