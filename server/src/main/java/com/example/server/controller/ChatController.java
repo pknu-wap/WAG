@@ -1,9 +1,6 @@
 package com.example.server.controller;
 
-import com.example.server.dto.ChatGameMessage;
-import com.example.server.dto.ChatMessage;
-import com.example.server.dto.ChatRoomInfoMessage;
-import com.example.server.dto.ChatRoomModeMessage;
+import com.example.server.dto.*;
 import com.example.server.payload.response.AnswerListResponse;
 import com.example.server.payload.response.RoomResponse;
 import com.example.server.security.CurrentUser;
@@ -59,12 +56,12 @@ public class ChatController {
     }
 
     @MessageMapping("/chat.ready")
-    public ChatMessage setReady(@Payload ChatMessage chatMessage) {
+    public ChatReadyMessage setReady(@Payload ChatMessage chatMessage) {
         String destination = "/topic/public/"+chatMessage.getRoomId();
-        ChatMessage rechatMessage = chatService.setReady(chatMessage);
-        rechatMessage.setMessageType(ChatMessage.MessageType.READY);
-        messagingTemplate.convertAndSend(destination, rechatMessage);
-        return rechatMessage;
+        ChatReadyMessage chatReadyMessage = chatService.setReady(chatMessage);
+        chatReadyMessage.setMessageType(ChatMessage.MessageType.READY);
+        messagingTemplate.convertAndSend(destination, chatReadyMessage);
+        return chatReadyMessage;
     }
 
     @MessageMapping("/chat.setCategory")
