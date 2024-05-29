@@ -27,6 +27,8 @@ public class Room {
     @NotNull
     private int timer;
 
+    private Long nowTurnUserId;
+
     private int cycle;
     private int currentOrder;
     private int correctMemberCnt;
