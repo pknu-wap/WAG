@@ -241,10 +241,10 @@ public class ChatService {
         }
 
         for(RoomUser roomUser : roomUsers){
-//            if(!roomUser.isCaptain()){
-//                roomUser.setReady(false);                 //TODO 프론트 레디 기능 추가 시 4줄 주석 해제 필요
-//                roomUserRepository.save(roomUser);
-//            }
+            if(!roomUser.isCaptain()){
+                roomUser.setReady(false);
+                roomUserRepository.save(roomUser);
+            }
 
             GameOrder gameOrder = gameOrderInit(roomUser, room);
             gameOrder.setNextTurn(order == 1);
@@ -255,7 +255,7 @@ public class ChatService {
             gameOrder.setAnswerName(answerLists.get(order-1).getName());
             gameOrder.setUserOrder(order);
             order += 1;
-
+            roomUser.setGameOrder(gameOrder);   // TODO 여기 수정
             gameOrderRepository.save(gameOrder);
         }
     }
