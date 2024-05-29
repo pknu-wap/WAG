@@ -26,3 +26,15 @@ export interface ButtonProps {
 export interface TimerProps {
   time: number;
 }
+
+
+//ReadyStartButoon
+export interface ReadyStartButtonProps {
+  myState: {
+    isHost: boolean;
+    isReady: boolean;
+  };
+  allReady: boolean;
+  handleStart: () => void;
+  handleReady: () => void;
+}
