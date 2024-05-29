@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
@@ -166,7 +167,7 @@ public class WebSocketEventListener {
                 isNextTurn = true;
                 chatMessage.setMessageType(ChatMessage.MessageType.ASK);
                 ChatGameMessage chatGameMessage = chatService.makeChatGameMessage(chatMessage, room);
-
+                chatGameMessage.setMessageType(ChatMessage.MessageType.ASK);
                 messagingTemplate.convertAndSend("/topic/public/"+room.getId(), chatGameMessage);
                 Thread.sleep(500);
             }
@@ -177,10 +178,9 @@ public class WebSocketEventListener {
             chatMessage.setMessageType(ChatMessage.MessageType.RESET);
 
             roomRepository.save(room);
-
-        ChatGameMessage chatGameMessage = chatService.makeChatGameMessage(chatMessage, room);
-        messagingTemplate.convertAndSend("/topic/public/"+room.getId(), chatGameMessage);
-
+            ChatGameMessage chatGameMessage = chatService.makeChatGameMessage(chatMessage, room);
+            chatGameMessage.setMessageType(ChatMessage.MessageType.RESET);
+            messagingTemplate.convertAndSend("/topic/public/"+room.getId(), chatGameMessage);
         }
 
         List<GameOrder> gameOrders = gameOrderRepository.findBackUser(gameOrder.getRoom().getId(), nowOrder+1, gameOrder.getRoom().getUserCount());
