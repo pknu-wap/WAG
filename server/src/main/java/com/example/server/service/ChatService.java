@@ -419,7 +419,7 @@ public class ChatService {
     public ChatGameMessage resetTimer(ChatMessage chatMessage){
         Room room = roomRepository.findById(chatMessage.getRoomId())
                 .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
-        room.setNowTurnUserId(roomUserRepository.findNextOrderByRoomId(room.getId())
+        room.setNowTurnUserId(gameOrderRepository.findNextOrderByRoomId(room.getId())
                 .orElseThrow(()->new NoSuchRoomUserException(room.getId())));
         roomRepository.save(room);
         ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
