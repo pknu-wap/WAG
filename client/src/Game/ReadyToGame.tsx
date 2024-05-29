@@ -307,6 +307,7 @@ const ReadyToGame = () => {
       Toast({ message: message.privateRoom ? '방이 비공개로 설정되었습니다.' : '방이 공개로 설정되었습니다.', type: 'info' });
     } else if (message.messageType === "ASK") {
       console.log("ASK로 온 메세지", message);
+      getGameAnswer();
       getGameCycle(message);
       getNextTurnInfo(message);
     } else if (message.messageType === "ANSWER") {
@@ -319,13 +320,13 @@ const ReadyToGame = () => {
       console.log("START로 온 메세지", message);
       setCountdown(5);
       getGameAnswer();
-          // API 응답을 받은 후에 5초를 기다립니다.
-          setTimeout(() => {
-            getGameCycle(message);
-            getNextTurnInfo(message);
-            setgameStart(true);
-            GameLogic(); // 5초 후에 GameLogic 실행
-          }, 5000);
+      // API 응답을 받은 후에 5초를 기다립니다.
+      setTimeout(() => {
+        getGameCycle(message);
+        getNextTurnInfo(message);
+        setgameStart(true);
+        GameLogic(); // 5초 후에 GameLogic 실행
+      }, 5000);
     } else if (message.messageType === "PENALTY") {
       setGameUserDtos(message.gameUserDtos);
       console.log("PENALTY로 온 메세지", message);
@@ -472,6 +473,7 @@ const ReadyToGame = () => {
 
       useEffect(() => {
         if (time < 0) {
+          getGameAnswer()
           stopTimer();
           resetTimer();
           if(isMyTurn) //질문을 30초 안에 하지 않는다면 강제로 턴을 넘긴다
@@ -501,6 +503,7 @@ const ReadyToGame = () => {
       const handleTimerEnd = () => {
         const nickname = localStorage.getItem("nickName");
         startTimer();
+        getGameAnswer();
         setHasSentCorrect(false); // 턴이 끝나면 다시 보낼 수 있도록 초기화
         setHasSentAsk(false);    // 턴이 끝나면 다시 보낼 수 있도록 초기화
         const nextUserNickname = nextTurnUserRef.current?.roomNickname;// 다음 턴 유저 정보 업데이트
