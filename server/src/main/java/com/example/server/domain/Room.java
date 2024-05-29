@@ -23,6 +23,8 @@ public class Room {
     @NotNull
     private int userCount;
 
+    private Long nowTurnUserId;
+
     private int cycle;
     private int currentOrder;
     private int correctMemberCnt;
