@@ -4,8 +4,10 @@ import { useParams, useLocation } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import {
   captainReadyToGameModalState,
+  ingameTimerCount,
   readyToGameModalState,
-} from "../recoil/modal";
+  timerCount,
+} from "../recoil/recoil";
 import { useEffect, useState, useRef } from "react";
 import ReadyToGameModal from "../components/modal/ReadyModal";
 import Button from "../components/button/Button";
@@ -34,6 +36,7 @@ import { Realistic } from "../components/party/Realistic";
 import RankingUser from "../components/ingameComponents/RankingUser";
 import DropdownSelect from "../components/dropDown/DropDown";
 import { Option } from "react-dropdown";
+import SliderComponent from "../components/slider/Slider";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -55,6 +58,7 @@ const ReadyToGame = () => {
   const [category, setCategory] = useState("")
   const [userCount, setUserCount] = useState(0)
   const [isGameEnd, setIsGameEnd] = useState(false)
+  const [timer, setTimer] = useState(0)
 
   const location = useLocation();
   const roomInfo = { ...location.state };
@@ -202,6 +206,7 @@ const ReadyToGame = () => {
     setIsPrivateRoom(roomInfo.privateRoom);
     setChangeIsPrivate(roomInfo.privateRoom);
     setCategory(roomInfo.category);
+    setIngameTimerRecoil(roomInfo.timer)
     let userDtos = roomInfo.userDtos;
     userDtos.forEach((dto) => {
       const nickName = localStorage.getItem("nickName");
@@ -242,6 +247,10 @@ const ReadyToGame = () => {
     } else if (messageType === "CATEGORY") {
       // nickname은 방장 이름으로만 send
       contentToSend = selectedOption;
+    } else if (messageType === "TIMER") {
+      // nickname은 방장 이름으로만 send
+      contentToSend = sliderValue.toString()
+      console.log(sliderValue)
     }
     console.log(contentToSend, messageType)
     stompClient.send(
@@ -303,7 +312,11 @@ const ReadyToGame = () => {
     } else if (message.messageType === "CATEGORY") {
       console.log("CATEGORY로 온 메세지", message);
       setCategory(message.content)
-    } else if (message.messageType === "CHANGE") {
+    } else if (message.messageType === "TIMER") {
+      console.log("TIMER로 온 메세지", message);
+      setIngameTimerRecoil(parseInt(message.content))
+    }
+    else if (message.messageType === "CHANGE") {
       console.log("CHANGE로 온 메세지", message);
       setRoomInfo();
       Toast({ message: message.privateRoom ? '방이 비공개로 설정되었습니다.' : '방이 공개로 설정되었습니다.', type: 'info' });
@@ -413,6 +426,20 @@ const ReadyToGame = () => {
     }
   }
 
+  // 타이머 세팅
+  const [timerRecoil, ] = useRecoilState(timerCount) // 방 만들기에서 가져온 recoil
+  const [sliderValue, setSliderValue] = useState(timerRecoil); // 슬라이더 변경 값
+  const [, setIngameTimerRecoil] = useRecoilState(ingameTimerCount) // 게임 중 타이메 recoil
+
+  const handleSliderChange = (value: number) => {
+    setSliderValue(value);
+    console.log('Slider value changed:', value);
+  };
+
+  const sendSliderChange = () => {
+    sendMessageToSocket("/app/chat.setTimer", "TIMER")
+  }
+
   // 새로고침 방지
   const usePreventRefresh = () => {
     const preventClose = (e: any) => {
@@ -462,87 +489,87 @@ const ReadyToGame = () => {
     );
   }
   /*====================== 게임 중 코드 ====================== */
-      const exitOnClick = () => {
-        window.location.replace("/")
-      };
-      const {
-        time,
-        startTimer,
-        stopTimer,
-        resetTimer,
-      }: TimerHookProps = useTimer();
-
-      useEffect(() => {
-        if (time < 0) {
-          stopTimer();
-          resetTimer();
-          if(isMyTurn) //질문을 30초 안에 하지 않는다면 강제로 턴을 넘긴다
-          {
-            if(!hasSentAsk){
-              console.log("질문을 하지 않아 강제로 ASK")
-              const roomId = localStorage.getItem("roomId");
-              const nickName = localStorage.getItem("nickName");
-              stompClient.send(
-                "/app/chat.sendGameMessage",
-                {},
-                JSON.stringify({
-                  sender: nickName,
-                  content: "",
-                  messageType: "ASK",
-                  roomId: roomId,
-                }));
-            }
-            setTimeout(() => {
-            sendMessageToSocket("/app/chat.sendGameMessage", "RESET"); 
-            getGameAnswer()
-            }, 200);
-          }
+  const exitOnClick = () => {
+    window.location.replace("/")
+  };
+  const {
+    time,
+    startTimer,
+    stopTimer,
+    resetTimer,
+  }: TimerHookProps = useTimer();
+  console.log(time)
+  useEffect(() => {
+    if (time < 0) {
+      stopTimer();
+      resetTimer();
+      if(isMyTurn) //질문을 30초 안에 하지 않는다면 강제로 턴을 넘긴다
+      {
+        if(!hasSentAsk){
+          console.log("질문을 하지 않아 강제로 ASK")
+          const roomId = localStorage.getItem("roomId");
+          const nickName = localStorage.getItem("nickName");
+          stompClient.send(
+            "/app/chat.sendGameMessage",
+            {},
+            JSON.stringify({
+              sender: nickName,
+              content: "",
+              messageType: "ASK",
+              roomId: roomId,
+            }));
         }
-      }, [stopTimer, resetTimer, time]);
-    
-      //타이머 30초 종료 후 로직
-      const handleTimerEnd = () => {
-        const nickname = localStorage.getItem("nickName");
-        startTimer();
-        setHasSentCorrect(false); // 턴이 끝나면 다시 보낼 수 있도록 초기화
-        setHasSentAsk(false);    // 턴이 끝나면 다시 보낼 수 있도록 초기화
-        const nextUserNickname = nextTurnUserRef.current?.roomNickname;// 다음 턴 유저 정보 업데이트
-        setIsMyTurn(nextUserNickname === nickname); //다음턴이 나라면 isMyTurn
-        setCurrentUserAnswer(currentAnswerRef.current); //다음 턴 유저의 정답어를 화면에 띄운다.
-        if (gameCycleRef.current !== currentCycle) { // 사이클 수가 바뀌었다면 게임턴수 재랜더링
-          setCurrentCycle(gameCycleRef.current);
-        }
-        if(nextUserNickname === nickname)
-        {
-          Toast({ message: '당신은 질문자입니다.', type: 'info' });
-        }
-        else
-        {
-          Toast({ message: '당신은 답변자입니다.', type: 'info' });
-        }
-        setChatMessages([]);
-      };
-
-    //정답자 처리 함수
-    let currentAnswererIndex = 1; // 현재 정답자 인덱스
-
-    function handleCorrectAnswer(message:any) {
-      const sender = message.sender;
-      const gameUserDtos = message.gameUserDtos;
-      const senderIndex = gameUserDtos.findIndex((user:any) => user.roomNickname === sender);
-      
-      if (senderIndex !== -1) {
-        if(gameUserDtos[senderIndex].ranking !== 0){
-          gameUserDtos[senderIndex].ranking = currentAnswererIndex; // 1부터 시작
-          Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
-          currentAnswererIndex++;
-        }
-        else{
-          Toast({ message: `${sender}가 정답을 맞추지 못했습니다!`, type: 'info' });
-        }
-
+        setTimeout(() => {
+        sendMessageToSocket("/app/chat.sendGameMessage", "RESET"); 
+        getGameAnswer()
+        }, 200);
       }
     }
+  }, [stopTimer, resetTimer, time]);
+    
+  //타이머 30초 종료 후 로직
+  const handleTimerEnd = () => {
+    const nickname = localStorage.getItem("nickName");
+    startTimer();
+    setHasSentCorrect(false); // 턴이 끝나면 다시 보낼 수 있도록 초기화
+    setHasSentAsk(false);    // 턴이 끝나면 다시 보낼 수 있도록 초기화
+    const nextUserNickname = nextTurnUserRef.current?.roomNickname;// 다음 턴 유저 정보 업데이트
+    setIsMyTurn(nextUserNickname === nickname); //다음턴이 나라면 isMyTurn
+    setCurrentUserAnswer(currentAnswerRef.current); //다음 턴 유저의 정답어를 화면에 띄운다.
+    if (gameCycleRef.current !== currentCycle) { // 사이클 수가 바뀌었다면 게임턴수 재랜더링
+      setCurrentCycle(gameCycleRef.current);
+    }
+    if(nextUserNickname === nickname)
+    {
+      Toast({ message: '당신은 질문자입니다.', type: 'info' });
+    }
+    else
+    {
+      Toast({ message: '당신은 답변자입니다.', type: 'info' });
+    }
+    setChatMessages([]);
+  };
+
+  //정답자 처리 함수
+  let currentAnswererIndex = 1; // 현재 정답자 인덱스
+
+  function handleCorrectAnswer(message:any) {
+    const sender = message.sender;
+    const gameUserDtos = message.gameUserDtos;
+    const senderIndex = gameUserDtos.findIndex((user:any) => user.roomNickname === sender);
+    
+    if (senderIndex !== -1) {
+      if(gameUserDtos[senderIndex].ranking !== 0){
+        gameUserDtos[senderIndex].ranking = currentAnswererIndex; // 1부터 시작
+        Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
+        currentAnswererIndex++;
+      }
+      else{
+        Toast({ message: `${sender}가 정답을 맞추지 못했습니다!`, type: 'info' });
+      }
+
+    }
+  }
     
     //게임시작 버튼 클릭 이벤트
   const clickGameStart = () => {
@@ -968,12 +995,17 @@ const ReadyToGame = () => {
             </div>
             <div className="flex flex-col justify-center items-center">
               <div className="mt-5">{renderButton()}</div>
-              <div>
+            <div>
           <div className="rounded-xl font-extrabold min-w-44 mb-3">게임 카테고리 설정</div>
           <div>
             <DropdownSelect onOptionSelect={handleOptionSelect} defaultValue={selectedOption}/>
             <Button size="sm" disabled={false} onClick={sendCategoryOnClick}>변경</Button>
           </div>
+        <div>
+          <div className="rounded-xl font-extrabold min-w-44 mb-3">턴 당 진행시간</div>
+          <SliderComponent value={sliderValue} onChange={handleSliderChange} />
+          <Button size="sm" disabled={false} onClick={sendSliderChange}>변경</Button>
+        </div>
         </div>
               <div><Button className="mt-2" size="md" disabled={false} onClick={clickGameStart}>GAME START</Button></div>
               <div><Button className="mt-2" size="sm" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>

@@ -41,6 +41,7 @@ export interface IRoomResponseInfo {
   gameStatus: boolean;
   userCount: number;
   category: string;
+  timer: number;
   userDtos: IUserDto[];
 }
 
