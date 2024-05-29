@@ -70,20 +70,33 @@ public class WebSocketEventListener {
             if(room.isGameStatus()){  // 만약 게임 중이라면 해당 유저 게임 진행 정보 삭제
                 if(room.getUserCount() == 2){  // 나간 후에 사람이 한명이라면 게임 종료
                     ChatGameMessage chatGameMessage;
-                    chatGameMessage = new ChatGameMessage();
+                    ChatMessage chatMessage = new ChatMessage();
+                    chatMessage.setRoomId(roomId);
+                    chatMessage.setContent("혼자 남았구나..");
+                    chatMessage.setMessageType(ChatMessage.MessageType.END);
+                    chatMessage.setSender(roomUser.getRoomNickname());
+                    chatGameMessage = chatService.makeChatGameMessage(chatMessage,room);
                     chatGameMessage.setMessageType(ChatMessage.MessageType.END);
-                    chatGameMessage.setContent("혼자 남았구나..");
                     String destination = "/topic/public/"+room.getId();
                     GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
                             .orElseThrow(NoSuchGameOrderException::new);
                     gameOrderRepository.delete(gameOrder);
+                    roomUserRepository.delete(roomUser);
 //                    deleteGameOrder(gameOrder);
                     //deleteRoomUser(roomUser);
                     messagingTemplate.convertAndSend(destination, chatGameMessage);
                     room.setUserCount(room.getUserCount() - 1);  // 유저 수 -1
-                    room.setGameStatus(false);
+//                    room.setGameStatus(false);
                     roomRepository.save(room);
 
+                    return;
+                }
+                if(room.getUserCount() == 1){
+                    GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
+                            .orElseThrow(NoSuchGameOrderException::new);
+                    gameOrderRepository.delete(gameOrder);
+                    roomUserRepository.delete(roomUser);
+                    roomRepository.delete(room);
                     return;
                 }
                 nowUserOut = updateGameOrder(roomUser);
