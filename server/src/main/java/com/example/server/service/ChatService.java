@@ -4,7 +4,6 @@ import com.example.server.domain.*;
 import com.example.server.dto.*;
 import com.example.server.exception.*;
 import com.example.server.payload.response.AnswerListResponse;
-import com.example.server.payload.response.ResultResponse;
 import com.example.server.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -51,6 +49,7 @@ public class ChatService {
         Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
                 .orElseThrow(() -> new NoSuchRoomException(chatMessage.getRoomId()));
         roomInit(room);
+
         roomRepository.save(room);
 
         ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
@@ -66,7 +65,7 @@ public class ChatService {
         return gameRecord;
     }
 
-    private static void roomInit(Room room) {
+    private void roomInit(Room room) {
         room.setGameStatus(true);
         room.setCycle(1);
         room.setCurrentOrder(1);
@@ -248,8 +247,11 @@ public class ChatService {
 //            }
 
             GameOrder gameOrder = gameOrderInit(roomUser, room);
-
             gameOrder.setNextTurn(order == 1);
+            if (order == 1) {
+                room.setNowTurnUserId(roomUser.getId());
+                roomRepository.save(room);
+            }
             gameOrder.setAnswerName(answerLists.get(order-1).getName());
             gameOrder.setUserOrder(order);
             order += 1;
