@@ -758,12 +758,7 @@ const ReadyToGame = () => {
     setAllReady(false);
     setChatMessages([]);
     setGameUserDtos([]);
-    // setReadyMessage({
-    //   roomNickname: "",
-    //   profileImage: null,
-    //   captain: false,
-    //   ready: false.
-    // });
+    setReadyMessage([]);
     setCurrentUserAnswer({
       nickname: "",
       answer: "",

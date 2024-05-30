@@ -136,7 +136,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
         ) : (
           <IconButton
           size="lg"
-          className={`${gameStart || ready ? 
+          className={`${gameStart || isCaptain || ready ? 
             "items-center bg-light-btn dark:bg-dark-btn relative" : 
             "items-center bg-[#A9A9A9] dark:bg-[#A9A9A9] relative"
           }`}
