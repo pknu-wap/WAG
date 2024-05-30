@@ -311,11 +311,13 @@ const ReadyToGame = () => {
       setUserCount(message.roomResponse.userDtos.length)
       console.log("JOIN으로 온 메세지", message);
       console.log(message.sender + " joined!");
+      getAllReady(message); //레디상태 재검사
     } else if (message.messageType === "LEAVE") {
       //addJoinUser();
       setJoinUsers(message.roomResponse.userDtos);
       setUserCount(message.roomResponse.userDtos.length)
       setRoomInfo();
+      getAllReady(message); //레디상태 재검사
       console.log("LEAVE으로 온 메세지", message);
     } else if (message.messageType === "CHAT") {
       console.log("CHAT으로 온 메세지", message);
@@ -343,6 +345,7 @@ const ReadyToGame = () => {
       console.log("CORRECT로 온 메세지", message);
     } else if(message.messageType === "READY"){
       console.log("READY로 온 메세지", message);
+      setRoomInfo();
       getAllReady(message);
     } else if (message.messageType === "START") {
       console.log("START로 온 메세지", message);
@@ -365,11 +368,9 @@ const ReadyToGame = () => {
       setTimeout(() => {
         setIsGameEnd(true)
       }, 5000);
-      
       console.log("END로 온 메세지", message);
     } else if (message.messageType === "RESET") {
       handleTimerEnd();
-      setChatMessages([]);
       console.log("RESET으로 온 메세지", message);
   }
     else {
@@ -519,6 +520,7 @@ const ReadyToGame = () => {
 
     // 최소 두 명 이상의 사용자가 전체 준비 상태인지 확인합니다.
     if (totalUsersCount > 1 && readyUsersCount === totalUsersCount) {
+      Toast({ message: "모든 사용자 게임 준비 완료", type: "success" });
       setAllReady(true);
     } else {
       setAllReady(false); // 그렇지 않으면 전체 준비 상태를 false로 설정합니다.
@@ -750,6 +752,8 @@ const ReadyToGame = () => {
     setIsGameEnd(false);
     setgameStart(false);
     setIsMyTurn(false);
+    setIsReady(false);
+    setAllReady(false);
     setChatMessages([]);
     setGameUserDtos([])
     setCurrentUserAnswer({
