@@ -400,6 +400,10 @@ public class ChatService {
                     char initialConsonant = (char) (initialConsonantIndex + 0x1100); // 초성 유니코드 범위 시작: 0x1100
                     sb.append(" " + initialConsonant);
                 }
+                else if(ch==' '){
+                    sb.append(" ");
+                    idx++;
+                }
             }
             else{
                 sb.append(" _");
@@ -411,7 +415,10 @@ public class ChatService {
     public String getLength(String myRealAnswer){
         StringBuilder sb = new StringBuilder();
         for(int i = 0; i < myRealAnswer.length(); i++){
-            sb.append(" _");
+            if(myRealAnswer.charAt(i)==' ')
+                sb.append(" ");
+            else
+                sb.append(" _");
         }
         return sb.toString();
     }
