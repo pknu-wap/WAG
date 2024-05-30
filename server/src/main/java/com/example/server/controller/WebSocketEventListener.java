@@ -56,6 +56,8 @@ public class WebSocketEventListener {
         String username = (String) headerAccessor.getSessionAttributes().get("username");
         Long roomId = (Long) headerAccessor.getSessionAttributes().get("roomId");
         boolean nowUserOut = false;
+        String destination = "/topic/public/"+roomId;
+
 
         if(username != null && roomId != null) {
             log.info("User Disconnected : " + username);
@@ -65,7 +67,8 @@ public class WebSocketEventListener {
             Room room = roomRepository.findById(roomId)
                     .orElseThrow(()-> new NoSuchRoomException(roomId));
 
-            if(room.getUserCount() == 1){  // 나간 사람이 마지막 사람이라면 방 삭제
+            // 나간 사람이 마지막 사람이라면 방 삭제
+            if(room.getUserCount() == 1){
                 roomUserRepository.delete(roomUser); // RoomUser 삭제
                 roomRepository.delete(room);
                 return;
@@ -73,34 +76,42 @@ public class WebSocketEventListener {
 
             if(room.isGameStatus()){  // 만약 게임 중이라면 해당 유저 게임 진행 정보 삭제
                 if(room.getUserCount() == 2){  // 나간 후에 사람이 한명이라면 게임 종료
+
                     ChatGameMessage chatGameMessage;
+                    // ChatMessage 생성
                     ChatMessage chatMessage = new ChatMessage();
                     chatMessage.setRoomId(roomId);
                     chatMessage.setContent("혼자 남았구나..");
                     chatMessage.setMessageType(ChatMessage.MessageType.END);
                     chatMessage.setSender(roomUser.getRoomNickname());
-                    String destination = "/topic/public/"+room.getId();
+
+                    //
                     GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
                             .orElseThrow(NoSuchGameOrderException::new);
                     gameOrderRepository.delete(gameOrder);
                     roomUserRepository.delete(roomUser);
+
                     room.setUserCount(room.getUserCount() - 1);  // 유저 수 -1
                     room.setGameStatus(false);
                     roomRepository.save(room);
 
+                    // 나간사람의 방장 여부와 관계없이 마지막 남은 인원을 방장으로 다시 설정
                     RoomUser nextCaption = roomUserRepository.findLastOne(roomId)
                                 .orElseThrow(() -> new NoSuchRoomUserException(roomId));
                     nextCaption.setCaptain(true);
                     nextCaption.setReady(true);
                     roomUserRepository.save(nextCaption);
 
+                    // END ChatGameMessage 전송
                     chatGameMessage = chatService.makeChatGameMessage(chatMessage,room);
                     chatGameMessage.setMessageType(ChatMessage.MessageType.END);
                     messagingTemplate.convertAndSend(destination, chatGameMessage);
 
+                    // disconnect event Listener 종료
                     return;
                 }
 
+                // 현재 질문자가 나갔으면 nowUserOut에 true를 반환
                 nowUserOut = updateGameOrder(roomUser);
             }
 
@@ -126,7 +137,7 @@ public class WebSocketEventListener {
                 chatMessage.setContent("질문자 탈주하여 다음 턴으로 넘어갑니다");
                 chatMessage.setRoomId(roomId);
                 ChatGameMessage chatGameMessage = chatService.makeChatGameMessage(chatMessage, room);
-                messagingTemplate.convertAndSend("/topic/public/"+roomId, chatGameMessage);
+                messagingTemplate.convertAndSend(destination, chatGameMessage);
             }
 
             roomUserRepository.delete(roomUser); // RoomUser 삭제
@@ -137,7 +148,7 @@ public class WebSocketEventListener {
             chatRoomInfoMessage.setRoomId(roomId);
             chatRoomInfoMessage.setRoomResponse(RoomResponse.create(room, UserDto.makeUserDtos(roomUsers)));
 
-            messagingTemplate.convertAndSend("/topic/public/"+roomId, chatRoomInfoMessage);
+            messagingTemplate.convertAndSend(destination, chatRoomInfoMessage);
         }
     }
     public boolean updateGameOrder(RoomUser roomUser) throws InterruptedException {
@@ -150,13 +161,17 @@ public class WebSocketEventListener {
         boolean nextTurn = gameOrder.isNextTurn();
         Room room = gameOrder.getRoom();
 
+        // 이번 턴에 질문해야 하는 사람이 나간 사람과 같다면
         if (room.getNowTurnUserId() == roomUser.getId()) {
+            // ChatMessage 생성
             ChatMessage chatMessage = new ChatMessage();
             chatMessage.setContent("");
             chatMessage.setSender(roomUser.getRoomNickname());
             chatMessage.setRoomId(room.getId());
 
+            // 만약 아직 질문을 하지 않았다면 -> 질문 처리
             if(nextTurn){
+
                 int nextOrder = chatService.getNextTurn(nowOrder, room.getCurrentOrder(), room.getId());
                 GameOrder go = gameOrderRepository.findByUserOrder(nextOrder, room.getId())
                         .orElseThrow(NoSuchGameOrderException::new);
@@ -165,30 +180,38 @@ public class WebSocketEventListener {
                 go.setNowTurn(false);
                 gameOrderRepository.save(go);
                 isNextTurn = true;
+
+                // 강제 ASK 전송
                 chatMessage.setMessageType(ChatMessage.MessageType.ASK);
                 ChatGameMessage chatGameMessage = chatService.makeChatGameMessage(chatMessage, room);
-                chatGameMessage.setMessageType(ChatMessage.MessageType.ASK);
                 messagingTemplate.convertAndSend("/topic/public/"+room.getId(), chatGameMessage);
+
+                // 전송 후 프론트가 읽을 때까지 잠시 대기
                 Thread.sleep(500);
             }
 
+            // 질문을 한 유저가 나갔거나 질문 처리를 하지 않은 유저의 질문 처리 후 처리
+            // 다음 턴 인원을 찾아 room의 NowTurnUserId에 저장
             int nt = getNextTurn(nowOrder, room.getUserCount(), room.getId());
-            Long roomUserId = gameOrderRepository.findByUserOrder(nt, room.getId()).get().getRoomUser().getId();
+            Long roomUserId = gameOrderRepository.findByUserOrder(nt, room.getId())
+                    .orElseThrow(NoSuchGameOrderException::new).getRoomUser().getId();
             room.setNowTurnUserId(roomUserId);
-            chatMessage.setMessageType(ChatMessage.MessageType.RESET);
-
             roomRepository.save(room);
+
+            // 기존에 보냈던 chatMessage에 MessageType만 RESET으로 바꿔 다시 전송
+            chatMessage.setMessageType(ChatMessage.MessageType.RESET);
             ChatGameMessage chatGameMessage = chatService.makeChatGameMessage(chatMessage, room);
-            chatGameMessage.setMessageType(ChatMessage.MessageType.RESET);
             messagingTemplate.convertAndSend("/topic/public/"+room.getId(), chatGameMessage);
         }
 
         List<GameOrder> gameOrders = gameOrderRepository.findBackUser(gameOrder.getRoom().getId(), nowOrder+1, gameOrder.getRoom().getUserCount());
-        for(GameOrder go : gameOrders){
-            go.setUserOrder(go.getUserOrder()-1);
-            gameOrderRepository.save(go);
+        if (!gameOrders.isEmpty()) {
+            for(GameOrder go : gameOrders){
+                go.setUserOrder(go.getUserOrder()-1);
+                gameOrderRepository.save(go);
+            }
         }
-        gameOrderRepository.delete(gameOrder);
+            gameOrderRepository.delete(gameOrder);
 
         return isNextTurn;
     }
