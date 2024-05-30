@@ -3,12 +3,13 @@ import { faUser } from "@fortawesome/free-regular-svg-icons";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import IconButton from "../button/IconButton";
-import { GameUserDto, IGetAnswerList } from "../../types/dto";
+import { GameUserDto, IGetAnswerList, ReadyUserDto } from "../../types/dto";
 import { faCrown } from "@fortawesome/free-solid-svg-icons";
 
 interface JoinUserProps {
   Nickname: string;
   isCaptain: boolean;
+  isReady?: ReadyUserDto[];
   gameStart: boolean;
   currentCycle: number;
   gameUserDto: GameUserDto[];
@@ -19,12 +20,13 @@ interface JoinUserProps {
 }
 
 const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
-  ({ Nickname, isCaptain, gameStart, currentCycle, gameUserDto, whoseTurn, className, onClick, children }, ref) => {
+  ({ Nickname, isCaptain, isReady, gameStart, currentCycle, gameUserDto, whoseTurn, className, onClick, children }, ref) => {
     const roomId = localStorage.getItem("roomId");
-    const myName = localStorage.getItem("nickName");
-    const [userRank, setUserRank] = useState<number>(0)
-    const [answer, setAnswer] = useState("");
-    const [penaltyCount, setPenaltyCount] = useState(0);
+    const myName = localStorage.getItem("nickName"); // 본인 이름 get
+    const [userRank, setUserRank] = useState<number>(0) // 게임 시 먼저 맞췄을 때
+    const [answer, setAnswer] = useState(""); // 정답어
+    const [penaltyCount, setPenaltyCount] = useState(0); // 페널티 갯수 체크
+    const [ready, setReady] = useState(false) // 레디 체크
 
     const getGameAnswer = async () => {
       try {
@@ -68,6 +70,19 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
         setOpacity("opacity-0");
       }
     };
+    const checkIsReady = () => {
+      console.log(isReady)
+      isReady?.forEach((dto) => {
+        if (Nickname === dto.roomNickname) {
+          setReady(dto.ready)
+        }
+      })
+    }
+    useEffect(() => {
+      checkIsReady()
+      console.log(gameStart)
+      console.log(ready)
+    }, [isReady])
 
     // 패널티 갯수 확인
     const checkOtherPenalty = () => {
@@ -100,7 +115,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
         ref={ref}
         className={`${className} flex flex-col items-center relative`}
       >
-        {Nickname === whoseTurn ? (
+        {Nickname === whoseTurn ? ( // 내 턴일 때 주황색으로 프로필 색깔 바뀌도록
         <IconButton
         size="lg"
         className="items-center bg-[#FFA500] dark:bg-[#FFA500] relative"
@@ -111,7 +126,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
           <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-14 absolute">
             {answer}
           </div>
-        ) : !gameStart && isCaptain ? (
+        ) : !gameStart && isCaptain ? ( // 대기방에서 방장 왕관
           <FontAwesomeIcon className="text-[#FFFF00] bottom-14 absolute" icon={faCrown} />
         ) : (
           <div></div>
@@ -121,7 +136,10 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
         ) : (
           <IconButton
           size="lg"
-          className="items-center bg-light-btn dark:bg-dark-btn relative"
+          className={`${gameStart || ready ? 
+            "items-center bg-light-btn dark:bg-dark-btn relative" : 
+            "items-center bg-[#A9A9A9] dark:bg-[#A9A9A9] relative"
+          }`}
           onClick={openTollTip}
           disabled={gameStart && myName !== Nickname && userRank === 0 ? false : true}
         >
@@ -129,7 +147,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
             <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-14 absolute">
               {answer}
             </div>
-          ) : !gameStart && isCaptain ? (
+          ) : !gameStart && isCaptain ? ( // 대기방에서 방장 왕관
             <FontAwesomeIcon className="text-[#FFFF00] bottom-14 absolute" icon={faCrown} />
           ) : (
             <div></div>

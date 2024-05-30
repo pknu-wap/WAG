@@ -2,6 +2,8 @@
 // API type : type 이름 앞에 "I" 붙이기
 // 소켓 객체 type : 그냥 이름만
 
+import { UserInfo } from "os";
+
 export const URL = "http://wwwag-backend.co.kr/ws";
 
 // 닉네임 중복확인 get response
@@ -60,6 +62,22 @@ export interface ChatMessageCaptainJoin {
   messageType: string;
   roomId: number;
   sender: string;
+}
+
+export interface ReadyUserDto {
+  roomNickname: string;
+  profileImage: null;
+  captain: boolean;
+  ready: boolean;
+}
+
+// READY 시 받는 값
+export interface ChatReadyMessage {
+  content: string;
+  messageType: string;
+  roomId: number;
+  sender: string;
+  userDtos: ReadyUserDto[]
 }
 
 //소켓으로 주고받는 채팅 객체
