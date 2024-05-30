@@ -370,6 +370,8 @@ const ReadyToGame = () => {
       }, 5000);
       console.log("END로 온 메세지", message);
     } else if (message.messageType === "RESET") {
+      stopTimer();
+      resetTimer();
       handleTimerEnd();
       console.log("RESET으로 온 메세지", message);
   }
@@ -540,9 +542,7 @@ const ReadyToGame = () => {
       }: TimerHookProps = useTimer();
 
       useEffect(() => {
-        if(time === 5){
-          if(isMyTurn) //질문을 30초 안에 하지 않는다면 강제로 턴을 넘긴다
-          {
+        if (time === 5 && isMyTurn) { //질문을 30초 안에 하지 않는다면 강제로 턴을 넘긴다
             if(!hasSentAsk){
               const roomId = localStorage.getItem("roomId");
               const nickName = localStorage.getItem("nickName");
@@ -556,7 +556,6 @@ const ReadyToGame = () => {
                   roomId: roomId,
                 }));
             }
-          } 
         }
         if(time < 0) {
           stopTimer();
