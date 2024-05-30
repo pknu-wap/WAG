@@ -21,6 +21,7 @@ import {
   URL,
   UserAnswerDto,
   AnswerUserDto,
+  ReadyUserDto,
 } from "../types/dto";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
@@ -79,6 +80,7 @@ const ReadyToGame = () => {
   };
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
+  const [readyMessage, setReadyMessage] = useState<ReadyUserDto[]>([]) // 레디 상태
   const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]); // 입장 유저
   const [gameUserDtos, setGameUserDtos] = useState<GameUserDto[]>([]); // 게임 중 유저 dto
   const [isReady, setIsReady] = useState<boolean>(false); //준비상태인지 아닌지
@@ -346,6 +348,7 @@ const ReadyToGame = () => {
     } else if(message.messageType === "READY"){
       console.log("READY로 온 메세지", message);
       setRoomInfo();
+      setReadyMessage(message.userDtos)
       getAllReady(message);
     } else if (message.messageType === "START") {
       console.log("START로 온 메세지", message);
@@ -754,11 +757,12 @@ const ReadyToGame = () => {
     setIsReady(false);
     setAllReady(false);
     setChatMessages([]);
-    setGameUserDtos([])
+    setGameUserDtos([]);
+    setReadyMessage([]);
     setCurrentUserAnswer({
       nickname: "",
       answer: "",
-    })
+    });
   }
     useEffect(() => {
       const handleResize = () => {
@@ -831,6 +835,7 @@ const ReadyToGame = () => {
                 <JoinUser
                   Nickname={info.roomNickname}
                   isCaptain={info.captain}
+                  isReady={readyMessage}
                   gameStart={gameStart}
                   className={""}
                   currentCycle={currentCycle}
