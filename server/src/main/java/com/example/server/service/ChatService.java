@@ -6,6 +6,7 @@ import com.example.server.exception.*;
 import com.example.server.payload.response.AnswerListResponse;
 import com.example.server.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ public class ChatService {
     private final GameOrderRepository gameOrderRepository;
     private final AnswerListRepository answerListRepository;
     private final GameRecordRepository gameRecordRepository;
+    private final SimpMessageSendingOperations messagingTemplate;   // 정답 맞추면 리셋
 
     public ChatGameMessage setGame(ChatMessage chatMessage) {
         if(chatMessage.getMessageType()==ChatMessage.MessageType.START){
@@ -207,6 +209,8 @@ public class ChatService {
             }
             else {
                 ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
+                chatMessage.setMessageType(ChatMessage.MessageType.RESET);                                   // 정답 맞추면 리셋
+                messagingTemplate.convertAndSend("/topic/public/"+room.getId(), chatGameMessage);   // 정답 맞추면 리셋
                 chatGameMessage.setMessageType(ChatMessage.MessageType.CORRECT);
                 return chatGameMessage;
             }
