@@ -39,6 +39,7 @@ import DropdownSelect from "../components/dropDown/DropDown";
 import { Option } from "react-dropdown";
 import ReadyStartButton from "./RedayStartButton";
 import SliderComponent from "../components/slider/Slider";
+import PopoverComponent from "../components/popover/Popover";
 
 
 var stompClient: any = null; //웹소켓 변수 선언
@@ -843,7 +844,7 @@ const ReadyToGame = () => {
                   whoseTurn={currentUserAnswer?.nickname}
                   children={
                     gameStart ? (
-                      <div className={`p-1 shadow-lg rounded-lg absolute top-1/2 left-0`}>
+                      <div className={""}>
                         <Button size="sm"
                           onClick={() => { socketPenaltyOnClick(info.roomNickname); }}>
                           경고 주기
@@ -854,7 +855,6 @@ const ReadyToGame = () => {
             );
           })}
         </div>
-
 
         {gameStart&&(
         <div className="flex justify-center items-center">
