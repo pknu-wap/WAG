@@ -99,7 +99,7 @@ const ChatRoom: React.FC<{ message: ChatMessage; whoseTurn?: string }> = ({ mess
     
 
     return (
-      <div id="chat-container" className="mt-1 overflow-auto h-full flex flex-col p-5">
+      <div id="chat-container" className="mt-1 overflow-auto h-full flex flex-col pr-3 p-5">
         {chatMessages.map(renderMessage)}
       </div>
     );

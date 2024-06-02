@@ -829,7 +829,7 @@ const ReadyToGame = () => {
       </div>
       ) : (
       <div>
-        <div className="flex flex-row justify-around items-center mt-10 mx-7">
+        <div className="flex flex-row justify-around items-center mt-10 mx-7 ">
           {joinUsers.map((info, index) => {
             return (
               <div key={index} className="relative">
@@ -893,7 +893,7 @@ const ReadyToGame = () => {
             <div className="text-lg">{joinUsers.length}/6</div>
           </div>
         </div>
-        <div className="m-auto w-3/4 h-96 mt-10 overflow-y-hidden rounded-3xl shadow-xl flex flex-col tracking-wider bg-[#A072BC]">
+        <div className="m-auto w-3/4 h-96 mt-10 overflow-y-hidden rounded-3xl shadow-xl flex flex-col tracking-wider bg-[#A072BC] overflow-y-scroll scrollbar-custom">
           {chatMessages.map((m, index) => (
             <ChatRoom key={index} message={m} whoseTurn={currentUserAnswer?.nickname} />
           ))}

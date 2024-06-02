@@ -115,7 +115,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
     return (
       <div
         ref={ref}
-        className={`${className} flex flex-col items-center relative`}
+        className={`${className} flex flex-col justify-center items-center relative mx-1`}
       >
         {Nickname === whoseTurn ? ( // 내 턴일 때 주황색으로 프로필 색깔 바뀌도록
         <PopoverComponent 
@@ -161,7 +161,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
                   {answer}
                 </div>
               ) : !gameStart && isCaptain ? ( // 대기방에서 방장 왕관
-                <FontAwesomeIcon className="text-[#FFFF00] bottom-14 absolute" icon={faCrown} />
+                <FontAwesomeIcon className="text-[#FFFF00] bottom-14 absolute z-50" icon={faCrown} />
               ) : (
                 <div></div>
               )}
@@ -198,7 +198,6 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
           <div>
           </div>
         )}
-        <div className="w-0 h-6 mt-1 rounded-md bg-[#9FDDFF]"></div>
       </div>
     );
   }
