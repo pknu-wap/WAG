@@ -39,6 +39,7 @@ import DropdownSelect from "../components/dropDown/DropDown";
 import { Option } from "react-dropdown";
 import ReadyStartButton from "./RedayStartButton";
 import SliderComponent from "../components/slider/Slider";
+import PopoverComponent from "../components/popover/Popover";
 
 
 var stompClient: any = null; //웹소켓 변수 선언
@@ -828,7 +829,7 @@ const ReadyToGame = () => {
       </div>
       ) : (
       <div>
-        <div className="flex flex-row justify-around items-center mt-10 mx-7">
+        <div className="flex flex-row justify-around items-center mt-10 mx-7 ">
           {joinUsers.map((info, index) => {
             return (
               <div key={index} className="relative">
@@ -843,7 +844,7 @@ const ReadyToGame = () => {
                   whoseTurn={currentUserAnswer?.nickname}
                   children={
                     gameStart ? (
-                      <div className={`p-1 shadow-lg rounded-lg absolute top-1/2 left-0`}>
+                      <div className={""}>
                         <Button size="sm"
                           onClick={() => { socketPenaltyOnClick(info.roomNickname); }}>
                           경고 주기
@@ -854,7 +855,6 @@ const ReadyToGame = () => {
             );
           })}
         </div>
-
 
         {gameStart&&(
         <div className="flex justify-center items-center">
@@ -893,7 +893,7 @@ const ReadyToGame = () => {
             <div className="text-lg">{joinUsers.length}/6</div>
           </div>
         </div>
-        <div className="m-auto w-3/4 h-96 mt-10 overflow-y-hidden rounded-3xl shadow-xl flex flex-col tracking-wider bg-[#A072BC]">
+        <div className="m-auto w-3/4 h-96 mt-10 overflow-y-hidden rounded-3xl shadow-xl flex flex-col tracking-wider bg-[#A072BC] overflow-y-scroll scrollbar-custom">
           {chatMessages.map((m, index) => (
             <ChatRoom key={index} message={m} whoseTurn={currentUserAnswer?.nickname} />
           ))}

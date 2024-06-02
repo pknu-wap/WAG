@@ -20,6 +20,31 @@ module.exports = {
       },
     },
   },
-  plugins: [require("@tailwindcss/forms")],
+  plugins: [require("@tailwindcss/forms"), 
+    function ({addUtilities}) {
+      addUtilities({
+        ".scrollbar-thin": {
+          '::-webkit-scrollbar': {
+            'width': '10px',
+          },
+          '::-webkit-scrollbar-thumb': {
+            'background': '#FFCCFF',
+            'border-radius': '10px',
+          },
+        },
+        ".scrollbar-thin-horizontal": {
+          '::-webkit-scrollbar': {
+            'height': '8px',
+          },
+          '::-webkit-scrollbar-thumb': {
+            'background': '#FFCCFF',
+            'border-radius': '8px',
+          },
+          'scrollbar-width': 'thin',
+          'scrollbar-color': '#FFCCFF #f1f1f1',
+        }
+      }, ['responsive'])
+    }
+  ],
   darkMode: "class",
 }; 
