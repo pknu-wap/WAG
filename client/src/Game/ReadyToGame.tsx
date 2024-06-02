@@ -39,7 +39,6 @@ import DropdownSelect from "../components/dropDown/DropDown";
 import { Option } from "react-dropdown";
 import ReadyStartButton from "./RedayStartButton";
 import SliderComponent from "../components/slider/Slider";
-import PopoverComponent from "../components/popover/Popover";
 
 
 var stompClient: any = null; //웹소켓 변수 선언
@@ -62,7 +61,6 @@ const ReadyToGame = () => {
   const [category, setCategory] = useState("")
   const [userCount, setUserCount] = useState(0)
   const [isGameEnd, setIsGameEnd] = useState(false)
-  const [timer, setTimer] = useState(0)
 
   const location = useLocation();
   const roomInfo = { ...location.state };
@@ -100,7 +98,6 @@ const ReadyToGame = () => {
   const [isMyTurn, setIsMyTurn] = useState(false);
   const gameCycleRef = useRef<number>(0);
   const [currentCycle, setCurrentCycle] = useState<number>(0);
-  const [nowTurnAnswer, setNowTurnAnswer] = useState("")
   const [hasSentCorrect, setHasSentCorrect] = useState(false);  //정답을 외쳤는지 
   const [hasSentAsk, setHasSentAsk] = useState(false);  //질문을 했는지 
 
@@ -311,6 +308,7 @@ const ReadyToGame = () => {
       //addJoinUser();
       setJoinUsers(message.roomResponse.userDtos);
       setRoomInfo();
+      setAllReady(false) // 유저 추가입장 시 게임시작 버튼 비활성화
       setUserCount(message.roomResponse.userDtos.length)
       console.log("JOIN으로 온 메세지", message);
       console.log(message.sender + " joined!");
@@ -454,7 +452,6 @@ const ReadyToGame = () => {
 
   const handleSliderChange = (value: number) => {
     setSliderValue(value);
-    console.log('Slider value changed:', value);
   };
 
   const sendSliderChange = () => {
@@ -705,14 +702,6 @@ const ReadyToGame = () => {
       throw error;
     }
   };
-  const findUserAnswer = async () => {
-    const userAnswer = await getGameAnswer();
-    userAnswer.answerUserDtos.forEach((dto) => {
-      if (dto.nickname === currentUserAnswer?.nickname) {
-        setNowTurnAnswer(dto.answer)
-      }
-    })
-  }
   useEffect(() => {
     if (gameStart) {
       getGameAnswer();
@@ -757,6 +746,7 @@ const ReadyToGame = () => {
     setIsMyTurn(false);
     setIsReady(false);
     setAllReady(false);
+    setIsCORRECTMode(false)
     setChatMessages([]);
     setGameUserDtos([]);
     setReadyMessage([]);
@@ -829,7 +819,7 @@ const ReadyToGame = () => {
       </div>
       ) : (
       <div>
-        <div className="flex flex-row justify-around items-center mt-10 mx-7 ">
+        <div className="flex flex-row justify-around items-center mt-10 mb-5 mx-7 ">
           {joinUsers.map((info, index) => {
             return (
               <div key={index} className="relative">

@@ -67,7 +67,6 @@ function CreateRoom() {
   const handleSliderChange = (value: number) => {
     setSliderValue(value);
     setTimerRecoil(value)
-    console.log('Slider value changed:', value);
   };
 
   const renderButton = () => {
