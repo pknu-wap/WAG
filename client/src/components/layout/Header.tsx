@@ -67,7 +67,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
         </IconButton>
 
         <RulesModal onRequestClose={closeModal}>
-        <div className="flex justify-center items-center">
+        <div className="text-light-text dark:text-dark-text flex justify-center items-center">
           <div className="p-10 justify-center items-center">
             <div className="text-2xl font-bold mb-5">🎉 양세찬 게임을 즐기는 방법! 👍</div>
 

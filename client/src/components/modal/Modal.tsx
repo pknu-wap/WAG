@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import { useRecoilState } from "recoil";
 
 import { modalState } from "../../recoil/recoil";
@@ -39,8 +39,13 @@ interface ModalProps {
   onRequestClose: () => void;
 }
 
-const Modal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
+const Modal: React.FC<ModalProps> = ({ children, onRequestClose}) => {
+
+
+  const baseClassName = "w-1/2 max-w-lg min-w-xs h-auto min-h-[310px] max-h-[400px] z-150 rounded-lg shadow-md overflow-auto bg-light-bg dark:bg-dark-bg";
+  
   const [isOpen] = useRecoilState(modalState);
+  const [theme, setTheme] = useState(localStorage.theme);
 
   // 모달을 닫을 때 onRequestClose 함수 호출
   const closeModal = (e: React.MouseEvent) => {
@@ -57,7 +62,7 @@ const Modal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
 
     <div style={customModalStyles.overlay} id="overlay" onClick={closeModal}>
       <motion.div
-        style={customModalStyles.content}
+        className={baseClassName}
         initial={{ opacity: 0, y: 20 }}
         animate={{
           opacity: 1,

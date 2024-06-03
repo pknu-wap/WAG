@@ -44,6 +44,7 @@ interface ModalProps {
 const ReadyToGameModal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
   const [isOpen] = useRecoilState(readyToGameModalState);
 
+  const baseClassName = "w-1/2 max-w-[650px] min-w-[250px] h-auto min-h-[310px] max-h-[400px] z-150 rounded-lg shadow-md bg-light-bg dark:bg-dark-bg overflow-auto";
 
   // 모달을 닫을 때 onRequestClose 함수 호출
   const closeModal = (e: React.MouseEvent) => {
@@ -60,7 +61,7 @@ const ReadyToGameModal: React.FC<ModalProps> = ({ children, onRequestClose }) =>
 
     <div style={customModalStyles.overlay} id="overlay" onClick={closeModal}>
     <motion.div
-      style={customModalStyles.content}
+      className={baseClassName}
       initial={{ opacity: 0, y: 20 }}
       animate={{
         opacity: 1,
