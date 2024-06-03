@@ -48,6 +48,7 @@ const ReadyToGame = () => {
   const [, setIsOpen] = useRecoilState(readyToGameModalState);
   const [, setCaptainIsOpen] = useRecoilState(captainReadyToGameModalState);
   const [nickname, setNickname] = useState<string>("");
+  const [beforeNickname, setBeforeNickname] = useState("")
   const [possible, setPossible] = useState<boolean>();
   const [myChatMessages, setMyChatMessages] = useState<string>("");
   const [changeIsPrivate, setChangeIsPrivate] = useState<boolean>(); // 대기방 방장 모달 내 바꾸는 여부
@@ -143,6 +144,22 @@ const ReadyToGame = () => {
     setPossible(undefined);
   }, [nickname]);
 
+  const nicknamePossibleClickRenderButton = () => {
+    if (nickname === beforeNickname) {
+      return (
+        <Button size="sm" disabled={true} onClick={nicknamePossibleClick}>
+        닉네임 확인
+        </Button>
+      )
+    } else {
+      return (
+        <Button size="sm" disabled={false} onClick={nicknamePossibleClick}>
+        닉네임 확인
+        </Button>
+      )
+    }
+  }
+
   // 닉네임 유효한지 api get
   const getNicknamePossible = async () => {
     try {
@@ -175,6 +192,7 @@ const ReadyToGame = () => {
     try {
       const data = await getNicknamePossible();
       setPossible(data.possible);
+      setBeforeNickname(nickname)
       localStorage.setItem("nickName", data.nickName);
     } catch (error) {
       console.error("닉네임 확인 오류:", error);
@@ -1083,9 +1101,7 @@ const ReadyToGame = () => {
           )}
         </div>
 
-          <Button className ="mt-3 m-auto flex justify-center items-center" size="sm" disabled={false} onClick={nicknamePossibleClick}>
-            닉네임 확인
-          </Button>
+          {nicknamePossibleClickRenderButton()}
 
           <div className="mt-3 m-auto flex justify-end items-end">
             {possible ? (
