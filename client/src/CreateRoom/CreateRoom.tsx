@@ -11,6 +11,7 @@ import { Option } from "react-dropdown";
 import SliderComponent from "../components/slider/Slider";
 import { useRecoilState } from "recoil";
 import { firstCategoryRecoil, timerCount } from "../recoil/recoil";
+import Wrapper from "../components/Wrapper";
 
 function CreateRoom() {
   const [isPrivate, setIsPrivate] = useState<boolean | null>(false); //일단은 공개방을 default로
@@ -90,6 +91,7 @@ function CreateRoom() {
   };
 
   return (
+    <Wrapper>
     <FullLayout>
       <div className="p-4">
         <div className="justify-center text-6xl mb-20">방 만들기</div>
@@ -142,6 +144,7 @@ function CreateRoom() {
         <div className="mt-12">{renderButton()}</div>
       </div>
     </FullLayout>
+    </Wrapper>
   );
 }
 

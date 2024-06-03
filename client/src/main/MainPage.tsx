@@ -11,6 +11,7 @@ import { faX } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Toast from "../components/toast/Toast";
+import Wrapper from "../components/Wrapper";
 type Props = {
   children?: React.ReactNode;
 };
@@ -113,6 +114,7 @@ function MainPage({ dark }: ComponentProps) {
   }, [dark]);
 
   return (
+    <Wrapper>
     <FullLayout>
       <div className="mt-16">
         {theme === "light" ? (
@@ -184,6 +186,7 @@ function MainPage({ dark }: ComponentProps) {
         </div>
       </Modal>
     </FullLayout>
+    </Wrapper>
   );
 }
 

@@ -39,6 +39,7 @@ import DropdownSelect from "../components/dropDown/DropDown";
 import { Option } from "react-dropdown";
 import ReadyStartButton from "./RedayStartButton";
 import SliderComponent from "../components/slider/Slider";
+import Wrapper from "../components/Wrapper";
 
 
 var stompClient: any = null; //웹소켓 변수 선언
@@ -861,6 +862,7 @@ const ReadyToGame = () => {
   }, []);
 
   return (
+    <Wrapper>
     <FullLayout>
       {isGameEnd ? (
       <div>
@@ -1155,6 +1157,7 @@ const ReadyToGame = () => {
         </div>
       </CaptainReatyToModal>
     </FullLayout>
+    </Wrapper>
   );
 };
 

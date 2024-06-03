@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import GamePlaying from "./Game/GamePlaying";
 import MainPage from "./main/MainPage";
 import FullLayout from "./components/layout/FullLayout";
@@ -10,14 +11,16 @@ import WrongUrl from "./components/layout/404";
 function App() {
   return (
     <FullLayout>
-      <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route path="/CreateRoom" element={<CreateRoom />} />
-        <Route path="/JoinGame" element={<JoinGame />} />
-        <Route path="/ReadyToGame/:roomId" element={<ReadyToGame />} />
-        <Route path="/GamePlaying" element={<GamePlaying />} />
-        <Route path="/*" element={<WrongUrl />} />
-      </Routes>
+      <AnimatePresence>
+        <Routes>
+          <Route path="/" element={<MainPage />} />
+          <Route path="/CreateRoom" element={<CreateRoom />} />
+          <Route path="/JoinGame" element={<JoinGame />} />
+          <Route path="/ReadyToGame/:roomId" element={<ReadyToGame />} />
+          <Route path="/GamePlaying" element={<GamePlaying />} />
+          <Route path="/*" element={<WrongUrl />} />
+        </Routes>
+      </AnimatePresence>
     </FullLayout>
   );
 }
