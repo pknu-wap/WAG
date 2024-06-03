@@ -5,6 +5,23 @@
 
 html {
   margin: auto;
+  overflow-y: scroll;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(185,49,252, 0.9);
+  /* 스크롤바 둥글게 설정    */
+  border-radius: 10px; 
+}
+
+.scrollbar-custom {
+  @apply scrollbar-thin;
+}
+.scrollbar-custom-horizontal {
+  @apply scrollbar-thin-horizontal;
 }
 
 body {

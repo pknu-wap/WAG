@@ -21,8 +21,8 @@ const ChatRoom: React.FC<{ message: ChatMessage; whoseTurn?: string }> = ({ mess
   }, [message]);
 
     // 메시지 렌더링 로직을 별도의 함수로 분리
-    const renderMessage = (msg: ChatMessage, index: number) => {
-      const userMessageTypes = ['CHAT', 'ASK', 'ANSWER', 'CORRECT']; // UserMessage로 처리될 메시지 타입들
+    const renderMessage = (msg: any, index: number) => {
+      const userMessageTypes = ['CHAT', 'ASK', 'ANSWER']; // UserMessage로 처리될 메시지 타입들
       const isUserMessage = userMessageTypes.includes(msg.messageType); //UserMessage 인지 아닌지
       const isMyMessage = msg.sender === myName;   //내가 보낸 메세지인지 아닌지
       if (isUserMessage) //CHAT, ASK, ANSWER, CORRECT 중에 하나라면
@@ -37,10 +37,31 @@ const ChatRoom: React.FC<{ message: ChatMessage; whoseTurn?: string }> = ({ mess
           </div>
         );
       } 
+      else if (msg.messageType === "CORRECT")
+        {
+          const gameUserDtos = msg.gameUserDtos;
+          const senderIndex = msg.gameUserDtos?.findIndex((user: any) => user.roomNickname === msg.sender)
+          if (senderIndex !== -1) {
+            if (gameUserDtos[senderIndex].ranking !== 0) {
+              return (
+                <div key={index} className="flex flex-col items-center mx-[2.5px]">
+                  <NotificationMessage message={{...msg, content: `${msg.sender}(이)가 "${msg.content}"(으)로 정답을 외쳤습니다.`}} />
+                  <NotificationMessage message={{...msg, content: "========== 5초 뒤 다음 턴으로 넘어갑니다 =========="}} />
+                </div>
+              )
+            } else {
+              return (
+                <div key={index} className="flex flex-col items-center mx-[2.5px]">
+                  <NotificationMessage message={{...msg, content: `${msg.sender}(이)가 "${msg.content}"(으)로 오답을 외쳤습니다.`}} />
+                </div>
+              )
+            }
+          }
+        }
       else if (msg.messageType === "CATEGORY")
         {
           return (
-            <div key={index} className="flex flex-col items-center">
+            <div key={index} className="flex flex-col items-center mx-[2.5px]">
               <NotificationMessage message={{...msg, content: `${msg.content}로 카테고리가 변경되었습니다.`}} />
             </div>
           )
@@ -48,7 +69,7 @@ const ChatRoom: React.FC<{ message: ChatMessage; whoseTurn?: string }> = ({ mess
       else if (msg.messageType === "TIMER") 
         {
           return (
-            <div key={index} className="flex flex-col items-center">
+            <div key={index} className="flex flex-col items-center mx-[2.5px]">
               <NotificationMessage message={{...msg, content: `${msg.content}로 타이머가 변경되었습니다.`}} />
             </div>
           )
@@ -56,7 +77,7 @@ const ChatRoom: React.FC<{ message: ChatMessage; whoseTurn?: string }> = ({ mess
       else if (msg.messageType === 'START') //UserMessage가 아니고
         {
         return (
-          <div key={index} className="flex flex-col items-center">
+          <div key={index} className="flex flex-col items-center mx-[2.5px]">
             <NotificationMessage message={{...msg, content: "--------------------------"}} />
             <NotificationMessage message={{...msg, content: "5초 뒤에 게임이 시작됩니다."}} />
             <NotificationMessage message={{...msg, content: "준비하세요!"}} />
@@ -73,13 +94,12 @@ const ChatRoom: React.FC<{ message: ChatMessage; whoseTurn?: string }> = ({ mess
       }
       else if (msg.messageType === 'END') // UserMessage가 아니고
       {
-        let containerClass = isMyMessage ? "flex flex-col items-end" : "flex flex-col items-start";
         return (
           <>
-            <div key={index} className={containerClass}>
-              <UserMessage message={msg} isMyMessage={isMyMessage}/>
+            <div key={index} className="flex flex-col items-center mx-[2.5px]">
+            <NotificationMessage message={{...msg, content: `${msg.sender}(이)가 "${msg.content}"(으)로 정답을 외쳤습니다.`}} />
             </div>
-            <div key={index} className="flex flex-col items-center">
+            <div key={index} className="flex flex-col items-center mx-[2.5px]">
               <NotificationMessage message={{...msg, content: "정답자가 모두 나왔습니다"}} />
               <NotificationMessage message={{...msg, content: "5초 뒤 결과페이지로 이동합니다!"}} />
             </div>
@@ -99,7 +119,7 @@ const ChatRoom: React.FC<{ message: ChatMessage; whoseTurn?: string }> = ({ mess
     
 
     return (
-      <div id="chat-container" className="mt-1 overflow-auto h-full flex flex-col p-5">
+      <div id="chat-container" className="mt-1 overflow-auto h-full flex flex-col pr-3 p-5">
         {chatMessages.map(renderMessage)}
       </div>
     );

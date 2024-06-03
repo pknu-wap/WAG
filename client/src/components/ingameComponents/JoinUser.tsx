@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import IconButton from "../button/IconButton";
 import { GameUserDto, IGetAnswerList, ReadyUserDto } from "../../types/dto";
 import { faCrown } from "@fortawesome/free-solid-svg-icons";
+import PopoverComponent from "../popover/Popover";
 
 interface JoinUserProps {
   Nickname: string;
@@ -54,24 +55,24 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
       });
     };
 
+    // 팝오버 버튼
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    // 팝오버 열고 닫기
+    const handleTogglePopover = () => {
+      setIsPopoverOpen(!isPopoverOpen);
+    };
+    const openTollTip = () => {
+      handleTogglePopover()
+    }
+
     useEffect(() => {
       if (gameStart) {
         findUserAnswer();
       } else {
-        console.log("게임 시작 전");
       }
     }, [currentCycle]);
 
-    const [opacity, setOpacity] = useState("opacity-0");
-    const openTollTip = () => {
-      if (opacity === "opacity-0") {
-        setOpacity("opacity-100");
-      } else {
-        setOpacity("opacity-0");
-      }
-    };
     const checkIsReady = () => {
-      console.log(isReady)
       isReady?.forEach((dto) => {
         if (Nickname === dto.roomNickname) {
           setReady(dto.ready)
@@ -80,8 +81,6 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
     }
     useEffect(() => {
       checkIsReady()
-      console.log(gameStart)
-      console.log(ready)
     }, [isReady])
 
     // 패널티 갯수 확인
@@ -89,7 +88,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
       gameUserDto.forEach((dto) => {
         if (Nickname === dto.roomNickname) {
           setPenaltyCount(dto.penalty);
-          setOpacity("opacity-0");
+          setIsPopoverOpen(false)
         }
       });
     };
@@ -104,7 +103,6 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
     }
 
     // 누구 턴인지 확인
-
     useEffect(() => {
       checkOtherPenalty();
       checkToRank();
@@ -113,47 +111,59 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
     return (
       <div
         ref={ref}
-        className={`${className} flex flex-col items-center relative`}
+        className={`${className} flex flex-col justify-center items-center relative mx-1`}
       >
         {Nickname === whoseTurn ? ( // 내 턴일 때 주황색으로 프로필 색깔 바뀌도록
-        <IconButton
-        size="lg"
-        className="items-center bg-[#FFA500] dark:bg-[#FFA500] relative"
-        onClick={openTollTip}
-        disabled={gameStart && myName !== Nickname && userRank === 0 ? false : true}
-        >
-        {gameStart ? (
-          <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-14 absolute">
-            {answer}
-          </div>
-        ) : !gameStart && isCaptain ? ( // 대기방에서 방장 왕관
-          <FontAwesomeIcon className="text-[#FFFF00] bottom-14 absolute" icon={faCrown} />
-        ) : (
-          <div></div>
-        )}
-        <FontAwesomeIcon icon={faUser} size="xl" />
-      </IconButton>
-        ) : (
+        <PopoverComponent 
+          isOpen={isPopoverOpen} onToggle={handleTogglePopover}
+          tooltipChildren={
+            children
+          }>
           <IconButton
           size="lg"
-          className={`${gameStart || isCaptain || ready ? 
-            "items-center bg-light-btn dark:bg-dark-btn relative" : 
-            "items-center bg-[#A9A9A9] dark:bg-[#A9A9A9] relative"
-          }`}
+          className="items-center bg-[#FFA500] dark:bg-[#FFA500] relative"
           onClick={openTollTip}
           disabled={gameStart && myName !== Nickname && userRank === 0 ? false : true}
-        >
-          {gameStart ? (
-            <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-14 absolute">
-              {answer}
-            </div>
-          ) : !gameStart && isCaptain ? ( // 대기방에서 방장 왕관
-            <FontAwesomeIcon className="text-[#FFFF00] bottom-14 absolute" icon={faCrown} />
-          ) : (
-            <div></div>
-          )}
+          >
+            {gameStart ? (
+              <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-14 absolute">
+                {answer}
+              </div>
+            ) : !gameStart && isCaptain ? ( // 대기방에서 방장 왕관
+              <FontAwesomeIcon className="text-[#FFFF00] bottom-14 absolute" icon={faCrown} />
+            ) : (
+              <div></div>
+            )}
           <FontAwesomeIcon icon={faUser} size="xl" />
-        </IconButton>
+          </IconButton>
+      </PopoverComponent>
+        ) : (
+          <PopoverComponent
+            isOpen={isPopoverOpen} onToggle={handleTogglePopover}
+            tooltipChildren={
+              children
+            }>
+            <IconButton
+            size="lg"
+            className={`${gameStart || isCaptain || ready ? 
+              "items-center bg-light-btn dark:bg-dark-btn relative" : 
+              "items-center bg-[#A9A9A9] dark:bg-[#A9A9A9] relative"
+            }`}
+            onClick={openTollTip}
+            disabled={gameStart && myName !== Nickname && userRank === 0 ? false : true}
+            >
+              {gameStart ? (
+                <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-14 absolute">
+                  {answer}
+                </div>
+              ) : !gameStart && isCaptain ? ( // 대기방에서 방장 왕관
+                <FontAwesomeIcon className="text-[#FFFF00] bottom-14 absolute z-50" icon={faCrown} />
+              ) : (
+                <div></div>
+              )}
+              <FontAwesomeIcon icon={faUser} size="xl" />
+            </IconButton>
+          </PopoverComponent>
         )}
         <div className="mt-2">{Nickname}</div>
         {penaltyCount === 0 ? (
@@ -184,8 +194,6 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
           <div>
           </div>
         )}
-        <div className="w-0 h-6 mt-1 rounded-md bg-[#9FDDFF]"></div>
-        <div className={`${opacity}`}>{children}</div>
       </div>
     );
   }
