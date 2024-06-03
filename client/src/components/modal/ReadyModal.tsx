@@ -6,8 +6,6 @@ import { readyToGameModalState } from "../../recoil/recoil";
 import { motion } from "framer-motion";
 import { CSSProperties } from "react";
 
-
-
 const customModalStyles = {
   overlay: {
     backgroundColor: "rgba(0, 0, 0, 0.4)",
@@ -46,33 +44,24 @@ const ReadyToGameModal: React.FC<ModalProps> = ({ children, onRequestClose }) =>
 
   const baseClassName = "w-1/2 max-w-[650px] min-w-[250px] h-auto min-h-[310px] max-h-[400px] z-150 rounded-lg shadow-md bg-light-bg dark:bg-dark-bg overflow-auto";
 
-  // 모달을 닫을 때 onRequestClose 함수 호출
-  const closeModal = (e: React.MouseEvent) => {
-    if ((e.target as Element).id === "overlay") {
-      onRequestClose();
-    }
-  };
-
   if (!isOpen) {
     return null;
   }
 
   return (
-
-    <div style={customModalStyles.overlay} id="overlay" onClick={closeModal}>
-    <motion.div
-      className={baseClassName}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{
-        opacity: 1,
-        y: 0,
-        transition: { delay: 0.1 },
-      }}
-
-    >
-      <div className="p-3">{children}</div>
-    </motion.div>
-  </div>
+    <div style={customModalStyles.overlay} id="overlay">
+      <motion.div
+        className={baseClassName}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          transition: { delay: 0.1 },
+        }}
+      >
+        <div className="p-3">{children}</div>
+      </motion.div>
+    </div>
   );
 };
 

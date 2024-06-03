@@ -1,6 +1,6 @@
 import IconButton from "../components/button/IconButton";
 import FullLayout from "../components/layout/FullLayout";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import {
   captainReadyToGameModalState,
@@ -65,6 +65,7 @@ const ReadyToGame = () => {
   const [isGameEnd, setIsGameEnd] = useState(false)
 
   const location = useLocation();
+  const navigate = useNavigate();
   const roomInfo = { ...location.state };
   
   const closeModal = () => {
@@ -1115,7 +1116,10 @@ const ReadyToGame = () => {
                 아직 멀었다
               </Button>
             )}
+            
           </div>
+
+          <div className="mt-3 m-auto" onClick={() => {navigate(location.state?.from || "/")}}>딛지</div>
         </div>
       </ReadyToGameModal>
 
