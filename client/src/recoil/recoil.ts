@@ -15,6 +15,11 @@ export const captainReadyToGameModalState = atom<boolean>({
   default: false
 })
 
+export const firstCategoryRecoil = atom<string>({
+  key: "category",
+  default: "전체"
+})
+
 export const timerCount = atom<number>({
   key: 'timerCount',
   default: 30

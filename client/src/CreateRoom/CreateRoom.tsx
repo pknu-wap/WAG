@@ -10,7 +10,7 @@ import DropdownSelect from "../components/dropDown/DropDown";
 import { Option } from "react-dropdown";
 import SliderComponent from "../components/slider/Slider";
 import { useRecoilState } from "recoil";
-import { timerCount } from "../recoil/recoil";
+import { firstCategoryRecoil, timerCount } from "../recoil/recoil";
 
 function CreateRoom() {
   const [isPrivate, setIsPrivate] = useState<boolean | null>(false); //일단은 공개방을 default로
@@ -54,9 +54,11 @@ function CreateRoom() {
   };
 
   // 카테고리 select
+  const [, setFirstCategory] = useRecoilState(firstCategoryRecoil)
   const [selectedOption, setSelectedOption] = useState<string>("전체");
   const handleOptionSelect = (option: Option) => {
     setSelectedOption(option.value);
+    setFirstCategory(option.value)
     console.log('Selected option:', option.value);
   };
 
