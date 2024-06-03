@@ -2,7 +2,7 @@ import React from "react";
 import ReactModal from "react-modal";
 import { useRecoilState } from "recoil";
 
-import { captainReadyToGameModalState } from "../../recoil/modal";
+import { captainReadyToGameModalState } from "../../recoil/recoil";
 import { motion } from "framer-motion";
 import { CSSProperties } from "react";
 
