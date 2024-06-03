@@ -15,6 +15,11 @@ export const captainReadyToGameModalState = atom<boolean>({
   default: false
 })
 
+export const rulesModalState = atom<boolean>({
+  key: "rulesModalState",
+  default: false,
+});
+
 export const firstCategoryRecoil = atom<string>({
   key: "category",
   default: "전체"
