@@ -16,7 +16,7 @@ body {
     sans-serif; */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  @apply bg-light-bg dark:bg-dark-bg;
+  @apply transition-colors duration-200 bg-light-bg dark:bg-dark-bg;
   max-width: 1024px;
   padding-bottom: 7vh;
 }
