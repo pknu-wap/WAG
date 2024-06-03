@@ -69,12 +69,10 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
       if (gameStart) {
         findUserAnswer();
       } else {
-        console.log("게임 시작 전");
       }
     }, [currentCycle]);
 
     const checkIsReady = () => {
-      console.log(isReady)
       isReady?.forEach((dto) => {
         if (Nickname === dto.roomNickname) {
           setReady(dto.ready)
@@ -83,8 +81,6 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
     }
     useEffect(() => {
       checkIsReady()
-      console.log(gameStart)
-      console.log(ready)
     }, [isReady])
 
     // 패널티 갯수 확인

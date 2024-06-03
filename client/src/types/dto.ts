@@ -87,6 +87,7 @@ export interface ChatMessage {
   content: string; // 메시지 텍스트
   roomId: number;
   isPrivateRoom: boolean; 
+  gameUserDtos?: GameUserDto[];
 }
 
 export interface JoinUser {

@@ -4,6 +4,7 @@ import { useParams, useLocation } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import {
   captainReadyToGameModalState,
+  firstCategoryRecoil,
   ingameTimerCount,
   readyToGameModalState,
   timerCount,
@@ -39,7 +40,6 @@ import DropdownSelect from "../components/dropDown/DropDown";
 import { Option } from "react-dropdown";
 import ReadyStartButton from "./RedayStartButton";
 import SliderComponent from "../components/slider/Slider";
-import PopoverComponent from "../components/popover/Popover";
 
 
 var stompClient: any = null; //웹소켓 변수 선언
@@ -62,7 +62,6 @@ const ReadyToGame = () => {
   const [category, setCategory] = useState("")
   const [userCount, setUserCount] = useState(0)
   const [isGameEnd, setIsGameEnd] = useState(false)
-  const [timer, setTimer] = useState(0)
 
   const location = useLocation();
   const roomInfo = { ...location.state };
@@ -72,6 +71,7 @@ const ReadyToGame = () => {
   };
   const openModal = () => {
     setIsOpen(true);
+
   };
   const captainCloseModal = () => {
     setCaptainIsOpen(false);
@@ -100,7 +100,6 @@ const ReadyToGame = () => {
   const [isMyTurn, setIsMyTurn] = useState(false);
   const gameCycleRef = useRef<number>(0);
   const [currentCycle, setCurrentCycle] = useState<number>(0);
-  const [nowTurnAnswer, setNowTurnAnswer] = useState("")
   const [hasSentCorrect, setHasSentCorrect] = useState(false);  //정답을 외쳤는지 
   const [hasSentAsk, setHasSentAsk] = useState(false);  //질문을 했는지 
 
@@ -113,12 +112,15 @@ const ReadyToGame = () => {
       if (roomInfo.isCaptin === true) {
         console.log("Captain is in");
         socketConnect();
+        setSelectedOption(category)
         roomInfo.isCaptin = false;
+        console.log("roomInfo : ", roomInfo)
       }
     } else {
       if (roomInfo.userCount === 1) {
       } else {
         openModal();
+        console.log("roomInfo : ", roomInfo)
       }
     }
   }, []);
@@ -206,6 +208,7 @@ const ReadyToGame = () => {
         }
       );
       console.log("방 정보 get api : ", response.data)
+      setUserCount(response.data.userCount)
       return response.data;
     } catch (error) {
       console.error("방 정보 get api 오류 발생 : ", error);
@@ -311,16 +314,18 @@ const ReadyToGame = () => {
       //addJoinUser();
       setJoinUsers(message.roomResponse.userDtos);
       setRoomInfo();
-      setUserCount(message.roomResponse.userDtos.length)
-      console.log("JOIN으로 온 메세지", message);
+      setReadyMessage(message.roomResponse.userDtos);
+      setAllReady(false) // 유저 추가입장 시 게임시작 버튼 비활성화
       console.log(message.sender + " joined!");
+      console.log("JOIN 즉시 userCount : ", userCount)
       getAllReady(message); //레디상태 재검사
+      console.log("JOIN으로 온 메세지", message);
     } else if (message.messageType === "LEAVE") {
       //addJoinUser();
       setJoinUsers(message.roomResponse.userDtos);
-      setUserCount(message.roomResponse.userDtos.length)
       setRoomInfo();
       getAllReady(message); //레디상태 재검사
+      console.log("LEAVE 즉시 userCount : ", userCount)
       console.log("LEAVE으로 온 메세지", message);
     } else if (message.messageType === "CHAT") {
       console.log("CHAT으로 온 메세지", message);
@@ -377,6 +382,7 @@ const ReadyToGame = () => {
       stopTimer();
       resetTimer();
       handleTimerEnd();
+      setIsCORRECTMode(false)
       console.log("RESET으로 온 메세지", message);
   }
     else {
@@ -434,7 +440,9 @@ const ReadyToGame = () => {
   };
 
   // 카테고리 select
-  const [selectedOption, setSelectedOption] = useState<string>("");
+  const [selectedOption, setSelectedOption] = useState<string>(category);
+  const [beforeCategory, setBeforeCategory] = useState(selectedOption)
+  const [count, setCount] = useState(1)
   const handleOptionSelect = (option: Option) => {
     setSelectedOption(option.value);
     console.log('Selected option:', option.value);
@@ -444,21 +452,24 @@ const ReadyToGame = () => {
       Toast({ message: "기존 카테고리 입니다!", type: "warn" });
     } else {
       sendMessageToSocket("/app/chat.setCategory", "CATEGORY")
+      setCount((v) => v + 1)
+      setBeforeCategory(selectedOption)
     }
+    captainCloseModal(); //모달 닫기
   }
 
   // 타이머 세팅
   const [timerRecoil, ] = useRecoilState(timerCount) // 방 만들기에서 가져온 recoil
   const [sliderValue, setSliderValue] = useState(timerRecoil); // 슬라이더 변경 값
-  const [, setIngameTimerRecoil] = useRecoilState(ingameTimerCount) // 게임 중 타이메 recoil
+  const [ingameTimerRecoil, setIngameTimerRecoil] = useRecoilState(ingameTimerCount) // 게임 중 타이메 recoil
 
   const handleSliderChange = (value: number) => {
     setSliderValue(value);
-    console.log('Slider value changed:', value);
   };
 
   const sendSliderChange = () => {
     sendMessageToSocket("/app/chat.setTimer", "TIMER")
+    captainCloseModal(); //모달 닫기
   }
 
   // 새로고침 방지
@@ -520,18 +531,59 @@ const ReadyToGame = () => {
   }
 
 
-  const getAllReady = (message : any) => {
-    const readyUsersCount = message.userDtos.filter((user : any) => user.ready).length;
-    const totalUsersCount = message.userDtos.length;
+  const getAllReady = async (message : any) => {
 
-    // 최소 두 명 이상의 사용자가 전체 준비 상태인지 확인합니다.
-    if (totalUsersCount > 1 && readyUsersCount === totalUsersCount) {
-      Toast({ message: "모든 사용자 게임 준비 완료", type: "success" });
-      setAllReady(true);
-    } else {
-      setAllReady(false); // 그렇지 않으면 전체 준비 상태를 false로 설정합니다.
+    // message.userDtos가 정의되지 않았을 경우 빈 배열로 처리
+    if (message.messageType === "JOIN" || message.messageType === "LEAVE") {
+      const userDtos = message.roomResponse.userDtos;
+      // userDtos가 배열인지 확인하여 필터링
+      const readyUsersCount = Array.isArray(userDtos) ? userDtos.filter((user: any) => user.ready).length : 0;
+      const totalUsersCount = Array.isArray(userDtos) ? userDtos.length : 0;
+
+      // 최소 두 명 이상의 사용자가 전체 준비 상태인지 확인합니다.
+      if (totalUsersCount > 1 && readyUsersCount === totalUsersCount) {
+        Toast({ message: "모든 사용자 게임 준비 완료", type: "success" });
+        setAllReady(true);
+      } else {
+        setAllReady(false); // 그렇지 않으면 전체 준비 상태를 false로 설정합니다.
+      }
+    } else if (message.messageType === "READY") {
+      const userDtos = message.userDtos;
+      // userDtos가 배열인지 확인하여 필터링
+      const readyUsersCount = Array.isArray(userDtos) ? userDtos.filter((user: any) => user.ready).length : 0;
+      const totalUsersCount = Array.isArray(userDtos) ? userDtos.length : 0;
+
+      // 최소 두 명 이상의 사용자가 전체 준비 상태인지 확인합니다.
+      if (totalUsersCount > 1 && readyUsersCount === totalUsersCount) {
+        Toast({ message: "모든 사용자 게임 준비 완료", type: "success" });
+        setAllReady(true);
+      } else {
+        setAllReady(false); // 그렇지 않으면 전체 준비 상태를 false로 설정합니다.
+      }
     }
   };
+  const categoryChangeRenderButton = () => {
+    if (category === selectedOption || selectedOption === beforeCategory) {
+      return (
+        <Button size="sm" disabled={true} onClick={sendCategoryOnClick}>카테고리 바꿀래?</Button>
+      )
+    } else {
+      return (
+        <Button size="sm" disabled={false} onClick={sendCategoryOnClick}>변경</Button>
+      )
+    }
+  }
+  const timerChangeRenderButton = () => {
+    if (ingameTimerRecoil === sliderValue) {
+      return (
+        <Button size="sm" disabled={true} onClick={sendSliderChange}>시간 바꿀래?</Button>
+      )
+    } else {
+      return (
+        <Button size="sm" disabled={false} onClick={sendSliderChange}>변경</Button>
+      )
+    }
+  }
 
   /*====================== 게임 중 코드 ====================== */
 
@@ -594,7 +646,7 @@ const ReadyToGame = () => {
   };
 
   //정답자 처리 함수
-  let currentAnswererIndex = 1; // 현재 정답자 인덱스
+  const [currentAnswererIndex, setCurrentAnswerIndex] = useState(1); // 현재 정답자 인덱스
 
   function handleCorrectAnswer(message:any) {
     const sender = message.sender;
@@ -605,7 +657,24 @@ const ReadyToGame = () => {
       if(gameUserDtos[senderIndex].ranking !== 0){
         gameUserDtos[senderIndex].ranking = currentAnswererIndex; // 1부터 시작
         Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
-        currentAnswererIndex++;
+        setCurrentAnswerIndex((current) => current + 1) // 정답 맞췄을 시 5초 후 다음턴으로 넘어감
+        if(!hasSentAsk){
+          const roomId = localStorage.getItem("roomId");
+          const nickName = localStorage.getItem("nickName");
+          stompClient.send(
+            "/app/chat.sendGameMessage",
+            {},
+            JSON.stringify({
+              sender: nickName,
+              content: "정답이다!!",
+              messageType: "ASK",
+              roomId: roomId,
+            }));
+        }
+        stopTimer(); // 타이머 멈춤
+        setTimeout(() => {
+          sendMessageToSocket("/app/chat.sendGameMessage", "RESET");
+        }, 5000);
       }
       else{
         Toast({ message: `${sender}가 정답을 맞추지 못했습니다!`, type: 'info' });
@@ -616,7 +685,7 @@ const ReadyToGame = () => {
     
     //게임시작 버튼 클릭 이벤트
   const clickGameStart = () => {
-    if(joinUsers.length > 1)
+    if(joinUsers.length > 1 && joinUsers.length === userCount)
     {
       captainCloseModal(); //모달 닫기
       sendMessageToSocket("/app/chat.sendGameMessage", "START");  //소켓에 START로 보냄
@@ -705,14 +774,6 @@ const ReadyToGame = () => {
       throw error;
     }
   };
-  const findUserAnswer = async () => {
-    const userAnswer = await getGameAnswer();
-    userAnswer.answerUserDtos.forEach((dto) => {
-      if (dto.nickname === currentUserAnswer?.nickname) {
-        setNowTurnAnswer(dto.answer)
-      }
-    })
-  }
   useEffect(() => {
     if (gameStart) {
       getGameAnswer();
@@ -757,6 +818,8 @@ const ReadyToGame = () => {
     setIsMyTurn(false);
     setIsReady(false);
     setAllReady(false);
+    setIsCORRECTMode(false)
+    setCurrentAnswerIndex(1)
     setChatMessages([]);
     setGameUserDtos([]);
     setReadyMessage([]);
@@ -829,7 +892,7 @@ const ReadyToGame = () => {
       </div>
       ) : (
       <div>
-        <div className="flex flex-row justify-around items-center mt-10 mx-7 ">
+        <div className="flex flex-row justify-around items-center mt-10 mb-5 mx-7 ">
           {joinUsers.map((info, index) => {
             return (
               <div key={index} className="relative">
@@ -1059,13 +1122,13 @@ const ReadyToGame = () => {
             <div>
           <div className="rounded-xl font-extrabold min-w-44 mb-3">게임 카테고리 설정</div>
           <div>
-            <DropdownSelect onOptionSelect={handleOptionSelect} defaultValue={selectedOption}/>
-            <Button size="sm" disabled={false} onClick={sendCategoryOnClick}>변경</Button>
+            <DropdownSelect onOptionSelect={handleOptionSelect} defaultValue={count === 1 ? category : selectedOption}/>
+            {categoryChangeRenderButton()}
           </div>
         <div>
           <div className="rounded-xl font-extrabold min-w-44 mb-3">턴 당 진행시간</div>
           <SliderComponent value={sliderValue} onChange={handleSliderChange} />
-          <Button size="sm" disabled={false} onClick={sendSliderChange}>변경</Button>
+          {timerChangeRenderButton()}
         </div>
         </div>
             </div>
