@@ -114,21 +114,27 @@ function MainPage({ dark }: ComponentProps) {
 
   return (
     <FullLayout>
-      {theme === "light" ? (
-        <img src="images/WAG_white.2.png" alt="logo light mode"></img>
-      ) : (
-        <img src="images/WAG_dark.2.png" alt="logo dark mode"></img>
-      )}
-      <div className="flex flex-col items-center justify-center space-y-5">
-        <Button size="lg" onClick={handleRandomEnterClick}>
-          랜덤 입장
-        </Button>
-        <Button size="lg" onClick={handleCreateRoomClick}>
-          방 생성
-        </Button>
-        <Button size="lg" onClick={openModal}>
-          입장코드 입력
-        </Button>
+      <div className="mt-16">
+        {theme === "light" ? (
+          <div className="flex justify-center items-center">
+            <img className="w-2/3" src="images/WAG_white.2.png" alt="logo light mode"></img>
+          </div>
+        ) : (
+          <div className="flex justify-center items-center "> 
+            <img className="w-2/3" src="images/WAG_dark.2.png" alt="logo dark mode"></img>
+          </div>
+        )}
+        <div className="flex flex-col items-center justify-center space-y-5 mt-4">
+          <Button size="lg" onClick={handleRandomEnterClick}>
+            랜덤 입장
+          </Button>
+          <Button size="lg" onClick={handleCreateRoomClick}>
+            방 생성
+          </Button>
+          <Button size="lg" onClick={openModal}>
+            입장코드 입력
+          </Button>
+        </div>
       </div>
 
       <Modal onRequestClose={closeModal}>
