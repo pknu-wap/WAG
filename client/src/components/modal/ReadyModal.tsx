@@ -1,9 +1,11 @@
 import React from "react";
 import ReactModal from "react-modal";
 import { useRecoilState } from "recoil";
+
 import { readyToGameModalState } from "../../recoil/modal";
 import { motion } from "framer-motion";
 import { CSSProperties } from "react";
+
 
 
 const customModalStyles = {
@@ -55,6 +57,7 @@ const ReadyToGameModal: React.FC<ModalProps> = ({ children, onRequestClose }) =>
   }
 
   return (
+
     <div style={customModalStyles.overlay} id="overlay" onClick={closeModal}>
     <motion.div
       style={customModalStyles.content}
@@ -64,6 +67,7 @@ const ReadyToGameModal: React.FC<ModalProps> = ({ children, onRequestClose }) =>
         y: 0,
         transition: { delay: 0.1 },
       }}
+
     >
       <div className="p-3">{children}</div>
     </motion.div>

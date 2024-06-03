@@ -8,6 +8,9 @@ import { IRoomResponseInfo } from "../types/dto";
 import Toast from "../components/toast/Toast";
 import DropdownSelect from "../components/dropDown/DropDown";
 import { Option } from "react-dropdown";
+import SliderComponent from "../components/slider/Slider";
+import { useRecoilState } from "recoil";
+import { firstCategoryRecoil, timerCount } from "../recoil/recoil";
 
 function CreateRoom() {
   const [isPrivate, setIsPrivate] = useState<boolean | null>(false); //일단은 공개방을 default로
@@ -28,6 +31,7 @@ function CreateRoom() {
           privateRoom: isPrivate,
           userNickName: nickName,
           category: selectedOption,
+          timer: sliderValue,
         }
       );
 
@@ -50,10 +54,21 @@ function CreateRoom() {
   };
 
   // 카테고리 select
+  const [, setFirstCategory] = useRecoilState(firstCategoryRecoil)
   const [selectedOption, setSelectedOption] = useState<string>("전체");
   const handleOptionSelect = (option: Option) => {
     setSelectedOption(option.value);
+    setFirstCategory(option.value)
     console.log('Selected option:', option.value);
+  };
+
+  // 타이머 세팅
+  const [sliderValue, setSliderValue] = useState(30);
+  const [, setTimerRecoil] = useRecoilState(timerCount)
+
+  const handleSliderChange = (value: number) => {
+    setSliderValue(value);
+    setTimerRecoil(value)
   };
 
   const renderButton = () => {
@@ -98,9 +113,13 @@ function CreateRoom() {
             onChange={() => setIsPrivate(true)}
           />
         </div>
-        <div>
+        <div className="mb-8">
           <div className="rounded-xl font-extrabold min-w-44 mb-3">게임 카테고리 설정</div>
           <DropdownSelect onOptionSelect={handleOptionSelect} defaultValue="전체" />
+        </div>
+        <div>
+          <div className="rounded-xl font-extrabold min-w-44 mb-3">턴 당 진행시간</div>
+          <SliderComponent value={sliderValue} onChange={handleSliderChange} />
         </div>
         <input
           className="w-3/4 h-12 mb-5 mt-5 rounded shadow-md pl-5 text-[#000000]"

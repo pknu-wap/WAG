@@ -1,4 +1,6 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRecoilState } from 'recoil';
+import { ingameTimerCount } from '../../recoil/recoil';
 
 export interface TimerHookProps {
   time: number;
@@ -6,13 +8,19 @@ export interface TimerHookProps {
   stopTimer: () => void;
   resetTimer: () => void;
 }
-
-export const INITIAL_TIME = 30;
+//export const INITIAL_TIME = 30;
 export const ONE_SECOND = 1000; // ms
 
 function useTimer(): TimerHookProps {
-  const [time, setTime] = useState<number>(INITIAL_TIME);
+  
+  const [ingameTimerCountState] = useRecoilState(ingameTimerCount);
+  const initialTimeRef = useRef(ingameTimerCountState); // initialTimeRef를 사용하여 초기값 저장
+  const [time, setTime] = useState<number>(initialTimeRef.current);
   const intervalRef: { current: NodeJS.Timeout | null } = useRef(null);
+  useEffect(() => {
+    initialTimeRef.current = ingameTimerCountState;
+    setTime(initialTimeRef.current);
+  }, [ingameTimerCountState]);
 
 
   //타이머 시작하는 함수
@@ -34,7 +42,7 @@ function useTimer(): TimerHookProps {
   
   //타이머 재시작하는 함수
   const resetTimer = useCallback(() => {
-    setTime(INITIAL_TIME);
+    setTime(initialTimeRef.current);
   }, []);
   
   return { time, startTimer, stopTimer, resetTimer };

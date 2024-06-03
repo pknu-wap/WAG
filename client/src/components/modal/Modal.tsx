@@ -1,8 +1,10 @@
 import React from "react";
 import { useRecoilState } from "recoil";
+
 import { modalState } from "../../recoil/modal";
 import { motion } from "framer-motion";
 import { CSSProperties } from "react";
+
 
 const customModalStyles = {
   overlay: {
@@ -52,6 +54,7 @@ const Modal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
   }
 
   return (
+
     <div style={customModalStyles.overlay} id="overlay" onClick={closeModal}>
       <motion.div
         style={customModalStyles.content}
@@ -65,6 +68,7 @@ const Modal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
         <div className="p-3">{children}</div>
       </motion.div>
     </div>
+
   );
 };
 

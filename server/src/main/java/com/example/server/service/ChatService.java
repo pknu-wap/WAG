@@ -4,7 +4,6 @@ import com.example.server.domain.*;
 import com.example.server.dto.*;
 import com.example.server.exception.*;
 import com.example.server.payload.response.AnswerListResponse;
-import com.example.server.payload.response.ResultResponse;
 import com.example.server.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -51,6 +49,7 @@ public class ChatService {
         Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
                 .orElseThrow(() -> new NoSuchRoomException(chatMessage.getRoomId()));
         roomInit(room);
+
         roomRepository.save(room);
 
         ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
@@ -66,7 +65,7 @@ public class ChatService {
         return gameRecord;
     }
 
-    private static void roomInit(Room room) {
+    private void roomInit(Room room) {
         room.setGameStatus(true);
         room.setCycle(1);
         room.setCurrentOrder(1);
@@ -193,6 +192,7 @@ public class ChatService {
                     .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
             newRoom.setCorrectMemberCnt(newRoom.getCorrectMemberCnt()+1);
             gameOrder.setRanking(newRoom.getCorrectMemberCnt());
+            gameOrderRepository.save(gameOrder);
 
             if(room.getCorrectMemberCnt() >= 3 || room.getUserCount()-1 <= room.getCorrectMemberCnt()){ // 게임 끝나는 경우
                 room.setGameStatus(false);
@@ -242,18 +242,21 @@ public class ChatService {
         }
 
         for(RoomUser roomUser : roomUsers){
-//            if(!roomUser.isCaptain()){
-//                roomUser.setReady(false);                 //TODO 프론트 레디 기능 추가 시 4줄 주석 해제 필요
-//                roomUserRepository.save(roomUser);
-//            }
+            if(!roomUser.isCaptain()){
+                roomUser.setReady(false);
+                roomUserRepository.save(roomUser);
+            }
 
             GameOrder gameOrder = gameOrderInit(roomUser, room);
-
             gameOrder.setNextTurn(order == 1);
+            if (order == 1) {
+                room.setNowTurnUserId(roomUser.getId());
+                roomRepository.save(room);
+            }
             gameOrder.setAnswerName(answerLists.get(order-1).getName());
             gameOrder.setUserOrder(order);
             order += 1;
-
+            roomUser.setGameOrder(gameOrder);   // TODO 여기 수정
             gameOrderRepository.save(gameOrder);
         }
     }
@@ -398,6 +401,10 @@ public class ChatService {
                     char initialConsonant = (char) (initialConsonantIndex + 0x1100); // 초성 유니코드 범위 시작: 0x1100
                     sb.append(" " + initialConsonant);
                 }
+                else if(ch==' '){
+                    sb.append(" ");
+                    idx++;
+                }
             }
             else{
                 sb.append(" _");
@@ -409,7 +416,10 @@ public class ChatService {
     public String getLength(String myRealAnswer){
         StringBuilder sb = new StringBuilder();
         for(int i = 0; i < myRealAnswer.length(); i++){
-            sb.append(" _");
+            if(myRealAnswer.charAt(i)==' ')
+                sb.append(" ");
+            else
+                sb.append(" _");
         }
         return sb.toString();
     }
@@ -417,6 +427,9 @@ public class ChatService {
     public ChatGameMessage resetTimer(ChatMessage chatMessage){
         Room room = roomRepository.findById(chatMessage.getRoomId())
                 .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
+        room.setNowTurnUserId(gameOrderRepository.findNextOrderByRoomId(room.getId())
+                .orElseThrow(()->new NoSuchRoomUserException(room.getId())));
+        roomRepository.save(room);
         ChatGameMessage chatGameMessage = makeChatGameMessage(chatMessage, room);
         chatGameMessage.setMessageType(ChatMessage.MessageType.RESET);
         return chatGameMessage;
