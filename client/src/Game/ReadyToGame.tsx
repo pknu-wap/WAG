@@ -4,7 +4,6 @@ import { useParams, useLocation } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import {
   captainReadyToGameModalState,
-  firstCategoryRecoil,
   ingameTimerCount,
   readyToGameModalState,
   timerCount,
@@ -81,7 +80,7 @@ const ReadyToGame = () => {
   };
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
-  const [readyMessage, setReadyMessage] = useState<ReadyUserDto[]>([]) // 레디 상태
+  const [readyMessage, setReadyMessage] = useState<any[]>([]) // 레디 상태
   const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]); // 입장 유저
   const [gameUserDtos, setGameUserDtos] = useState<GameUserDto[]>([]); // 게임 중 유저 dto
   const [isReady, setIsReady] = useState<boolean>(false); //준비상태인지 아닌지
@@ -225,6 +224,7 @@ const ReadyToGame = () => {
     setCategory(roomInfo.category);
     setIngameTimerRecoil(roomInfo.timer)
     let userDtos = roomInfo.userDtos;
+    setReadyMessage(userDtos);
     userDtos.forEach((dto) => {
       const nickName = localStorage.getItem("nickName");
       if (dto.captain && dto.roomNickname === nickName) setIsMeCaptain(true);
@@ -646,7 +646,6 @@ const ReadyToGame = () => {
   };
 
   //정답자 처리 함수
-  const [currentAnswererIndex, setCurrentAnswerIndex] = useState(1); // 현재 정답자 인덱스
 
   function handleCorrectAnswer(message:any) {
     const sender = message.sender;
@@ -655,12 +654,11 @@ const ReadyToGame = () => {
     
     if (senderIndex !== -1) {
       if(gameUserDtos[senderIndex].ranking !== 0){
-        gameUserDtos[senderIndex].ranking = currentAnswererIndex; // 1부터 시작
         Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
-        setCurrentAnswerIndex((current) => current + 1) // 정답 맞췄을 시 5초 후 다음턴으로 넘어감
         if(!hasSentAsk){
+          console.log("정답 외쳤을 때")
           const roomId = localStorage.getItem("roomId");
-          const nickName = localStorage.getItem("nickName");
+          const nickName = currentUserAnswer?.nickname
           stompClient.send(
             "/app/chat.sendGameMessage",
             {},
@@ -819,30 +817,30 @@ const ReadyToGame = () => {
     setIsReady(false);
     setAllReady(false);
     setIsCORRECTMode(false)
-    setCurrentAnswerIndex(1)
     setChatMessages([]);
     setGameUserDtos([]);
     setReadyMessage([]);
+    setRoomInfo();
     setCurrentUserAnswer({
       nickname: "",
       answer: "",
     });
   }
-    useEffect(() => {
-      const handleResize = () => {
-        if (window.innerWidth <= 1024) {
-            setSize(window.innerWidth);
-        } else {
-            setSize(1024)
-        }
-      };
-  
-      window.addEventListener('resize', handleResize);
-  
-      return () => {
-        window.removeEventListener('resize', handleResize);
-      };
-    }, []);
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 1024) {
+          setSize(window.innerWidth);
+      } else {
+          setSize(1024)
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   return (
     <FullLayout>
