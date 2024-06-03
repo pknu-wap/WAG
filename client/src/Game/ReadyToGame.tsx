@@ -4,7 +4,6 @@ import { useParams, useLocation } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import {
   captainReadyToGameModalState,
-  firstCategoryRecoil,
   ingameTimerCount,
   readyToGameModalState,
   timerCount,
@@ -652,6 +651,7 @@ const ReadyToGame = () => {
     const sender = message.sender;
     const gameUserDtos = message.gameUserDtos;
     const senderIndex = gameUserDtos.findIndex((user:any) => user.roomNickname === sender);
+    console.log("정답 처리 전 : ", currentAnswererIndex)
     
     if (senderIndex !== -1) {
       if(gameUserDtos[senderIndex].ranking !== 0){
@@ -660,7 +660,7 @@ const ReadyToGame = () => {
         setCurrentAnswerIndex((current) => current + 1) // 정답 맞췄을 시 5초 후 다음턴으로 넘어감
         if(!hasSentAsk){
           const roomId = localStorage.getItem("roomId");
-          const nickName = localStorage.getItem("nickName");
+          const nickName = message.sender
           stompClient.send(
             "/app/chat.sendGameMessage",
             {},
@@ -675,6 +675,7 @@ const ReadyToGame = () => {
         setTimeout(() => {
           sendMessageToSocket("/app/chat.sendGameMessage", "RESET");
         }, 5000);
+        console.log("정답 처리 후 : ", currentAnswererIndex)
       }
       else{
         Toast({ message: `${sender}가 정답을 맞추지 못했습니다!`, type: 'info' });
