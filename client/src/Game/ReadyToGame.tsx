@@ -184,7 +184,7 @@ const ReadyToGame = () => {
     setIsNicknameChecked(true);
     setIsLoading(true);
   
-    if (nickname === "" || nickname.includes(" ")) {
+    if (nickname === "" || nickname.includes(" ") || nickname.length > 9) {
       setPossible(false);
       setIsLoading(false);
       return;
@@ -1094,7 +1094,7 @@ const ReadyToGame = () => {
               possible ? (
                 <div className="text-[#33B3FF]">사용가능!</div>
               ) : (
-                <div className="text-[#FF0000]">이미 사용중인 닉네임입니다!</div>
+                <div className="text-[#FF0000]">사용 불가한 닉네임입니다!</div>
               )
             )
           )}
