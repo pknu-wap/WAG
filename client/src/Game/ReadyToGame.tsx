@@ -1083,7 +1083,7 @@ const ReadyToGame = () => {
           )}
         </div>
 
-          <Button size="sm" disabled={false} onClick={nicknamePossibleClick}>
+          <Button className ="mt-3 m-auto flex justify-center items-center" size="sm" disabled={false} onClick={nicknamePossibleClick}>
             닉네임 확인
           </Button>
 
