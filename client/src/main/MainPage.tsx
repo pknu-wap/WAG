@@ -143,9 +143,7 @@ function MainPage({ dark }: ComponentProps) {
         <div className="flex flex-col justify-between">
           <div className="my-5 flex flex-row justify-between items-center">
             <div className="text-4xl">JOIN</div>
-            <button onClick={closeModal}>
-              <FontAwesomeIcon icon={faX} />
-            </button>
+            
           </div>
           <div className="text-lg">입장코드 형식 : 랜덤 숫자 4자리</div>
           <br />
