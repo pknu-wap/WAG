@@ -192,6 +192,7 @@ public class ChatService {
                     .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
             newRoom.setCorrectMemberCnt(newRoom.getCorrectMemberCnt()+1);
             gameOrder.setRanking(newRoom.getCorrectMemberCnt());
+            gameOrderRepository.save(gameOrder);
 
             if(room.getCorrectMemberCnt() >= 3 || room.getUserCount()-1 <= room.getCorrectMemberCnt()){ // 게임 끝나는 경우
                 room.setGameStatus(false);
