@@ -375,6 +375,7 @@ const ReadyToGame = () => {
       stopTimer();
       resetTimer();
       handleTimerEnd();
+      setIsCORRECTMode(false)
       console.log("RESET으로 온 메세지", message);
   }
     else {
@@ -443,6 +444,7 @@ const ReadyToGame = () => {
     } else {
       sendMessageToSocket("/app/chat.setCategory", "CATEGORY")
     }
+    captainCloseModal(); //모달 닫기
   }
 
   // 타이머 세팅
@@ -456,6 +458,7 @@ const ReadyToGame = () => {
 
   const sendSliderChange = () => {
     sendMessageToSocket("/app/chat.setTimer", "TIMER")
+    captainCloseModal(); //모달 닫기
   }
 
   // 새로고침 방지
@@ -603,6 +606,10 @@ const ReadyToGame = () => {
         gameUserDtos[senderIndex].ranking = currentAnswererIndex; // 1부터 시작
         Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
         currentAnswererIndex++;
+        stopTimer(); // 타이머 멈춤
+        setTimeout(() => {
+          sendMessageToSocket("/app/chat.sendGameMessage", "RESET");
+        }, 5000);
       }
       else{
         Toast({ message: `${sender}가 정답을 맞추지 못했습니다!`, type: 'info' });
