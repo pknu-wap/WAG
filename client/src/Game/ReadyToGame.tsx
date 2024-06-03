@@ -70,12 +70,15 @@ const ReadyToGame = () => {
   };
   const openModal = () => {
     setIsOpen(true);
+
   };
   const captainCloseModal = () => {
     setCaptainIsOpen(false);
+    console.log("시간이 지난 후 즉시 userCount : ", userCount)
   };
   const captainOpenModal = () => {
     setCaptainIsOpen(true);
+    console.log("시간이 지난 후 즉시 userCount : ", userCount)
   };
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
@@ -203,6 +206,7 @@ const ReadyToGame = () => {
         }
       );
       console.log("방 정보 get api : ", response.data)
+      setUserCount(response.data.userCount)
       return response.data;
     } catch (error) {
       console.error("방 정보 get api 오류 발생 : ", error);
@@ -308,17 +312,18 @@ const ReadyToGame = () => {
       //addJoinUser();
       setJoinUsers(message.roomResponse.userDtos);
       setRoomInfo();
+      setReadyMessage(message.roomResponse.userDtos);
       setAllReady(false) // 유저 추가입장 시 게임시작 버튼 비활성화
-      setUserCount(message.roomResponse.userDtos.length)
-      console.log("JOIN으로 온 메세지", message);
       console.log(message.sender + " joined!");
+      console.log("JOIN 즉시 userCount : ", userCount)
       getAllReady(message); //레디상태 재검사
+      console.log("JOIN으로 온 메세지", message);
     } else if (message.messageType === "LEAVE") {
       //addJoinUser();
       setJoinUsers(message.roomResponse.userDtos);
-      setUserCount(message.roomResponse.userDtos.length)
       setRoomInfo();
       getAllReady(message); //레디상태 재검사
+      console.log("LEAVE 즉시 userCount : ", userCount)
       console.log("LEAVE으로 온 메세지", message);
     } else if (message.messageType === "CHAT") {
       console.log("CHAT으로 온 메세지", message);
@@ -520,17 +525,48 @@ const ReadyToGame = () => {
   }
 
 
-  const getAllReady = (message : any) => {
-    const readyUsersCount = message.userDtos.filter((user : any) => user.ready).length;
-    const totalUsersCount = message.userDtos.length;
+  const getAllReady = async (message : any) => {
+  // message 객체의 구조를 출력하여 확인
+  console.log("Received message:", message);
+
+  // message.userDtos가 정의되지 않았을 경우 빈 배열로 처리
+  if (message.messageType === "JOIN" || message.messageType === "LEAVE") {
+    const userDtos = message.roomResponse.userDtos;
+    // userDtos가 배열인지 확인하여 필터링
+    const readyUsersCount = Array.isArray(userDtos) ? userDtos.filter((user: any) => user.ready).length : 0;
+    const totalUsersCount = Array.isArray(userDtos) ? userDtos.length : 0;
+
+    console.log("readyUsersCount : ", readyUsersCount)
+    console.log("totalUsersCount : ", totalUsersCount)
 
     // 최소 두 명 이상의 사용자가 전체 준비 상태인지 확인합니다.
     if (totalUsersCount > 1 && readyUsersCount === totalUsersCount) {
       Toast({ message: "모든 사용자 게임 준비 완료", type: "success" });
       setAllReady(true);
+      console.log("setAllReady 작용됨 :", true);
     } else {
       setAllReady(false); // 그렇지 않으면 전체 준비 상태를 false로 설정합니다.
+      console.log("setAllReady 작용안됨 :", false);
     }
+  } else if (message.messageType === "READY") {
+    const userDtos = message.userDtos;
+    // userDtos가 배열인지 확인하여 필터링
+    const readyUsersCount = Array.isArray(userDtos) ? userDtos.filter((user: any) => user.ready).length : 0;
+    const totalUsersCount = Array.isArray(userDtos) ? userDtos.length : 0;
+
+    console.log("readyUsersCount : ", readyUsersCount)
+    console.log("totalUsersCount : ", totalUsersCount)
+
+    // 최소 두 명 이상의 사용자가 전체 준비 상태인지 확인합니다.
+    if (totalUsersCount > 1 && readyUsersCount === totalUsersCount) {
+      Toast({ message: "모든 사용자 게임 준비 완료", type: "success" });
+      setAllReady(true);
+      console.log("setAllReady 작용됨 :", true);
+    } else {
+      setAllReady(false); // 그렇지 않으면 전체 준비 상태를 false로 설정합니다.
+      console.log("setAllReady 작용안됨 :", false);
+    }
+  }
   };
 
   /*====================== 게임 중 코드 ====================== */
@@ -594,7 +630,7 @@ const ReadyToGame = () => {
   };
 
   //정답자 처리 함수
-  let currentAnswererIndex = 1; // 현재 정답자 인덱스
+  const [currentAnswererIndex, setCurrentAnswerIndex] = useState(1); // 현재 정답자 인덱스
 
   function handleCorrectAnswer(message:any) {
     const sender = message.sender;
@@ -605,7 +641,20 @@ const ReadyToGame = () => {
       if(gameUserDtos[senderIndex].ranking !== 0){
         gameUserDtos[senderIndex].ranking = currentAnswererIndex; // 1부터 시작
         Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
-        currentAnswererIndex++;
+        setCurrentAnswerIndex((current) => current + 1) // 정답 맞췄을 시 5초 후 다음턴으로 넘어감
+        if(!hasSentAsk){
+          const roomId = localStorage.getItem("roomId");
+          const nickName = localStorage.getItem("nickName");
+          stompClient.send(
+            "/app/chat.sendGameMessage",
+            {},
+            JSON.stringify({
+              sender: nickName,
+              content: "정답이다!!",
+              messageType: "ASK",
+              roomId: roomId,
+            }));
+        }
         stopTimer(); // 타이머 멈춤
         setTimeout(() => {
           sendMessageToSocket("/app/chat.sendGameMessage", "RESET");
@@ -620,7 +669,7 @@ const ReadyToGame = () => {
     
     //게임시작 버튼 클릭 이벤트
   const clickGameStart = () => {
-    if(joinUsers.length > 1)
+    if(joinUsers.length > 1 && joinUsers.length === userCount)
     {
       captainCloseModal(); //모달 닫기
       sendMessageToSocket("/app/chat.sendGameMessage", "START");  //소켓에 START로 보냄
@@ -754,6 +803,7 @@ const ReadyToGame = () => {
     setIsReady(false);
     setAllReady(false);
     setIsCORRECTMode(false)
+    setCurrentAnswerIndex(1)
     setChatMessages([]);
     setGameUserDtos([]);
     setReadyMessage([]);
