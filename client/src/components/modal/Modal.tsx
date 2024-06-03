@@ -1,7 +1,7 @@
 import React from "react";
 import { useRecoilState } from "recoil";
 
-import { modalState } from "../../recoil/modal";
+import { modalState } from "../../recoil/recoil";
 import { motion } from "framer-motion";
 import { CSSProperties } from "react";
 
