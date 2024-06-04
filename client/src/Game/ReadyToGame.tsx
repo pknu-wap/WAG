@@ -1174,7 +1174,7 @@ const ReadyToGame = () => {
             
           </div>
 
-          <div className="mt-3 m-auto" onClick={() => {navigate(location.state?.from || "/")}}>딛지</div>
+          <div className="mt-3 m-auto" onClick={() => {navigate(location.state?.from || "/")}}>딛자</div>
         </div>
       </ReadyToGameModal>
 
