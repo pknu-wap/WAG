@@ -65,7 +65,7 @@ const ReadyToGame = () => {
   const [isMeCaptain, setIsMeCaptain] = useState(false);
   const [category, setCategory] = useState("")
   const [userCount, setUserCount] = useState(0)
-  const [isGameEnd, setIsGameEnd] = useState(true)
+  const [isGameEnd, setIsGameEnd] = useState(false)
 
   const location = useLocation();
   const navigate = useNavigate();
