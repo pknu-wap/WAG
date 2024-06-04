@@ -75,7 +75,12 @@ public class WebSocketEventListener {
             }
 
             if(room.isGameStatus()){  // 만약 게임 중이라면 해당 유저 게임 진행 정보 삭제
-                if(room.getUserCount() == 2){  // 나간 후에 사람이 한명이라면 게임 종료
+                GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
+                        .orElseThrow(NoSuchGameOrderException::new);
+                if(gameOrder.getRanking() != 0){
+                    room.setLeftCorrectMember(room.getLeftCorrectMember()-1);
+                }
+                if(room.getUserCount() - room.getLeftCorrectMember() <= 2){  // 나간 후에 사람이 한명이라면 게임 종료
 
                     ChatGameMessage chatGameMessage;
                     // ChatMessage 생성
@@ -85,9 +90,6 @@ public class WebSocketEventListener {
                     chatMessage.setMessageType(ChatMessage.MessageType.END);
                     chatMessage.setSender(roomUser.getRoomNickname());
 
-                    //
-                    GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
-                            .orElseThrow(NoSuchGameOrderException::new);
                     gameOrderRepository.delete(gameOrder);
                     roomUserRepository.delete(roomUser);
 
