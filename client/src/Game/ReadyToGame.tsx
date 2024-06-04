@@ -40,7 +40,7 @@ import { Option } from "react-dropdown";
 import ReadyStartButton from "./RedayStartButton";
 import SliderComponent from "../components/slider/Slider";
 import Wrapper from "../components/Wrapper";
-
+import {motion} from "framer-motion";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -865,9 +865,17 @@ const ReadyToGame = () => {
   return (
     <Wrapper>
     <FullLayout>
+      
       {isGameEnd ? (
       <div>
-        <div className="relative">
+        <motion.div className="relative"
+                    initial={{ scale: 0 }} // 초기 상태에서 원의 크기를 작게 설정
+                    animate={{ scale: 1 }} // 애니메이션을 통해 원의 크기를 정상 크기로 설정
+                    transition={{
+                      type: "spring",
+                      stiffness: 100,
+                      damping: 20
+                    }}>
           {/* Bottom section with purple semi-circle */}
           <div className="w-full h-[96px] absolute -top-[96px] bg-light-btn dark:bg-dark-btn"></div>
           <div 
@@ -888,8 +896,13 @@ const ReadyToGame = () => {
               <p className="text-[#ffffff] text-xl">{myName}</p>
             </div>
           </div>
-        </div>
-
+        </motion.div>
+    
+        <motion.div
+      className="box"
+      animate={{ y: 100 }}
+      transition={{ type: "spring" }}
+    >
           {/* List of players */}
           <div style={{height: `${size/3}px`}}></div>
           <div className="m-auto w-3/4">
@@ -908,6 +921,7 @@ const ReadyToGame = () => {
             <Button className="mr-5 mb-5" size="sm" onClick={restartOnClick}>재시작하기</Button>
             <Button className="mr-5 mb-5" size="sm" onClick={exitOnClick}>메인페이지로 가기</Button>
           </div>
+          </motion.div>
       </div>
       ) : (
       <div>
