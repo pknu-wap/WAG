@@ -679,16 +679,16 @@ const ReadyToGame = () => {
             "/app/chat.sendGameMessage",
             {},
             JSON.stringify({
-              sender: localStorage.getItem("nickName"),
+              sender: sender,
               content: "정답이다!!",
               messageType: "ASK",
               roomId: localStorage.getItem("roomId"),
             }));
+            stopTimer(); // 타이머 멈춤
+            setTimeout(() => {
+              sendMessageToSocket("/app/chat.sendGameMessage", "RESET");
+            }, 5000);
         }
-        stopTimer(); // 타이머 멈춤
-        setTimeout(() => {
-          sendMessageToSocket("/app/chat.sendGameMessage", "RESET");
-        }, 5000);
       }
       else{
         Toast({ message: `${sender}가 정답을 맞추지 못했습니다!`, type: 'info' });
