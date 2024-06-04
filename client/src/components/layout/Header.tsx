@@ -55,10 +55,19 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
     setIsOpen(false);
   };
   
+  function isChrome() {
+    const userAgent = window.navigator.userAgent;
+    console.log(userAgent)
+    return userAgent.includes('Chrome');
+  }
+  
+  
   return (
     <header className="m-5 z-50">
       <div className="flex justify-end z-50">
-      <IconButton
+        {isChrome() ? (
+          <>
+          <IconButton
           className="z-50 mr-3"
           size="md"
           onClick={() => {
@@ -124,6 +133,9 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
           
         </div>
       </RulesModal>
+          </>
+        ) : null}
+      
       </div>
     </header>
   );
