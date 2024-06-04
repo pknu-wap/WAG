@@ -142,7 +142,7 @@ function MainPage({ dark }: ComponentProps) {
       <div className="mt-16">
         {theme === "light" ? (
           <div className="flex justify-center items-center">
-            <img className={`w-2/3 ${isClicked ? 'clicked' : ''}`} src="images/WAG_white.2.png" 
+            <img className={`relative w-2/3 ${isClicked ? 'clicked' : ''}`} src="images/WAG_white.2.png" 
               alt="logo light mode"
               onClick={() => {
                 handleLightLogoClick();
@@ -154,7 +154,7 @@ function MainPage({ dark }: ComponentProps) {
           </div>
         ) : (
           <div className="flex justify-center items-center "> 
-            <img className={`w-2/3 ${isClicked ? 'clicked' : ''}`} src="images/WAG_dark.2.png" 
+            <img className={`relative w-2/3 ${isClicked ? 'clicked' : ''}`} src="images/WAG_dark.2.png" 
               alt="logo light mode"
               onClick={() => {
                 handleDarkLogoClick();
@@ -180,7 +180,7 @@ function MainPage({ dark }: ComponentProps) {
       </div>
 
       <Modal onRequestClose={closeModal}>
-        <div className="flex flex-col justify-between">
+        <div className="relative z-10 flex flex-col justify-between">
           <div className="my-5 flex flex-row justify-between items-center">
             <div className="text-4xl">JOIN</div>
             
