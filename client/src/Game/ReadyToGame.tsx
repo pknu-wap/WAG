@@ -669,12 +669,14 @@ const ReadyToGame = () => {
     const sender = message.sender;
     const gameUserDtos = message.gameUserDtos;
     const senderIndex = gameUserDtos.findIndex((user:any) => user.roomNickname === sender);
+    const myName = localStorage.getItem("nickName");
     
     if (senderIndex !== -1) {
       if(gameUserDtos[senderIndex].ranking !== 0){
         Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
+        console.log(nextTurnUserRef)
         if(!hasSentAsk){
-          console.log("정답 외쳤을 때")
+          console.log("질문하지 않았을 때")
           stompClient.send(
             "/app/chat.sendGameMessage",
             {},
@@ -684,11 +686,13 @@ const ReadyToGame = () => {
               messageType: "ASK",
               roomId: localStorage.getItem("roomId"),
             }));
-            stopTimer(); // 타이머 멈춤
-            setTimeout(() => {
-              sendMessageToSocket("/app/chat.sendGameMessage", "RESET");
-            }, 5000);
         }
+        stopTimer(); // 타이머 멈춤
+        setTimeout(() => {
+          if (sender === myName) {
+            sendMessageToSocket("/app/chat.sendGameMessage", "RESET");
+          }
+        }, 5000);
       }
       else{
         Toast({ message: `${sender}가 정답을 맞추지 못했습니다!`, type: 'info' });
