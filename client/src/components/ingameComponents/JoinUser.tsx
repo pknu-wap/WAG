@@ -157,7 +157,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
                   {answer}
                 </div>
               ) : !gameStart && isCaptain ? ( // 대기방에서 방장 왕관
-                <FontAwesomeIcon className="text-[#FFFF00] bottom-14 absolute z-50" icon={faCrown} />
+                <FontAwesomeIcon className="text-[#FFFF00] sm:bottom-14 bottom-10 absolute z-50" icon={faCrown} />
               ) : (
                 <div></div>
               )}
@@ -165,7 +165,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
             </IconButton>
           </PopoverComponent>
         )}
-        <div className="mt-2">{Nickname}</div>
+        <div className="text-xs sm:text-sm lg:text-base text-base mt-2">{Nickname}</div>
         {penaltyCount === 0 ? (
           <div></div>
         ) : penaltyCount === 1 ? (

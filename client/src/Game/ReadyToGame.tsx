@@ -675,16 +675,14 @@ const ReadyToGame = () => {
         Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
         if(!hasSentAsk){
           console.log("정답 외쳤을 때")
-          const roomId = localStorage.getItem("roomId");
-          const nickName = currentUserAnswer?.nickname
           stompClient.send(
             "/app/chat.sendGameMessage",
             {},
             JSON.stringify({
-              sender: nickName,
+              sender: currentUserAnswer?.nickname,
               content: "정답이다!!",
               messageType: "ASK",
-              roomId: roomId,
+              roomId: localStorage.getItem("roomId"),
             }));
         }
         stopTimer(); // 타이머 멈춤
@@ -962,8 +960,8 @@ const ReadyToGame = () => {
               </div>
             ) : ( // 게임 시작 전
               <div>
-                <div className="text-xl font-semibold">게임 대기 중</div>
-                <div className="text-xl font-semibold">카테고리 : {category}</div>
+                <div className="sm:text-xl text-lg font-semibold">게임 대기 중</div>
+                <div className="sm:text-xl text-lg font-semibold">카테고리 : {category}</div>
               </div>
             )}
           </div>
@@ -979,17 +977,18 @@ const ReadyToGame = () => {
         </div>
         
         {countdown === null && !gameStart && (
-        <div className="m-auto grid grid-cols-1 sm:grid-cols-2 mt-2 gap-2">
-          <div className="mr-5 mb-2"><Button size="md" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>
-          <div className="mr-5">
-              <ReadyStartButton
+        <div className="m-auto max-w-[700px] grid grid-cols-1 md:grid-cols-2 mt-5">
+          <div className="mr-5 mb-5"><Button size="md" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>
+          <div className="mr-5 mb-5">
+            <ReadyStartButton
               myState={myState}
               allReady={allReady} // 모든 유저 준비 상태 확인
               handleStart={clickGameStart}
               handleReady={ClickReady}
             />
-            </div>
-          </div>)}
+          </div>
+        </div>
+        )}
 
         <div className="mt-5 flex flex-row justify-center algin-center">
           {!gameStart && (
@@ -1005,11 +1004,11 @@ const ReadyToGame = () => {
           </div>
 
 
-          <div className="w-5/12 flex flex-row justify-center algin-center relative">
+          <div className="w-1/2 max-w-[400px] flex flex-row justify-center algin-center relative">
             <input
               className={`${isCORRECTMode && isMyTurn ? 
                 "w-full rounded-2xl shadow-md pl-5 text-[#000000] focus:shadow-2xl border-[4px] border-[#A072BC]" 
-                : "w-full h-[48px] rounded-2xl shadow-md pl-5 text-[#000000]"}`}
+                : "text-xs h-[42px] sm:text-base sm:h-[48px] w-full rounded-2xl shadow-md pl-5 text-[#000000]"}`}
               type="text"
               placeholder={
                 gameStart // gameStart가 true인 경우에만 조건부 렌더링
