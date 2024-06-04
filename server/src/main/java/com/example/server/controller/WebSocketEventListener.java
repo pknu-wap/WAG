@@ -97,12 +97,24 @@ public class WebSocketEventListener {
                     room.setGameStatus(false);
                     roomRepository.save(room);
 
-                    // 나간사람의 방장 여부와 관계없이 마지막 남은 인원을 방장으로 다시 설정
-                    RoomUser nextCaption = roomUserRepository.findLastOne(roomId)
+                    if(room.getUserCount() <= 1){
+                        //혼자 남았을 경우 나간사람의 방장 여부와 관계없이 마지막 남은 인원을 방장으로 다시 설정
+                        RoomUser nextCaption = roomUserRepository.findLastOne(roomId)
                                 .orElseThrow(() -> new NoSuchRoomUserException(roomId));
-                    nextCaption.setCaptain(true);
-                    nextCaption.setReady(true);
-                    roomUserRepository.save(nextCaption);
+                        nextCaption.setCaptain(true);
+                        nextCaption.setReady(true);
+                        roomUserRepository.save(nextCaption);
+                    }
+                    else {
+                        if(roomUser.isCaptain()){   // 나간 사람이 방장이라면 방장 위임
+                            RoomUser nextCaption = roomUserRepository.findNextCaptinByRandom(roomId)
+                                    .orElseThrow(() -> new NoSuchRoomUserException(roomId));
+                            nextCaption.setCaptain(true);
+                            nextCaption.setReady(true);
+                            roomUserRepository.save(nextCaption);
+                        }
+                    }
+
 
                     // END ChatGameMessage 전송
                     chatGameMessage = chatService.makeChatGameMessage(chatMessage,room);
