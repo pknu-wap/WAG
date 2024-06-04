@@ -137,7 +137,7 @@ function CreateRoom() {
           <SliderComponent value={sliderValue} onChange={handleSliderChange} />
         </div>
         <input
-          className="w-3/4 h-12 mb-5 mt-5 rounded shadow-md pl-5 text-[#000000]"
+          className="relative z-10 w-3/4 h-12 mb-5 mt-5 rounded shadow-md pl-5 text-[#000000]"
           type="error"
           required
           placeholder={"닉네임을 입력해주세요"}
