@@ -147,13 +147,13 @@ const ReadyToGame = () => {
   const nicknamePossibleClickRenderButton = () => {
     if (nickname === beforeNickname) {
       return (
-        <Button size="sm" disabled={true} onClick={nicknamePossibleClick}>
+        <Button size="md" disabled={true} onClick={nicknamePossibleClick}>
         닉네임 확인
         </Button>
       )
     } else {
       return (
-        <Button size="sm" disabled={false} onClick={nicknamePossibleClick}>
+        <Button size="md" disabled={false} onClick={nicknamePossibleClick}>
         닉네임 확인
         </Button>
       )
@@ -979,9 +979,9 @@ const ReadyToGame = () => {
         </div>
         
         {countdown === null && !gameStart && (
-        <div className="flex justify-center algin-center mt-2">
-          <div><Button className="mr-5" size="md" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>
-          <div>
+        <div className="m-auto grid grid-cols-1 sm:grid-cols-2 mt-2 gap-2">
+          <div className="mr-5 mb-2"><Button size="md" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>
+          <div className="mr-5">
               <ReadyStartButton
               myState={myState}
               allReady={allReady} // 모든 유저 준비 상태 확인

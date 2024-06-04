@@ -19,6 +19,7 @@ module.exports = {
         btn_hover: "rgba(255,106,194, 0.9)",
       },
     },
+
   },
   plugins: [require("@tailwindcss/forms"), 
     function ({addUtilities}) {
