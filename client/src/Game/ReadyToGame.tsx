@@ -675,16 +675,14 @@ const ReadyToGame = () => {
         Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
         if(!hasSentAsk){
           console.log("정답 외쳤을 때")
-          const roomId = localStorage.getItem("roomId");
-          const nickName = currentUserAnswer?.nickname
           stompClient.send(
             "/app/chat.sendGameMessage",
             {},
             JSON.stringify({
-              sender: nickName,
+              sender: localStorage.getItem("nickName"),
               content: "정답이다!!",
               messageType: "ASK",
-              roomId: roomId,
+              roomId: localStorage.getItem("roomId"),
             }));
         }
         stopTimer(); // 타이머 멈춤
