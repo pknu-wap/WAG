@@ -547,3 +547,15 @@ code {
 .banter-loader__box:nth-child(9) {
   animation: moveBox-9 4s infinite;
 }
+
+/* 클릭되는 애니메이션 효과 */
+@keyframes clickEffect {
+  0% { transform: scale(1); } /* 시작 시 크기는 보통 크기 */
+  50% { transform: scale(1.1); } /* 애니메이션 중간에 크기를 확대 */
+  100% { transform: scale(1); } /* 애니메이션 끝에 다시 보통 크기로 돌아옴 */
+}
+
+/* 클릭된 이미지에 적용할 스타일 */
+.clicked {
+  animation: clickEffect 0.2s linear; /* 클릭되는 애니메이션을 0.2초 동안 linear로 적용 */
+}

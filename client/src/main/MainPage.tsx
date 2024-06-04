@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Button from "../components/button/Button";
 import FullLayout from "../components/layout/FullLayout";
 import { ConnectedProps, connect } from "react-redux";
@@ -28,6 +28,7 @@ function MainPage({ dark }: ComponentProps) {
   const [theme, setTheme] = useState(localStorage.theme);
   const [enterCode, setEnterCode] = useState<number>();
   const [, setIsOpen] = useRecoilState(modalState);
+  const [isClicked, setIsClicked] = useState(false)
   const openModal = () => {
     setIsOpen(true);
   };
@@ -97,6 +98,28 @@ function MainPage({ dark }: ComponentProps) {
     navigate("/CreateRoom"); // 페이지 이동 처리
   };
 
+  const audioLightRef = useRef<HTMLAudioElement>(null);
+  const audioDarkRef = useRef<HTMLAudioElement>(null);
+  
+  const handleLightLogoClick = () => {
+    
+    const playSound = () => {
+      const audio = new Audio('audio/lightmode_wag.m4a'); // 새로운 audio 요소 생성
+      audio.play(); // 소리를 재생합니다.
+    };
+  
+    playSound();
+  }
+
+  const handleDarkLogoClick = () => {
+    
+    const playSound = () => {
+      const audio = new Audio('audio/darkmode_wag.m4a'); // 새로운 audio 요소 생성
+      audio.play(); // 소리를 재생합니다.
+    };
+  
+    playSound();
+  }
   useEffect(() => {
     if (enterCode === undefined || Number.isNaN(enterCode)) {
       setDisabled(true);
@@ -119,13 +142,30 @@ function MainPage({ dark }: ComponentProps) {
       <div className="mt-16">
         {theme === "light" ? (
           <div className="flex justify-center items-center">
-            <img className="w-2/3" src="images/WAG_white.2.png" alt="logo light mode"></img>
+            <img className={`w-2/3 ${isClicked ? 'clicked' : ''}`} src="images/WAG_white.2.png" 
+              alt="logo light mode"
+              onClick={() => {
+                handleLightLogoClick();
+                setIsClicked(true); // 클릭될 때마다 isClicked 상태를 true로 설정하여 애니메이션을 발생시킵니다.
+                setTimeout(() => setIsClicked(false), 200);
+                }}>
+
+              </img>
           </div>
         ) : (
           <div className="flex justify-center items-center "> 
-            <img className="w-2/3" src="images/WAG_dark.2.png" alt="logo dark mode"></img>
+            <img className={`w-2/3 ${isClicked ? 'clicked' : ''}`} src="images/WAG_dark.2.png" 
+              alt="logo light mode"
+              onClick={() => {
+                handleDarkLogoClick();
+                setIsClicked(true); // 클릭될 때마다 isClicked 상태를 true로 설정하여 애니메이션을 발생시킵니다.
+                setTimeout(() => setIsClicked(false), 200);
+                }}>
+
+              </img>
           </div>
         )}
+        
         <div className="flex flex-col items-center justify-center space-y-5 mt-4">
           <Button size="lg" onClick={handleRandomEnterClick}>
             랜덤 입장
