@@ -5,6 +5,7 @@ import { useRecoilState } from "recoil";
 import {
   captainReadyToGameModalState,
   ingameTimerCount,
+  loadingModalState,
   readyToGameModalState,
   timerCount,
 } from "../recoil/recoil";
@@ -27,6 +28,7 @@ import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import ChatRoom from "../components/chatRoom/ChatRoom";
 import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
+import LoadingModal from "../components/modal/LoadingModal";
 import RadioButton from "../components/radioButton/RadioButton";
 import Toast from "../components/toast/Toast";
 import { history } from "../util/history";
@@ -48,6 +50,7 @@ const ReadyToGame = () => {
   const params = useParams(); // params를 상수에 할당
   const [, setIsOpen] = useRecoilState(readyToGameModalState);
   const [, setCaptainIsOpen] = useRecoilState(captainReadyToGameModalState);
+  const [, setLoadingIsOpen] = useRecoilState(loadingModalState);
   const [nickname, setNickname] = useState<string>("");
   const [beforeNickname, setBeforeNickname] = useState("")
   const [possible, setPossible] = useState<boolean>();
@@ -62,7 +65,7 @@ const ReadyToGame = () => {
   const [isMeCaptain, setIsMeCaptain] = useState(false);
   const [category, setCategory] = useState("")
   const [userCount, setUserCount] = useState(0)
-  const [isGameEnd, setIsGameEnd] = useState(false)
+  const [isGameEnd, setIsGameEnd] = useState(true)
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -82,6 +85,13 @@ const ReadyToGame = () => {
     setCaptainIsOpen(true);
   };
 
+  const loadingCloseModal = () => {
+    setLoadingIsOpen(false)
+  }
+
+  const loadingOpenModal = () => {
+    setLoadingIsOpen(true)
+  }
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
   const [readyMessage, setReadyMessage] = useState<any[]>([]) // 레디 상태
   const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]); // 입장 유저
@@ -108,6 +118,9 @@ const ReadyToGame = () => {
   const answerListRef = useRef<any>(null); //정답어 리스트가 도착하면 상태를 바꾸어줌
   const currentAnswerRef = useRef<any>(null); 
   const [currentUserAnswer, setCurrentUserAnswer] = useState<AnswerUserDto>(); //다음 유저의 정보를 바탕으로 정답어 받아놓기
+
+  const [isLocationLoading, setIsLocationLoading] = useState<boolean>(false);
+
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
   useEffect(() => {
     if ("isCaptin" in roomInfo) {
@@ -831,7 +844,13 @@ const ReadyToGame = () => {
   }, [isGameEnd]);
 
   const restartOnClick = () => {
-    setIsGameEnd(false);
+    setIsLocationLoading(true)
+    loadingOpenModal()
+    setTimeout( () => {
+      setIsGameEnd(false);
+      loadingCloseModal()
+    }, 1000);
+
     setgameStart(false);
     setIsMyTurn(false);
     setIsReady(false);
@@ -861,11 +880,33 @@ const ReadyToGame = () => {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+  
+  const LoadingSpinner = () => (
+    <>
+      <div className="banter-loader">
+        <div className="banter-loader__box"></div>
+        <div className="banter-loader__box"></div>
+        <div className="banter-loader__box"></div>
+        <div className="banter-loader__box"></div>
+        <div className="banter-loader__box"></div>
+        <div className="banter-loader__box"></div>
+        <div className="banter-loader__box"></div>
+        <div className="banter-loader__box"></div>
+        <div className="banter-loader__box"></div>
+      </div> 
+      <div className="mt-60">
+        이름들을 섞는 중이에요!
+      </div>
+      </>
+  );
 
   return (
     <Wrapper>
     <FullLayout>
-      
+    <LoadingModal onRequestClose={loadingCloseModal}>
+      <LoadingSpinner/>
+    </LoadingModal>
+
       {isGameEnd ? (
       <div>
         <motion.div className="relative"

@@ -20,6 +20,11 @@ export const rulesModalState = atom<boolean>({
   default: false,
 });
 
+export const loadingModalState = atom<boolean>({
+  key: "loadingModalState",
+  default: false,
+});
+
 export const firstCategoryRecoil = atom<string>({
   key: "category",
   default: "전체"
