@@ -18,7 +18,7 @@ type ComponentProps = Props & PropsFromRedux;
 const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
 
   const [play, setPlay] = useState(false)
-  const [audio, setAudio] = useState<HTMLAudioElement>(new Audio('/audio/jazz_theme.mp3'))
+  const [audio, setAudio] = useState<HTMLAudioElement>(new Audio('/audio/main_theme.mp3'))
   
   useEffect(() => {
     if (dark) {
