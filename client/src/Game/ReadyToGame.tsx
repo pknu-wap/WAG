@@ -196,7 +196,7 @@ const ReadyToGame = () => {
 
   const handlePlaySound = () => {
     const playSound = () => {
-      const audio = new Audio('audio/button_click.m4a')  
+      const audio = new Audio('audio/button_click.mp3')  
       audio.play()
     };
   
@@ -205,7 +205,7 @@ const ReadyToGame = () => {
 
   const handleCorrectSound = () => {
     const playSound = () => {
-      const audio = new Audio('audio/correct_answer2.m4a')  
+      const audio = new Audio('audio/correct_answer2.mp3')  
       audio.play()
     };
   
@@ -215,7 +215,7 @@ const ReadyToGame = () => {
 
   const handleWrongSound = () => {
     const playSound = () => {
-      const audio = new Audio('audio/blip03.m4a')  
+      const audio = new Audio('audio/blip03.mp3')  
       audio.play()
     };
   
@@ -224,7 +224,7 @@ const ReadyToGame = () => {
 
   const handleQuestionSound = () => {
     const playSound = () => {
-      const audio = new Audio('audio/question.m4a')  
+      const audio = new Audio('audio/question.mp3')  
       audio.play()
     };
   
@@ -234,8 +234,8 @@ const ReadyToGame = () => {
 
   const handlePartySound = () => {
     const playSound = () => {
-      const audio = new Audio('audio/yay.m4a')  
-      const audioFire = new Audio('audio/fireworkblast.m4a')  
+      const audio = new Audio('audio/yay.mp3')  
+      const audioFire = new Audio('audio/fireworkblast.mp3')  
       audio.play()
       audioFire.play()
     };
@@ -245,7 +245,7 @@ const ReadyToGame = () => {
 
   const handleBooSound = () => {
     const playSound = () => {
-      const audio = new Audio('audio/fail.m4a'); // 새로운 audio 요소 생성
+      const audio = new Audio('audio/fail.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
   
@@ -255,7 +255,7 @@ const ReadyToGame = () => {
   const handleStartSound = () => {
     
     const playSound = () => {
-      const audio = new Audio('audio/start.m4a'); // 새로운 audio 요소 생성
+      const audio = new Audio('audio/start.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
   
@@ -265,7 +265,7 @@ const ReadyToGame = () => {
   const handleGameStartSound = () => {
     
     const playSound = () => {
-      const audio = new Audio('audio/startGame.m4a'); // 새로운 audio 요소 생성
+      const audio = new Audio('audio/startGame.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
   
@@ -275,7 +275,7 @@ const ReadyToGame = () => {
   const handleWarningSound = () => {
     
     const playSound = () => {
-      const audio = new Audio('audio/warning.m4a'); // 새로운 audio 요소 생성
+      const audio = new Audio('audio/warning.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
   
