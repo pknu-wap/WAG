@@ -30,6 +30,7 @@ function MainPage({ dark }: ComponentProps) {
   const [, setIsOpen] = useRecoilState(modalState);
   const [isClicked, setIsClicked] = useState(false)
   const openModal = () => {
+    handlePlaySound();
     setIsOpen(true);
   };
 
@@ -67,8 +68,15 @@ function MainPage({ dark }: ComponentProps) {
     }
   };
 
+  const handlePlaySound = () => {
+    const audio = new Audio('/audio/button_click.mp3')  
+    audio.play()
+  };
+
   //랜덤입장 버튼 클릭
   const handleRandomEnterClick = async () => {
+    handlePlaySound();
+
     const roomId = await getRandomRoomId();
     if (roomId !== "no available room") {
       localStorage.setItem("roomId", roomId);
@@ -82,6 +90,7 @@ function MainPage({ dark }: ComponentProps) {
   
   //코드입장시 버튼 클릭
   const buttonCheckHandler = async () => {
+    handlePlaySound();
     const roomId = await getRoomIdCode();
 
     if (roomId === "invalid enterCode") {
@@ -95,6 +104,7 @@ function MainPage({ dark }: ComponentProps) {
   };
 
   const handleCreateRoomClick = () => {
+    handlePlaySound();
     navigate("/CreateRoom"); // 페이지 이동 처리
   };
 
