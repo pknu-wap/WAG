@@ -86,7 +86,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
   return (
     <header className="m-5 z-50">
       <div className="flex justify-end z-50">
-      <audio ref={audioRef} src='audio/main_theme.m4a' loop autoPlay />
+      <audio ref={audioRef} src='audio/main_theme.mp3' loop autoPlay />
         {isChrome() ? (
           <>
           <IconButton

@@ -26,7 +26,7 @@ function CreateRoom() {
   const handlePlaySound = () => {
 
     const playSound = () => {
-      const audio = new Audio('audio/button_click.m4a')  
+      const audio = new Audio('audio/button_click.mp3')  
       audio.play()
     };
   
