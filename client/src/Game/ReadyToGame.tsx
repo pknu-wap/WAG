@@ -196,50 +196,91 @@ const ReadyToGame = () => {
 
 
   const handlePlaySound = () => {
-    const audio = new Audio('audio/button_click.m4a')  
-    audio.play()
+    const playSound = () => {
+      const audio = new Audio('audio/button_click.m4a')  
+      audio.play()
+    };
+  
+    playSound();
   };
 
   const handleCorrectSound = () => {
-    const audio = new Audio('audio/correct_answer2.m4a')  
-    audio.play()
+    const playSound = () => {
+      const audio = new Audio('audio/correct_answer2.m4a')  
+      audio.play()
+    };
+  
+    playSound();
+
   };
 
   const handleWrongSound = () => {
-    const audio = new Audio('audio/blip03.m4a')  
-    audio.play()
+    const playSound = () => {
+      const audio = new Audio('audio/blip03.m4a')  
+      audio.play()
+    };
+  
+    playSound();
   };
 
   const handleQuestionSound = () => {
-    const audio = new Audio('audio/question.m4a')  
-    audio.play()
+    const playSound = () => {
+      const audio = new Audio('audio/question.m4a')  
+      audio.play()
+    };
+  
+    playSound();
+    
   };
 
   const handlePartySound = () => {
-    const audio = new Audio('audio/yay.m4a')  
-    const audioFire = new Audio('audio/fireworkblast.m4a')  
-    audio.play()
-    audioFire.play()
+    const playSound = () => {
+      const audio = new Audio('audio/yay.m4a')  
+      const audioFire = new Audio('audio/fireworkblast.m4a')  
+      audio.play()
+      audioFire.play()
+    };
+  
+    playSound();
   };
 
   const handleBooSound = () => {
-    const audio = new Audio('audio/fail.m4a')  
-    audio.play()
+    const playSound = () => {
+      const audio = new Audio('audio/fail.m4a'); // 새로운 audio 요소 생성
+      audio.play(); // 소리를 재생합니다.
+    };
+  
+    playSound();
   }
 
   const handleStartSound = () => {
-    const audio = new Audio('audio/start.m4a')  
-    audio.play()
+    
+    const playSound = () => {
+      const audio = new Audio('audio/start.m4a'); // 새로운 audio 요소 생성
+      audio.play(); // 소리를 재생합니다.
+    };
+  
+    playSound();
   }
 
   const handleGameStartSound = () => {
-    const audio = new Audio('audio/startGame.m4a')  
-    audio.play()
-  }
+    
+    const playSound = () => {
+      const audio = new Audio('audio/startGame.m4a'); // 새로운 audio 요소 생성
+      audio.play(); // 소리를 재생합니다.
+    };
   
+    playSound();
+  }
+
   const handleWarningSound = () => {
-    const audio = new Audio('audio/warning.m4a')  
-    audio.play()
+    
+    const playSound = () => {
+      const audio = new Audio('audio/warning.m4a'); // 새로운 audio 요소 생성
+      audio.play(); // 소리를 재생합니다.
+    };
+  
+    playSound();
   }
 
   const nicknamePossibleClick = async () => {

@@ -24,8 +24,14 @@ function CreateRoom() {
   // };
 
   const handlePlaySound = () => {
-    const audio = new Audio('audio/button_click.m4a')  
-    audio.play()
+
+    const playSound = () => {
+      const audio = new Audio('audio/button_click.m4a')  
+      audio.play()
+    };
+  
+    playSound();
+    
   };
 
   const createRoom = async () => {

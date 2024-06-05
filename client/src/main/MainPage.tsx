@@ -69,9 +69,14 @@ function MainPage({ dark }: ComponentProps) {
   };
 
   const handlePlaySound = () => {
-    const audio = new Audio('audio/button_click.m4a')  
-    audio.play()
-  };
+    
+    const playSound = () => {
+      const audio = new Audio('audio/button_click.m4a'); // 새로운 audio 요소 생성
+      audio.play(); // 소리를 재생합니다.
+    };
+  
+    playSound();
+  }
 
   //랜덤입장 버튼 클릭
   const handleRandomEnterClick = async () => {
@@ -130,6 +135,7 @@ function MainPage({ dark }: ComponentProps) {
   
     playSound();
   }
+
   useEffect(() => {
     if (enterCode === undefined || Number.isNaN(enterCode)) {
       setDisabled(true);

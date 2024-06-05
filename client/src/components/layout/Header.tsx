@@ -6,7 +6,7 @@ import IconButton from "../button/IconButton";
 import RulesModal from "../modal/RulesModal";
 import { useRecoilState } from "recoil";
 import { rulesModalState } from "../../recoil/recoil";
-const { useEffect, useState } = React;
+const { useEffect, useState, useRef } = React;
 
 type Props = {
   children?: React.ReactNode;
@@ -18,7 +18,7 @@ type ComponentProps = Props & PropsFromRedux;
 const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
 
   const [play, setPlay] = useState(false)
-  const [audio, setAudio] = useState<HTMLAudioElement>(new Audio('audio/main_theme.m4a'))
+  const audioRef = useRef<HTMLAudioElement>(null)
   
   useEffect(() => {
     if (dark) {
@@ -28,21 +28,42 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
     }
   }, [dark]);
 
+  
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.muted = true; // 오디오를 음소거합니다.
+      audio.play()
+        .then(() => {
+          audio.muted = false; // 음소거를 해제합니다.
+          setPlay(true); // 오디오가 재생 중임을 상태로 설정합니다.
+          console.log('오디오 자동 재생 시작');
+        })
+        .catch((error) => {
+          console.error('오디오 자동 재생 오류:', error);
+        });
+
+      // 오디오가 끝날 때마다 다시 재생하도록 설정
+      audio.onended = () => {
+        audio.currentTime = 0; // 재생 시간을 처음으로 설정
+        audio.play().catch((error) => {
+          console.error('오디오 반복 재생 오류:', error);
+        });
+      };
+    }
+  }, []);
+
     const handlePlayMusic = () => {
-      // if (!audio) {
-      //   console.log(audio)
-      //   setAudio(new Audio('audio/mainpage_theme.m4a')) // 음악 파일 경로를 넣어주세요
-      //   audio.loop = true; // 음악을 반복 재생하고 싶다면 설정
-      // }
-    
-      if (!play) {
-        setPlay(true)
-        audio.loop = true
-        audio.play();
-      } else {
-        setPlay(false)
-        audio.loop= false
-        audio.pause();
+      const audio = audioRef.current;
+      if (audio) {
+        if (play) {
+          audio.pause(); // 오디오를 멈춥니다.
+        } else {
+          audio.play().catch((error) => {
+            console.error('오디오 재생 오류:', error);
+          }); // 오디오를 재생합니다.
+        }
+        setPlay(!play); // 재생 상태를 토글합니다.
       }
       
   };
@@ -65,6 +86,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
   return (
     <header className="m-5 z-50">
       <div className="flex justify-end z-50">
+      <audio ref={audioRef} src='audio/main_theme.m4a' loop autoPlay />
         {isChrome() ? (
           <>
           <IconButton
