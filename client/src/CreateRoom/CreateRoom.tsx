@@ -11,10 +11,11 @@ import { Option } from "react-dropdown";
 import SliderComponent from "../components/slider/Slider";
 import { useRecoilState } from "recoil";
 import { firstCategoryRecoil, timerCount } from "../recoil/recoil";
+import Wrapper from "../components/Wrapper";
 
 function CreateRoom() {
   const [isPrivate, setIsPrivate] = useState<boolean | null>(false); //일단은 공개방을 default로
-  const [nickName, setNickname] = useState<string>();
+  const [nickName, setNickname] = useState<string>("");
 
   const navigate = useNavigate();
 
@@ -22,7 +23,18 @@ function CreateRoom() {
   //   console.log(event.target.value);
   // };
 
+  const handlePlaySound = () => {
+    const audio = new Audio('/audio/button_click.mp3')  
+    audio.play()
+  };
+
   const createRoom = async () => {
+    handlePlaySound();
+    if (await nicknamePossibleClick()=== false){
+      Toast({ message: "사용 불가한 닉네임입니다!", type: "warn" });
+      return;
+    }
+
     try {
       console.log("11", isPrivate);
       const response = await axios.post<IRoomResponseInfo>(
@@ -79,7 +91,7 @@ function CreateRoom() {
         <Button size="lg" onClick={createRoom}>
           공개방 생성
         </Button>
-      );
+      );  
     } else {
       return (
         <Button size="lg" onClick={createRoom}>
@@ -89,7 +101,16 @@ function CreateRoom() {
     }
   };
 
+  const nicknamePossibleClick = async () => {
+    if (nickName === "" || nickName.includes(" ") || nickName.length > 9) {
+      return false;
+    }
+    return true;
+
+  };
+
   return (
+    <Wrapper>
     <FullLayout>
       <div className="p-4">
         <div className="justify-center text-6xl mb-20">방 만들기</div>
@@ -122,19 +143,19 @@ function CreateRoom() {
           <SliderComponent value={sliderValue} onChange={handleSliderChange} />
         </div>
         <input
-          className="w-3/4 h-12 mb-5 mt-5 rounded shadow-md pl-5 text-[#000000]"
+          className="relative z-10 w-3/4 h-12 mb-5 mt-5 rounded shadow-md pl-5 text-[#000000]"
           type="error"
           required
           placeholder={"닉네임을 입력해주세요"}
           onChange={(e) => {
             setNickname(e.target.value);
           }}
-          onKeyDown={(e) => {
+          onKeyDown={async (e) => {
             if (e.nativeEvent.isComposing) return ;
             if (e.key === "Enter" && nickName?.trim() !== "") {
-              createRoom();
+              createRoom()  
             } else if (e.key === "Enter" && nickName?.trim() === "") {
-              Toast({ message: "이름을 입력해주세요!", type: "warn" });
+              Toast({ message: "사용 불가한 닉네임입니다!", type: "warn" });
             }
           }}
         ></input>
@@ -142,6 +163,7 @@ function CreateRoom() {
         <div className="mt-12">{renderButton()}</div>
       </div>
     </FullLayout>
+    </Wrapper>
   );
 }
 

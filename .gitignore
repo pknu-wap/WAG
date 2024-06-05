@@ -37,3 +37,4 @@ out/
 
 ### VS Code ###
 .vscode/
+client/public/audio/jazz_theme.mp3

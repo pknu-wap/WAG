@@ -1,10 +1,11 @@
 import IconButton from "../components/button/IconButton";
 import FullLayout from "../components/layout/FullLayout";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import {
   captainReadyToGameModalState,
   ingameTimerCount,
+  loadingModalState,
   readyToGameModalState,
   timerCount,
 } from "../recoil/recoil";
@@ -27,6 +28,7 @@ import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import ChatRoom from "../components/chatRoom/ChatRoom";
 import CaptainReatyToModal from "../components/modal/CaptainReadyModal";
+import LoadingModal from "../components/modal/LoadingModal";
 import RadioButton from "../components/radioButton/RadioButton";
 import Toast from "../components/toast/Toast";
 import { history } from "../util/history";
@@ -39,7 +41,8 @@ import DropdownSelect from "../components/dropDown/DropDown";
 import { Option } from "react-dropdown";
 import ReadyStartButton from "./RedayStartButton";
 import SliderComponent from "../components/slider/Slider";
-
+import Wrapper from "../components/Wrapper";
+import {motion} from "framer-motion";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -47,6 +50,7 @@ const ReadyToGame = () => {
   const params = useParams(); // params를 상수에 할당
   const [, setIsOpen] = useRecoilState(readyToGameModalState);
   const [, setCaptainIsOpen] = useRecoilState(captainReadyToGameModalState);
+  const [, setLoadingIsOpen] = useRecoilState(loadingModalState);
   const [nickname, setNickname] = useState<string>("");
   const [beforeNickname, setBeforeNickname] = useState("")
   const [possible, setPossible] = useState<boolean>();
@@ -64,6 +68,7 @@ const ReadyToGame = () => {
   const [isGameEnd, setIsGameEnd] = useState(false)
 
   const location = useLocation();
+  const navigate = useNavigate();
   const roomInfo = { ...location.state };
   
   const closeModal = () => {
@@ -80,6 +85,13 @@ const ReadyToGame = () => {
     setCaptainIsOpen(true);
   };
 
+  const loadingCloseModal = () => {
+    setLoadingIsOpen(false)
+  }
+
+  const loadingOpenModal = () => {
+    setLoadingIsOpen(true)
+  }
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]); // 채팅 데이터 상태
   const [readyMessage, setReadyMessage] = useState<any[]>([]) // 레디 상태
   const [joinUsers, setJoinUsers] = useState<IUserDto[]>([]); // 입장 유저
@@ -106,6 +118,9 @@ const ReadyToGame = () => {
   const answerListRef = useRef<any>(null); //정답어 리스트가 도착하면 상태를 바꾸어줌
   const currentAnswerRef = useRef<any>(null); 
   const [currentUserAnswer, setCurrentUserAnswer] = useState<AnswerUserDto>(); //다음 유저의 정보를 바탕으로 정답어 받아놓기
+
+  const [isLocationLoading, setIsLocationLoading] = useState<boolean>(false);
+
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
   useEffect(() => {
     if ("isCaptin" in roomInfo) {
@@ -179,11 +194,60 @@ const ReadyToGame = () => {
     }
   };
 
+
+  const handlePlaySound = () => {
+    const audio = new Audio('/audio/button_click.mp3')  
+    audio.play()
+  };
+
+  const handleCorrectSound = () => {
+    const audio = new Audio('/audio/correct_answer2.mp3')  
+    audio.play()
+  };
+
+  const handleWrongSound = () => {
+    const audio = new Audio('/audio/blip03.mp3')  
+    audio.play()
+  };
+
+  const handleQuestionSound = () => {
+    const audio = new Audio('/audio/question.mp3')  
+    audio.play()
+  };
+
+  const handlePartySound = () => {
+    const audio = new Audio('/audio/yay.mp3')  
+    const audioFire = new Audio('/audio/fireworkblast.mp3')  
+    audio.play()
+    audioFire.play()
+  };
+
+  const handleBooSound = () => {
+    const audio = new Audio('/audio/fail.mp3')  
+    audio.play()
+  }
+
+  const handleStartSound = () => {
+    const audio = new Audio('/audio/start.mp3')  
+    audio.play()
+  }
+
+  const handleGameStartSound = () => {
+    const audio = new Audio('/audio/startGame.mp3')  
+    audio.play()
+  }
+  
+  const handleWarningSound = () => {
+    const audio = new Audio('/audio/warning.mp3')  
+    audio.play()
+  }
+
   const nicknamePossibleClick = async () => {
+    handlePlaySound();
     setIsNicknameChecked(true);
     setIsLoading(true);
   
-    if (nickname === "" || nickname.includes(" ")) {
+    if (nickname === "" || nickname.includes(" ") || nickname.length > 9) {
       setPossible(false);
       setIsLoading(false);
       return;
@@ -267,6 +331,7 @@ const ReadyToGame = () => {
 
   //드가자 버튼 클릭시
   const handleGoIn = async () => {
+    handlePlaySound();
     socketConnect();
     closeModal();
   };
@@ -288,6 +353,7 @@ const ReadyToGame = () => {
       console.log(sliderValue)
     }
     console.log(contentToSend, messageType)
+    
     stompClient.send(
       socketURL,
       {},
@@ -311,6 +377,7 @@ const ReadyToGame = () => {
           setHasSentCorrect(true); // 전송 후 상태 업데이트
         } else if (!isCORRECTMode && !hasSentAsk) 
           { // ASK 메시지 전송 여부 확인
+            handleQuestionSound();
           sendMessageToSocket("/app/chat.sendGameMessage", "ASK");
           setHasSentAsk(true); // 전송 후 상태 업데이트
         } 
@@ -375,6 +442,7 @@ const ReadyToGame = () => {
       setReadyMessage(message.userDtos)
       getAllReady(message);
     } else if (message.messageType === "START") {
+      handleStartSound();
       console.log("START로 온 메세지", message);
       setCountdown(5);
       getGameAnswer();
@@ -390,6 +458,7 @@ const ReadyToGame = () => {
       console.log("PENALTY로 온 메세지", message);
     } else if(message.messageType === "END"){
       stopTimer();
+      handleCorrectSound();
       Toast({ message: "게임이 끝났습니다!", type: "success" });
       setGameUserDtos(message.gameUserDtos);
       setTimeout(() => {
@@ -414,6 +483,7 @@ const ReadyToGame = () => {
 
   // 대기방 방장 모달 공개/비공개 바꾸는 소켓
   const privateModeOnclick = () => {
+    handlePlaySound();
     sendMessageToSocket("/app/chat.changeMode", "CHANGE");
     if (isPrivateRoom) {
       // 공개 방으로 변경
@@ -466,6 +536,7 @@ const ReadyToGame = () => {
     console.log('Selected option:', option.value);
   };
   const sendCategoryOnClick = () => {
+    handlePlaySound();
     if (category === selectedOption) {
       Toast({ message: "기존 카테고리 입니다!", type: "warn" });
     } else {
@@ -486,6 +557,7 @@ const ReadyToGame = () => {
   };
 
   const sendSliderChange = () => {
+    handlePlaySound();
     sendMessageToSocket("/app/chat.setTimer", "TIMER")
     captainCloseModal(); //모달 닫기
   }
@@ -525,6 +597,7 @@ const ReadyToGame = () => {
   }, [enterCode]);
 
   function socketPenaltyOnClick(recipient: string) {
+    handleWarningSound();
     const roomId = localStorage.getItem("roomId");
     const nickName = localStorage.getItem("nickName");
         stompClient.send(
@@ -542,6 +615,7 @@ const ReadyToGame = () => {
   const ClickReady = () => {
     setIsReady(isReady => !isReady);
     sendMessageToSocket("/app/chat.ready", "READY");
+    handlePlaySound();
     if(isReady)
       Toast({ message: "준비 취소 ❌", type: "error" });
     else
@@ -606,6 +680,7 @@ const ReadyToGame = () => {
   /*====================== 게임 중 코드 ====================== */
 
       const exitOnClick = () => {
+        handlePlaySound();
         window.location.replace("/")
       };
       const {
@@ -620,6 +695,7 @@ const ReadyToGame = () => {
             if(!hasSentAsk){
               const roomId = localStorage.getItem("roomId");
               const nickName = localStorage.getItem("nickName");
+              handleQuestionSound();
               stompClient.send(
                 "/app/chat.sendGameMessage",
                 {},
@@ -642,6 +718,7 @@ const ReadyToGame = () => {
     
   //타이머 30초 종료 후 로직
   const handleTimerEnd = () => {
+    handleGameStartSound();
     const nickname = localStorage.getItem("nickName");
     startTimer();
     setHasSentCorrect(false); // 턴이 끝나면 다시 보낼 수 있도록 초기화
@@ -673,8 +750,8 @@ const ReadyToGame = () => {
     
     if (senderIndex !== -1) {
       if(gameUserDtos[senderIndex].ranking !== 0){
+        handleCorrectSound();
         Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
-        console.log(nextTurnUserRef)
         if(!hasSentAsk){
           console.log("질문하지 않았을 때")
           stompClient.send(
@@ -695,6 +772,7 @@ const ReadyToGame = () => {
         }, 5000);
       }
       else{
+        handleWrongSound();
         Toast({ message: `${sender}가 정답을 맞추지 못했습니다!`, type: 'info' });
       }
 
@@ -703,6 +781,7 @@ const ReadyToGame = () => {
     
     //게임시작 버튼 클릭 이벤트
   const clickGameStart = () => {
+    handlePlaySound();
     if(joinUsers.length > 1 && joinUsers.length === userCount)
     {
       captainCloseModal(); //모달 닫기
@@ -713,6 +792,7 @@ const ReadyToGame = () => {
 
   // 정답 입력 모드로 전환하는 함수
   const switchToCORRECT = () => {
+    handlePlaySound();
     if(currentCycle === 1)
       {
         Toast({ message: '정답 맞추기는 2라운드부터!', type: 'error' });
@@ -723,11 +803,12 @@ const ReadyToGame = () => {
     
   // 채팅 모드로 전환하는 함수
   const switchToASK = () => {
+    handlePlaySound();
     setIsCORRECTMode(false);
   };
 
   //게임중 작동 함수를 넣는 함수
-  const GameLogic = async () => { // async 추가
+  const GameLogic = async () => { // async 추가ㅌ
     Toast({ message: "게임을 시작합니다!", type: "success" });
       handleTimerEnd(); 
   };
@@ -821,7 +902,11 @@ const ReadyToGame = () => {
         if (user.roomNickname === myName) {
             setMyRank(user.ranking);
             if (user.ranking <= 3 && user.ranking !== 0) {
+                handlePartySound();
                 setShowConfetti(true);
+            }
+            else {
+              handleBooSound();
             }
         }
     });
@@ -831,7 +916,14 @@ const ReadyToGame = () => {
   }, [isGameEnd]);
 
   const restartOnClick = () => {
-    setIsGameEnd(false);
+    handlePlaySound();
+    setIsLocationLoading(true)
+    loadingOpenModal()
+    setTimeout( () => {
+      setIsGameEnd(false);
+      loadingCloseModal()
+    }, 1000);
+
     setgameStart(false);
     setIsMyTurn(false);
     setIsReady(false);
@@ -861,12 +953,43 @@ const ReadyToGame = () => {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+  
+  const LoadingSpinner = () => (
+    <>
+      <div className="banter-loader">
+        <div className="banter-loader__box"></div>
+        <div className="banter-loader__box"></div>
+        <div className="banter-loader__box"></div>
+        <div className="banter-loader__box"></div>
+        <div className="banter-loader__box"></div>
+        <div className="banter-loader__box"></div>
+        <div className="banter-loader__box"></div>
+        <div className="banter-loader__box"></div>
+        <div className="banter-loader__box"></div>
+      </div> 
+      <div className="mt-60">
+        이름들을 섞는 중이에요!
+      </div>
+      </>
+  );
 
   return (
+    <Wrapper>
     <FullLayout>
+    <LoadingModal onRequestClose={loadingCloseModal}>
+      <LoadingSpinner/>
+    </LoadingModal>
+
       {isGameEnd ? (
       <div>
-        <div className="relative">
+        <motion.div className="relative"
+                    initial={{ scale: 0 }} // 초기 상태에서 원의 크기를 작게 설정
+                    animate={{ scale: 1 }} // 애니메이션을 통해 원의 크기를 정상 크기로 설정
+                    transition={{
+                      type: "spring",
+                      stiffness: 100,
+                      damping: 20
+                    }}>
           {/* Bottom section with purple semi-circle */}
           <div className="w-full h-[96px] absolute -top-[96px] bg-light-btn dark:bg-dark-btn"></div>
           <div 
@@ -887,8 +1010,13 @@ const ReadyToGame = () => {
               <p className="text-[#ffffff] text-xl">{myName}</p>
             </div>
           </div>
-        </div>
-
+        </motion.div>
+    
+        <motion.div
+      className="box"
+      animate={{ y: 100 }}
+      transition={{ type: "spring" }}
+    >
           {/* List of players */}
           <div style={{height: `${size/3}px`}}></div>
           <div className="m-auto w-3/4">
@@ -907,6 +1035,7 @@ const ReadyToGame = () => {
             <Button className="mr-5 mb-5" size="sm" onClick={restartOnClick}>재시작하기</Button>
             <Button className="mr-5 mb-5" size="sm" onClick={exitOnClick}>메인페이지로 가기</Button>
           </div>
+          </motion.div>
       </div>
       ) : (
       <div>
@@ -976,6 +1105,7 @@ const ReadyToGame = () => {
             <div className="text-lg">{joinUsers.length}/6</div>
           </div>
         </div>
+
         <div className="flex flex-col">
           <div className="m-auto w-3/4 h-[384px] mt-10 pb-1 overflow-y-hidden rounded-t-2xl pl-0 flex flex-col tracking-wider bg-[#A072BC] overflow-y-scroll scrollbar-custom">
             {chatMessages.map((m, index) => (
@@ -1094,7 +1224,7 @@ const ReadyToGame = () => {
               possible ? (
                 <div className="text-[#33B3FF]">사용가능!</div>
               ) : (
-                <div className="text-[#FF0000]">이미 사용중인 닉네임입니다!</div>
+                <div className="text-[#FF0000]">사용 불가한 닉네임입니다!</div>
               )
             )
           )}
@@ -1115,7 +1245,10 @@ const ReadyToGame = () => {
                 아직 멀었다
               </Button>
             )}
+            
           </div>
+
+          <div className="mt-3 m-auto" onClick={() => {navigate(location.state?.from || "/")}}>딛자</div>
         </div>
       </ReadyToGameModal>
 
@@ -1157,6 +1290,7 @@ const ReadyToGame = () => {
         </div>
       </CaptainReatyToModal>
     </FullLayout>
+    </Wrapper>
   );
 };
 
