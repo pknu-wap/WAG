@@ -19,19 +19,19 @@ const Button = ({
 
   switch (size) {
     case "xs": {
-      combinedClassName += " w-1/5 h-10 text-base";
+      combinedClassName += " w-1/5 h-10 text-sm sm:text-base";
       break;
     }
     case "sm": {
-      combinedClassName += " w-1/5 h-12 text-base";
+      combinedClassName += " w-1/5 h-10 sm:h-12 text-sm sm:text-base";
       break;
     }
     case "md": {
-      combinedClassName += " w-1/4 h-12 text-lg";
+      combinedClassName += " w-1/5 sm:w-1/4 h-10 sm:h-12 text-base sm:text-lg";
       break;
     }
     case "lg": {
-      combinedClassName += " w-1/3 h-16 text-2xl font-black";
+      combinedClassName += " w-1/3 h-14 sm:h-16 text-lg sm:text-2xl font-black";
       break;
     }
     default: {
