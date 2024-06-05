@@ -23,7 +23,13 @@ function CreateRoom() {
   //   console.log(event.target.value);
   // };
 
+  const handlePlaySound = () => {
+    const audio = new Audio('/audio/button_click.mp3')  
+    audio.play()
+  };
+
   const createRoom = async () => {
+    handlePlaySound();
     if (await nicknamePossibleClick()=== false){
       Toast({ message: "사용 불가한 닉네임입니다!", type: "warn" });
       return;
