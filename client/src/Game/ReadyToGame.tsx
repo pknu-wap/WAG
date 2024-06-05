@@ -972,69 +972,71 @@ const ReadyToGame = () => {
             <div className="text-lg">{joinUsers.length}/6</div>
           </div>
         </div>
-
-        <div className="m-auto w-3/4 h-[426px] mt-10 overflow-y-hidden rounded-2xl pb-[42px] pl-0 flex flex-col tracking-wider bg-[#A072BC] overflow-y-scroll scrollbar-custom relative">
-          {chatMessages.map((m, index) => (
-            <ChatRoom key={index} message={m} whoseTurn={currentUserAnswer?.nickname} />
-          ))}
-
-          <div className="w-full absolute bottom-2 flex juftify-center items-end">
-            {(!gameStart && isMeCaptain) ? (
-              <IconButton size="md" className="" onClick={captainOpenModal}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                </svg>
-              </IconButton>
-            ) : (<div></div>)}
-            <input
-              className={`${isCORRECTMode && isMyTurn ? 
-                "w-full rounded-2xl text-[#000000] border-[4px] border-[#A072BC]" 
-                : "text-xs h-[42px] sm:text-base sm:h-[48px] w-full rounded-2xl text-[#000000]"}`}
-              type="text"
-              placeholder={
-                gameStart // gameStart가 true인 경우에만 조건부 렌더링
-                  ? isMyTurn
-                    ? isCORRECTMode
-                      ? "정답을 입력하세요"
-                      : "질문을 시작하세요" // isMyTurn이 true일 때
-                    : "답변을 시작하세요" // isMyTurn이 false일 때
-                  : "채팅 메시지를 입력해주세요" // gameStart가 false일 때
-              }
-              value={myChatMessages}
-              onKeyDown={(e) => {
-                if (e.nativeEvent.isComposing) return; 
-                if (e.key === "Enter" && myChatMessages.trim() !== "") {
-                  sendMessage();
-                } else if (e.key === "Enter" && myChatMessages.trim() === "") {
-                  Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
-                }
-              }}
-              onChange={(e) => {
-                setMyChatMessages(e.target.value);
-              }}
-            />
-            <IconButton
-              className="right-0 bottom-0 absolute"
-              size="sm"
-              onClick={() => {  // onClick 핸들러 수정
-                if (myChatMessages.trim() !== "") { 
-                  sendMessage();
-                } else {
-                  Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
-                }
-              }}
-              isInput={true}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none" viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="size-6 text-[#000000]">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
-              </svg>
-            </IconButton>
+        <div className="flex flex-col">
+          <div className="m-auto w-3/4 h-[384px] mt-10 pb-1 overflow-y-hidden rounded-t-2xl pl-0 flex flex-col tracking-wider bg-[#A072BC] overflow-y-scroll scrollbar-custom">
+            {chatMessages.map((m, index) => (
+              <ChatRoom key={index} message={m} whoseTurn={currentUserAnswer?.nickname} />
+            ))}
+          </div>
+            <div className="m-auto w-3/4 h-[52px] overflow-y-hidden rounded-b-2xl flex flex-col tracking-wider bg-[#A072BC] relative">
+              <div className="w-full absolute bottom-1 px-1 flex juftify-center items-end">
+                {(!gameStart && isMeCaptain) ? (
+                  <IconButton size="md" className="" onClick={captainOpenModal} isInput={true}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    </svg>
+                  </IconButton>
+                ) : (<div></div>)}
+                <input
+                  className={`${isCORRECTMode && isMyTurn ? 
+                    "w-full text-xs h-[42px] sm:text-base sm:h-[48px] rounded-2xl text-[#000000] border-[3px] border-[#FFA500]" 
+                    : "text-xs h-[42px] sm:text-base sm:h-[48px] w-full rounded-2xl text-[#000000]"}`}
+                  type="text"
+                  placeholder={
+                    gameStart // gameStart가 true인 경우에만 조건부 렌더링
+                      ? isMyTurn
+                        ? isCORRECTMode
+                          ? "정답을 입력하세요"
+                          : "질문을 시작하세요" // isMyTurn이 true일 때
+                        : "답변을 시작하세요" // isMyTurn이 false일 때
+                      : "채팅 메시지를 입력해주세요" // gameStart가 false일 때
+                  }
+                  value={myChatMessages}
+                  onKeyDown={(e) => {
+                    if (e.nativeEvent.isComposing) return; 
+                    if (e.key === "Enter" && myChatMessages.trim() !== "") {
+                      sendMessage();
+                    } else if (e.key === "Enter" && myChatMessages.trim() === "") {
+                      Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
+                    }
+                  }}
+                  onChange={(e) => {
+                    setMyChatMessages(e.target.value);
+                  }}
+                />
+                <IconButton
+                  className="right-0 bottom-0 absolute"
+                  size="sm"
+                  onClick={() => {  // onClick 핸들러 수정
+                    if (myChatMessages.trim() !== "") { 
+                      sendMessage();
+                    } else {
+                      Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
+                    }
+                  }}
+                  isInput={true}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none" viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="size-6 text-[#000000]">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+                  </svg>
+                </IconButton>
+            </div>
           </div>
         </div>
         
