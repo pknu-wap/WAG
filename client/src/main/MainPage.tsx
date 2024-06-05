@@ -71,7 +71,7 @@ function MainPage({ dark }: ComponentProps) {
   const handlePlaySound = () => {
     
     const playSound = () => {
-      const audio = new Audio('audio/button_click.m4a'); // 새로운 audio 요소 생성
+      const audio = new Audio('../audio/button_click.m4a'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
   
