@@ -1,24 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRecoilState } from "recoil";
-
 import { modalState } from "../../recoil/recoil";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { CSSProperties } from "react";
-
 
 const customModalStyles = {
   overlay: {
     backgroundColor: "rgba(0, 0, 0, 0.4)",
     width: "100%",
-    height: "100%", // 여기서 높이를 100%로 수정
+    height: "100%",
     zIndex: 10,
-    position: "fixed" as CSSProperties["position"], // 타입 명시
+    position: "fixed" as CSSProperties["position"],
     top: 0,
     left: 0,
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-  } as CSSProperties, // 전체 스타일 객체에 타입 적용
+  } as CSSProperties,
   content: {
     width: "50%",
     maxWidth: "650px",
@@ -31,7 +29,7 @@ const customModalStyles = {
     boxShadow: "2px 2px 2px rgba(0, 0, 0, 0.25)",
     backgroundColor: "#FFE5E5",
     overflow: "auto",
-  } as CSSProperties, // 전체 스타일 객체에 타입 적용
+  } as CSSProperties,
 };
 
 interface ModalProps {
@@ -40,35 +38,35 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
-  const [isOpen] = useRecoilState(modalState);
+  const baseClassName =
+    "w-1/2 max-w-lg min-w-xs h-auto min-h-[310px] max-h-[400px] z-150 rounded-lg shadow-md overflow-auto bg-light-bg dark:bg-dark-bg";
+  const [isOpen, setIsOpen] = useRecoilState(modalState);
 
-  // 모달을 닫을 때 onRequestClose 함수 호출
   const closeModal = (e: React.MouseEvent) => {
     if ((e.target as Element).id === "overlay") {
-      onRequestClose();
+      setIsOpen(false);
     }
   };
 
-  if (!isOpen) {
-    return null;
-  }
-
   return (
-
-    <div style={customModalStyles.overlay} id="overlay" onClick={closeModal}>
-      <motion.div
-        style={customModalStyles.content}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{
-          opacity: 1,
-          y: 0,
-          transition: { delay: 0.1 },
-        }}
-      >
-        <div className="p-3">{children}</div>
-      </motion.div>
-    </div>
-
+    <AnimatePresence>
+      {isOpen && (
+        <div style={customModalStyles.overlay} id="overlay" onClick={closeModal}>
+          <motion.div
+            className={baseClassName}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              transition: { delay: 0.1 },
+            }}
+            exit={{ opacity: 0, y: 20, transition: { duration: 0.1 } }} // 닫힐 때 애니메이션 추가
+          >
+            <div className="p-3">{children}</div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 };
 

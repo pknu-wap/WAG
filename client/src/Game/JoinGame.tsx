@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import FullLayout from "../components/layout/FullLayout";
 import Button from "../components/button/Button";
+import Wrapper from "../components/Wrapper";
 
 // 방장이 아닌 초대된 사람들 참가 페이지(비공개방)
 function JoinGame() {
@@ -15,6 +16,7 @@ function JoinGame() {
   }, []);
 
   return (
+    <Wrapper>
     <FullLayout>
       <div className="m-auto w-4/5 h-4/5 p-10 rounded-2xl shadow-2xl">
         <div className="text-6xl">JOIN</div>
@@ -58,6 +60,7 @@ function JoinGame() {
       </div>
 
     </FullLayout>
+    </Wrapper>
   );
 }
 

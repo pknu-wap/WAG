@@ -2,9 +2,11 @@ import React from "react";
 import ReactModal from "react-modal";
 import { useRecoilState } from "recoil";
 
-import { readyToGameModalState } from "../../recoil/recoil";
+import { loadingModalState } from "../../recoil/recoil";
 import { motion } from "framer-motion";
 import { CSSProperties } from "react";
+
+
 
 const customModalStyles = {
   overlay: {
@@ -39,17 +41,24 @@ interface ModalProps {
   onRequestClose: () => void;
 }
 
-const ReadyToGameModal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
-  const [isOpen] = useRecoilState(readyToGameModalState);
+const LoadingModal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
+  const [isOpen] = useRecoilState(loadingModalState);
 
-  const baseClassName = "w-1/2 max-w-[650px] min-w-[250px] h-auto min-h-[310px] max-h-[400px] z-150 rounded-lg shadow-md bg-light-bg dark:bg-dark-bg overflow-auto";
+  const baseClassName = "w-1/2 justify-center items-center max-w-[650px] min-w-[250px] h-auto min-h-[310px] max-h-[400px] z-150 rounded-lg shadow-md bg-light-bg dark:bg-dark-bg overflow-auto";
+  // 모달을 닫을 때 onRequestClose 함수 호출
+  const closeModal = (e: React.MouseEvent) => {
+    if ((e.target as Element).id === "overlay") {
+      onRequestClose();
+    }
+  };
 
   if (!isOpen) {
     return null;
   }
 
   return (
-    <div style={customModalStyles.overlay} id="overlay">
+
+    <div style={customModalStyles.overlay} id="overlay" onClick={closeModal}>
       <motion.div
         className={baseClassName}
         initial={{ opacity: 0, y: 20 }}
@@ -62,7 +71,8 @@ const ReadyToGameModal: React.FC<ModalProps> = ({ children, onRequestClose }) =>
         <div className="p-3">{children}</div>
       </motion.div>
     </div>
+
   );
 };
 
-export default ReadyToGameModal;
+export default LoadingModal;

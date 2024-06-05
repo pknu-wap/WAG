@@ -4,6 +4,7 @@ import { faClock, faUser } from "@fortawesome/free-regular-svg-icons";
 import { useEffect, useState } from "react";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import FullLayout from "../components/layout/FullLayout";
+import Wrapper from "../components/Wrapper";
 
 const GamePlaying = () => {
   const [count, setCount] = useState(30);
@@ -23,6 +24,7 @@ const GamePlaying = () => {
   }, [count]);
 
   return (
+    <Wrapper>
     <FullLayout>
       <div className="flex flex-row justify-between items-center mt-10 mx-7">
         <div className="flex flex-col items-center relative">
@@ -175,6 +177,7 @@ const GamePlaying = () => {
         ></input>
       </div>
     </FullLayout>
+    </Wrapper>
   );
 };
 

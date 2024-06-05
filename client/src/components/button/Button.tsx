@@ -1,4 +1,5 @@
 import { ButtonProps } from "../../types/common";
+import classNames from "classnames";
 
 const Button = ({
   type,
@@ -8,14 +9,11 @@ const Button = ({
   children,
   disabled,
 }: ButtonProps) => {
-  let combinedClassName = ""; // 이 변수에 className을 중첩시킨다.
-  if (disabled === true) {
-    combinedClassName =
-      "rounded-xl font-extrabold bg-light-btn_disabled min-w-44 shadow-xl dark:bg-light-btn_disabled";
-  } else {
-    combinedClassName =
-      "rounded-xl font-extrabold bg-light-btn min-w-44 shadow-xl hover:shadow-2xl hover:bg-light-btn_hover active:bg-light-btn dark:hover:bg-dark-btn_hover dark:active:bg-dark-btn dark:bg-dark-btn";
-  }
+  const baseClassName = "rounded-xl font-extrabold min-w-44 shadow-xl transform transition-transform duration-100";
+
+
+  const enabledClassName = "bg-light-btn hover:shadow-2xl hover:bg-light-btn_hover active:bg-light-btn dark:hover:bg-dark-btn_hover dark:active:bg-dark-btn dark:bg-dark-btn active:scale-95";
+  const disabledClassName = "bg-light-btn_disabled dark:bg-light-btn_disabled cursor-not-allowed";
 
   switch (size) {
     case "xs": {
@@ -40,10 +38,16 @@ const Button = ({
     }
   }
 
+
   return (
     <button
-      type={type ? type : "button"}
-      className={`${className} ${combinedClassName}`}
+      type={type || "button"}
+      className={classNames(
+        baseClassName,
+        disabled ? disabledClassName : enabledClassName,
+        sizeClassName[size || "md"],
+        className
+      )}
       onClick={onClick}
       disabled={disabled}
     >
