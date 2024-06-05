@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Button from "../components/button/Button";
 import FullLayout from "../components/layout/FullLayout";
 import { ConnectedProps, connect } from "react-redux";
@@ -11,6 +11,7 @@ import { faX } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Toast from "../components/toast/Toast";
+import Wrapper from "../components/Wrapper";
 type Props = {
   children?: React.ReactNode;
 };
@@ -27,7 +28,9 @@ function MainPage({ dark }: ComponentProps) {
   const [theme, setTheme] = useState(localStorage.theme);
   const [enterCode, setEnterCode] = useState<number>();
   const [, setIsOpen] = useRecoilState(modalState);
+  const [isClicked, setIsClicked] = useState(false)
   const openModal = () => {
+    handlePlaySound();
     setIsOpen(true);
   };
 
@@ -65,8 +68,15 @@ function MainPage({ dark }: ComponentProps) {
     }
   };
 
+  const handlePlaySound = () => {
+    const audio = new Audio('/audio/button_click.mp3')  
+    audio.play()
+  };
+
   //랜덤입장 버튼 클릭
   const handleRandomEnterClick = async () => {
+    handlePlaySound();
+
     const roomId = await getRandomRoomId();
     if (roomId !== "no available room") {
       localStorage.setItem("roomId", roomId);
@@ -80,6 +90,7 @@ function MainPage({ dark }: ComponentProps) {
   
   //코드입장시 버튼 클릭
   const buttonCheckHandler = async () => {
+    handlePlaySound();
     const roomId = await getRoomIdCode();
 
     if (roomId === "invalid enterCode") {
@@ -93,9 +104,32 @@ function MainPage({ dark }: ComponentProps) {
   };
 
   const handleCreateRoomClick = () => {
+    handlePlaySound();
     navigate("/CreateRoom"); // 페이지 이동 처리
   };
 
+  const audioLightRef = useRef<HTMLAudioElement>(null);
+  const audioDarkRef = useRef<HTMLAudioElement>(null);
+  
+  const handleLightLogoClick = () => {
+    
+    const playSound = () => {
+      const audio = new Audio('audio/lightmode_wag.m4a'); // 새로운 audio 요소 생성
+      audio.play(); // 소리를 재생합니다.
+    };
+  
+    playSound();
+  }
+
+  const handleDarkLogoClick = () => {
+    
+    const playSound = () => {
+      const audio = new Audio('audio/darkmode_wag.m4a'); // 새로운 audio 요소 생성
+      audio.play(); // 소리를 재생합니다.
+    };
+  
+    playSound();
+  }
   useEffect(() => {
     if (enterCode === undefined || Number.isNaN(enterCode)) {
       setDisabled(true);
@@ -113,17 +147,35 @@ function MainPage({ dark }: ComponentProps) {
   }, [dark]);
 
   return (
+    <Wrapper>
     <FullLayout>
       <div className="mt-16">
         {theme === "light" ? (
           <div className="flex justify-center items-center">
-            <img className="w-2/3" src="images/WAG_white.2.png" alt="logo light mode"></img>
+            <img className={`relative w-2/3 ${isClicked ? 'clicked' : ''}`} src="images/WAG_white.2.png" 
+              alt="logo light mode"
+              onClick={() => {
+                handleLightLogoClick();
+                setIsClicked(true); // 클릭될 때마다 isClicked 상태를 true로 설정하여 애니메이션을 발생시킵니다.
+                setTimeout(() => setIsClicked(false), 200);
+                }}>
+
+              </img>
           </div>
         ) : (
           <div className="flex justify-center items-center "> 
-            <img className="w-2/3" src="images/WAG_dark.2.png" alt="logo dark mode"></img>
+            <img className={`relative w-2/3 ${isClicked ? 'clicked' : ''}`} src="images/WAG_dark.2.png" 
+              alt="logo light mode"
+              onClick={() => {
+                handleDarkLogoClick();
+                setIsClicked(true); // 클릭될 때마다 isClicked 상태를 true로 설정하여 애니메이션을 발생시킵니다.
+                setTimeout(() => setIsClicked(false), 200);
+                }}>
+
+              </img>
           </div>
         )}
+        
         <div className="flex flex-col items-center justify-center space-y-5 mt-4">
           <Button size="lg" onClick={handleRandomEnterClick}>
             랜덤 입장
@@ -138,12 +190,10 @@ function MainPage({ dark }: ComponentProps) {
       </div>
 
       <Modal onRequestClose={closeModal}>
-        <div className="flex flex-col justify-between">
+        <div className="relative z-10 flex flex-col justify-between">
           <div className="my-5 flex flex-row justify-between items-center">
             <div className="text-4xl">JOIN</div>
-            <button onClick={closeModal}>
-              <FontAwesomeIcon icon={faX} />
-            </button>
+            
           </div>
           <div className="text-lg">입장코드 형식 : 랜덤 숫자 4자리</div>
           <br />
@@ -184,6 +234,7 @@ function MainPage({ dark }: ComponentProps) {
         </div>
       </Modal>
     </FullLayout>
+    </Wrapper>
   );
 }
 
