@@ -32,6 +32,7 @@ public class Room {
     private int cycle;
     private int currentOrder;
     private int correctMemberCnt;
+    private int leftCorrectMember;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RoomUser> roomUsers;

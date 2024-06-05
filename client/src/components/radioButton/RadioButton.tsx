@@ -15,7 +15,7 @@ const RadioButton = ({
   onChange,
   checked,
 }: RadioButtonProps) => (
-  <div className="flex items-center ps-4 border border-gray-200 rounded shadow-sm">
+  <div className="z-50 flex items-center ps-4 border border-gray-200 rounded shadow-sm">
     <input
       id={id}
       type="radio"

@@ -70,6 +70,7 @@ public class ChatService {
         room.setCycle(1);
         room.setCurrentOrder(1);
         room.setCorrectMemberCnt(0);
+        room.setLeftCorrectMember(0);
     }
 
     public ChatGameMessage penaltyUser(ChatMessage chatMessage){
@@ -191,6 +192,7 @@ public class ChatService {
             Room newRoom = roomRepository.findById(chatMessage.getRoomId())
                     .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
             newRoom.setCorrectMemberCnt(newRoom.getCorrectMemberCnt()+1);
+            newRoom.setLeftCorrectMember(newRoom.getLeftCorrectMember()+1);
             gameOrder.setRanking(newRoom.getCorrectMemberCnt());
             gameOrderRepository.save(gameOrder);
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { useRecoilState } from "recoil";
-import { captainReadyToGameModalState } from "../../recoil/recoil";
+import { rulesModalState } from "../../recoil/recoil";
 import { motion, AnimatePresence } from "framer-motion";
 import { CSSProperties } from "react";
 
@@ -37,8 +37,8 @@ interface ModalProps {
   onRequestClose: () => void;
 }
 
-const CaptainReadyToModal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
-  const [isOpen, setIsOpen] = useRecoilState(captainReadyToGameModalState);
+const RulesModal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
+  const [isOpen, setIsOpen] = useRecoilState(rulesModalState);
 
   const baseClassName = "w-1/2 max-w-[650px] min-w-[250px] h-auto min-h-[310px] max-h-[400px] z-150 rounded-lg shadow-md bg-light-bg dark:bg-dark-bg overflow-auto";
 
@@ -73,4 +73,4 @@ const CaptainReadyToModal: React.FC<ModalProps> = ({ children, onRequestClose })
   );
 };
 
-export default CaptainReadyToModal;
+export default RulesModal;

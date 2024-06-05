@@ -126,11 +126,11 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
           disabled={gameStart && myName !== Nickname && userRank === 0 ? false : true}
           >
             {gameStart ? (
-              <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-14 absolute">
+              <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center sm:bottom-14 bottom-10 absolute">
                 {answer}
               </div>
             ) : !gameStart && isCaptain ? ( // 대기방에서 방장 왕관
-              <FontAwesomeIcon className="text-[#FFFF00] bottom-14 absolute" icon={faCrown} />
+              <FontAwesomeIcon className="text-[#FFFF00] sm:bottom-14 bottom-10 absolute" icon={faCrown} />
             ) : (
               <div></div>
             )}
@@ -153,11 +153,11 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
             disabled={gameStart && myName !== Nickname && userRank === 0 ? false : true}
             >
               {gameStart ? (
-                <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center bottom-14 absolute">
+                <div className="w-20 h-6 rounded-md sm:text-xs text-[10px] bg-[#C55959] shadow-xl flex justify-center items-center sm:bottom-14 bottom-10 absolute">
                   {answer}
                 </div>
               ) : !gameStart && isCaptain ? ( // 대기방에서 방장 왕관
-                <FontAwesomeIcon className="text-[#FFFF00] bottom-14 absolute z-50" icon={faCrown} />
+                <FontAwesomeIcon className="text-[#FFFF00] sm:bottom-14 bottom-10 absolute z-50" icon={faCrown} />
               ) : (
                 <div></div>
               )}
@@ -165,7 +165,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
             </IconButton>
           </PopoverComponent>
         )}
-        <div className="mt-2">{Nickname}</div>
+        <div className="text-xs sm:text-sm lg:text-base text-base mt-2">{Nickname}</div>
         {penaltyCount === 0 ? (
           <div></div>
         ) : penaltyCount === 1 ? (
@@ -179,15 +179,15 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
           <div className="w-3 h-5 rounded absolute top-12 left-12 border-[1px] border-[#000000] bg-[#FF0000]"></div>
         )}
         {userRank === 1 ? (
-          <div className="w-12 h-12 rounded absolute top-11 left-11 z-10">
+          <div className="sm:w-12 w-10 sm:h-12 h-10 rounded absolute top-8 sm:left-11 left-8 z-10">
             <img className="z-10" src="/images/1st.png" alt="1st"></img>
           </div>
         ) : userRank === 2 ? (
-          <div className="w-12 h-12 rounded absolute top-11 left-11 z-10">
+          <div className="sm:w-12 w-10 sm:h-12 h-10 rounded absolute top-8 sm:left-11 left-8 z-10">
             <img className="z-10" src="/images/2nd.png" alt="2nd"></img>
           </div>
         ) : userRank === 3 ? (
-          <div className="w-12 h-12 rounded absolute top-11 left-11 z-10">
+          <div className="sm:w-12 w-10 sm:h-12 h-10 rounded absolute top-8 sm:left-11 left-8 z-10">
             <img className="z-10" src="/images/3rd.png" alt="3rd"></img>
           </div>
         ) : (
