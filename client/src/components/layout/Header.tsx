@@ -58,7 +58,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
   function isChrome() {
     const userAgent = window.navigator.userAgent;
     console.log(userAgent)
-    return userAgent.includes('Chrome');
+    return userAgent.includes('Chrome') || userAgent.includes('Safari');
   }
   
   
