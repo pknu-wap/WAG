@@ -196,49 +196,49 @@ const ReadyToGame = () => {
 
 
   const handlePlaySound = () => {
-    const audio = new Audio('/audio/button_click.mp3')  
+    const audio = new Audio('audio/button_click.mp3')  
     audio.play()
   };
 
   const handleCorrectSound = () => {
-    const audio = new Audio('/audio/correct_answer2.mp3')  
+    const audio = new Audio('audio/correct_answer2.mp3')  
     audio.play()
   };
 
   const handleWrongSound = () => {
-    const audio = new Audio('/audio/blip03.mp3')  
+    const audio = new Audio('audio/blip03.mp3')  
     audio.play()
   };
 
   const handleQuestionSound = () => {
-    const audio = new Audio('/audio/question.mp3')  
+    const audio = new Audio('audio/question.mp3')  
     audio.play()
   };
 
   const handlePartySound = () => {
-    const audio = new Audio('/audio/yay.mp3')  
-    const audioFire = new Audio('/audio/fireworkblast.mp3')  
+    const audio = new Audio('audio/yay.mp3')  
+    const audioFire = new Audio('audio/fireworkblast.mp3')  
     audio.play()
     audioFire.play()
   };
 
   const handleBooSound = () => {
-    const audio = new Audio('/audio/fail.mp3')  
+    const audio = new Audio('audio/fail.mp3')  
     audio.play()
   }
 
   const handleStartSound = () => {
-    const audio = new Audio('/audio/start.mp3')  
+    const audio = new Audio('audio/start.mp3')  
     audio.play()
   }
 
   const handleGameStartSound = () => {
-    const audio = new Audio('/audio/startGame.mp3')  
+    const audio = new Audio('audio/startGame.mp3')  
     audio.play()
   }
   
   const handleWarningSound = () => {
-    const audio = new Audio('/audio/warning.mp3')  
+    const audio = new Audio('audio/warning.mp3')  
     audio.play()
   }
 

@@ -69,7 +69,7 @@ function MainPage({ dark }: ComponentProps) {
   };
 
   const handlePlaySound = () => {
-    const audio = new Audio('/audio/button_click.mp3')  
+    const audio = new Audio('audio/button_click.mp3')  
     audio.play()
   };
 
