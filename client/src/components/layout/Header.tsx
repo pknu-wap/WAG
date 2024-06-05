@@ -18,7 +18,7 @@ type ComponentProps = Props & PropsFromRedux;
 const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
 
   const [play, setPlay] = useState(false)
-  const [audio, setAudio] = useState<HTMLAudioElement>(new Audio('audio/main_theme.mp3'))
+  const [audio, setAudio] = useState<HTMLAudioElement>(new Audio('audio/main_theme.m4a'))
   
   useEffect(() => {
     if (dark) {
@@ -31,7 +31,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
     const handlePlayMusic = () => {
       // if (!audio) {
       //   console.log(audio)
-      //   setAudio(new Audio('audio/mainpage_theme.mp3')) // 음악 파일 경로를 넣어주세요
+      //   setAudio(new Audio('audio/mainpage_theme.m4a')) // 음악 파일 경로를 넣어주세요
       //   audio.loop = true; // 음악을 반복 재생하고 싶다면 설정
       // }
     
