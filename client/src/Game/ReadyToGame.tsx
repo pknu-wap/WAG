@@ -1107,7 +1107,7 @@ const ReadyToGame = () => {
         </div>
 
         <div className="flex flex-col">
-          <div className="relative m-auto w-3/4 sm:h-[384px] h-[350px] sm:mt-10 mt-5 pb-1 overflow-y-hidden rounded-t-2xl pl-0 flex flex-col tracking-wider bg-[#A072BC] overflow-y-scroll scrollbar-custom">
+          <div className="relative m-auto w-3/4 sm:h-[384px] h-[320px] sm:mt-10 mt-5 pb-1 overflow-y-hidden rounded-t-2xl pl-0 flex flex-col tracking-wider bg-[#A072BC] overflow-y-scroll scrollbar-custom">
             {chatMessages.map((m, index) => (
               <ChatRoom key={index} message={m} whoseTurn={currentUserAnswer?.nickname} />
             ))}
