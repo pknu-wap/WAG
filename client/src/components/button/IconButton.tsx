@@ -15,15 +15,15 @@ const IconButton = ({
 
   switch (size) {
     case "sm": {
-      combinedClassName += " w-12 h-12 rounded-full text-base";
+      combinedClassName += " sm:w-12 sm:h-12 sm:text-base w-10 h-10 text-[13px] rounded-full";
       break;
     }
     case "md": {
-      combinedClassName += " w-14 h-14 rounded-full text-lg";
+      combinedClassName += " sm:w-14 sm:h-14 sm:text-base w-12 h-12 text-sm rounded-full";
       break;
     }
     case "lg": {
-      combinedClassName += " w-16 h-16 rounded-full text-2xl font-black";
+      combinedClassName += " lg:w-16 lg:h-16 lg:text-xl sm:w-14 sm:h-14 sm:text-lg w-12 h-12 text-base rounded-full font-black";
       break;
     }
     default: {
