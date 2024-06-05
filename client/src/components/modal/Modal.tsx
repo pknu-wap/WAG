@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useRecoilState } from "recoil";
 import { modalState } from "../../recoil/recoil";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,9 +18,9 @@ const customModalStyles = {
     alignItems: "center",
   } as CSSProperties,
   content: {
-    width: "50%",
-    maxWidth: "650px",
-    minWidth: "250px",
+    width: "70%",
+    maxWidth: "550px",
+    minWidth: "450px",
     height: "auto",
     minHeight: "310px",
     maxHeight: "400px",
@@ -39,7 +39,7 @@ interface ModalProps {
 
 const Modal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
   const baseClassName =
-    "w-1/2 max-w-lg min-w-xs h-auto min-h-[310px] max-h-[400px] z-150 rounded-lg shadow-md overflow-auto bg-light-bg dark:bg-dark-bg";
+    "w-5/6 max-w-lg min-w-xs h-auto min-h-[310px] max-h-[400px] z-150 rounded-lg shadow-md overflow-auto bg-light-bg dark:bg-dark-bg";
   const [isOpen, setIsOpen] = useRecoilState(modalState);
 
   const closeModal = (e: React.MouseEvent) => {

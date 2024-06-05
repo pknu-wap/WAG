@@ -1,5 +1,4 @@
 import React from "react";
-import ReactModal from "react-modal";
 import { useRecoilState } from "recoil";
 
 import { loadingModalState } from "../../recoil/recoil";
@@ -23,7 +22,7 @@ const customModalStyles = {
   } as CSSProperties, // 전체 스타일 객체에 타입 적용
   content: {
     width: "50%",
-    maxWidth: "650px",
+    maxWidth: "550px",
     minWidth: "250px",
     height: "auto",
     minHeight: "310px",
