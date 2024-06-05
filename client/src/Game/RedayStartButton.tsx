@@ -5,7 +5,7 @@ import { ReadyStartButtonProps } from "../types/common";
 
   function ReadyStartButton({ myState, handleStart, handleReady, allReady}: ReadyStartButtonProps) {
   return (
-    <div>
+    <div className=''>
       {myState?.isHost ? (
         <Button
             size='md'

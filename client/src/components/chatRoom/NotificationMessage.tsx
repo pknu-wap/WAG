@@ -4,7 +4,7 @@
  const NotificationMessage: React.FC<{ message: ChatMessage }> = ({ message }) => {
  return (
      <>
-     <span className="text-white">{message.content}</span>
+     <span className="text-base text-white">{message.content}</span>
      </>
  );
  };

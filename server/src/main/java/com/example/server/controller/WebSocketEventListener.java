@@ -75,7 +75,12 @@ public class WebSocketEventListener {
             }
 
             if(room.isGameStatus()){  // 만약 게임 중이라면 해당 유저 게임 진행 정보 삭제
-                if(room.getUserCount() == 2){  // 나간 후에 사람이 한명이라면 게임 종료
+                GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
+                        .orElseThrow(NoSuchGameOrderException::new);
+                if(gameOrder.getRanking() != 0){
+                    room.setLeftCorrectMember(room.getLeftCorrectMember()-1);
+                }
+                if(room.getUserCount() - room.getLeftCorrectMember() <= 2){  // 나간 후에 사람이 한명이라면 게임 종료
 
                     ChatGameMessage chatGameMessage;
                     // ChatMessage 생성
@@ -85,9 +90,6 @@ public class WebSocketEventListener {
                     chatMessage.setMessageType(ChatMessage.MessageType.END);
                     chatMessage.setSender(roomUser.getRoomNickname());
 
-                    //
-                    GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
-                            .orElseThrow(NoSuchGameOrderException::new);
                     gameOrderRepository.delete(gameOrder);
                     roomUserRepository.delete(roomUser);
 
@@ -95,12 +97,23 @@ public class WebSocketEventListener {
                     room.setGameStatus(false);
                     roomRepository.save(room);
 
-                    // 나간사람의 방장 여부와 관계없이 마지막 남은 인원을 방장으로 다시 설정
-                    RoomUser nextCaption = roomUserRepository.findLastOne(roomId)
+//                    if(room.getUserCount() <= 1){
+//                        //혼자 남았을 경우 나간사람의 방장 여부와 관계없이 마지막 남은 인원을 방장으로 다시 설정
+//                        RoomUser nextCaption = roomUserRepository.findLastOne(roomId)
+//                                .orElseThrow(() -> new NoSuchRoomUserException(roomId));
+//                        nextCaption.setCaptain(true);
+//                        nextCaption.setReady(true);
+//                        roomUserRepository.save(nextCaption);
+//                    }
+//                    else {
+                    if(roomUser.isCaptain()){   // 나간 사람이 방장이라면 방장 위임
+                        RoomUser nextCaption = roomUserRepository.findNextCaptinByRandom(roomId)
                                 .orElseThrow(() -> new NoSuchRoomUserException(roomId));
-                    nextCaption.setCaptain(true);
-                    nextCaption.setReady(true);
-                    roomUserRepository.save(nextCaption);
+                        nextCaption.setCaptain(true);
+                        nextCaption.setReady(true);
+                        roomUserRepository.save(nextCaption);
+                    }
+
 
                     // END ChatGameMessage 전송
                     chatGameMessage = chatService.makeChatGameMessage(chatMessage,room);
