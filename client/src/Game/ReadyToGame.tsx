@@ -876,9 +876,9 @@ const ReadyToGame = () => {
           >
             <div className="flex flex-col items-center justify-center">
               {myRank !== 0 ? (
-                <h1 className="text-[#ffffff] pt-0 text-3xl font-bold">{myRank}등</h1>
+                <h1 className="text-[#ffffff] pt-0 sm:text-3xl text-2xl font-bold">{myRank}등</h1>
               ) : (
-                <h1 className="text-[#ffffff] pt-0 text-3xl font-bold">순위권에 들지 못했습니다</h1>
+                <h1 className="text-[#ffffff] pt-0 sm:text-3xl text-2xl font-bold">순위권에 들지 못했습니다</h1>
               )}
               <p className="text-[#ffffff] text-xl">{myName}</p>
             </div>
