@@ -19,7 +19,7 @@ const customModalStyles = {
   } as CSSProperties,
   content: {
     width: "50%",
-    maxWidth: "650px",
+    maxWidth: "550px",
     minWidth: "250px",
     height: "auto",
     minHeight: "310px",
@@ -40,7 +40,7 @@ interface ModalProps {
 const RulesModal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
   const [isOpen, setIsOpen] = useRecoilState(rulesModalState);
 
-  const baseClassName = "w-1/2 max-w-[650px] min-w-[250px] h-auto min-h-[310px] max-h-[400px] z-150 rounded-lg shadow-md bg-light-bg dark:bg-dark-bg overflow-auto";
+  const baseClassName = "w-5/6 max-w-[650px] min-w-[250px] h-auto min-h-[310px] max-h-[400px] z-150 rounded-lg shadow-md bg-light-bg dark:bg-dark-bg overflow-auto";
 
   const closeModal = (e: React.MouseEvent) => {
     if ((e.target as Element).id === "overlay") {

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import Button from "../components/button/Button";
 import FullLayout from "../components/layout/FullLayout";
 import { ConnectedProps, connect } from "react-redux";
@@ -6,8 +6,6 @@ import { RootState } from "../modules";
 import { useRecoilState } from "recoil";
 import { modalState } from "../recoil/recoil";
 import Modal from "../components/modal/Modal";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faX } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Toast from "../components/toast/Toast";
@@ -112,9 +110,6 @@ function MainPage({ dark }: ComponentProps) {
     handlePlaySound();
     navigate("/CreateRoom"); // 페이지 이동 처리
   };
-
-  const audioLightRef = useRef<HTMLAudioElement>(null);
-  const audioDarkRef = useRef<HTMLAudioElement>(null);
   
   const handleLightLogoClick = () => {
     
@@ -155,7 +150,7 @@ function MainPage({ dark }: ComponentProps) {
   return (
     <Wrapper>
     <FullLayout>
-      <div className="mt-16">
+      <div className="sm:mt-0 mt-20">
         {theme === "light" ? (
           <div className="flex justify-center items-center">
             <img className={`relative w-2/3 ${isClicked ? 'clicked' : ''}`} src="images/WAG_white.2.png" 
@@ -182,7 +177,7 @@ function MainPage({ dark }: ComponentProps) {
           </div>
         )}
         
-        <div className="flex flex-col items-center justify-center space-y-5 mt-4">
+        <div className="flex flex-col items-center justify-center space-y-5 mt-0">
           <Button size="lg" onClick={handleRandomEnterClick}>
             랜덤 입장
           </Button>

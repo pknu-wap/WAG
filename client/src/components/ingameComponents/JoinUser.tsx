@@ -126,7 +126,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
           disabled={gameStart && myName !== Nickname && userRank === 0 ? false : true}
           >
             {gameStart ? (
-              <div className="w-20 h-6 rounded-md text-xs bg-[#C55959] shadow-xl flex justify-center items-center sm:bottom-14 bottom-10 absolute">
+              <div className="w-20 h-6 rounded-md sm:text-lg text-[13px] text-[#FFA500] bg-[none] flex justify-center items-center sm:bottom-16 bottom-14 absolute">
                 {answer}
               </div>
             ) : !gameStart && isCaptain ? ( // 대기방에서 방장 왕관
@@ -153,7 +153,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
             disabled={gameStart && myName !== Nickname && userRank === 0 ? false : true}
             >
               {gameStart ? (
-                <div className="w-20 h-6 rounded-md sm:text-xs text-[10px] bg-[#C55959] shadow-xl flex justify-center items-center sm:bottom-14 bottom-10 absolute">
+                <div className="w-20 h-6 rounded-md sm:text-lg text-[13px] bg-[none] flex justify-center items-center sm:bottom-16 bottom-14 absolute">
                   {answer}
                 </div>
               ) : !gameStart && isCaptain ? ( // 대기방에서 방장 왕관
@@ -169,25 +169,25 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
         {penaltyCount === 0 ? (
           <div></div>
         ) : penaltyCount === 1 ? (
-          <div className="w-3 h-5 rounded absolute top-12 left-12 border-[1px] border-[#000000] bg-[#FFFF00]"></div>
+          <div className="w-3 h-5 rounded absolute sm:top-12 sm:left-12 top-10 left-10 border-[0.1px] border-[#454141] bg-[#FFFF00]"></div>
         ) : penaltyCount === 2 ? (
-          <div className="absolute top-12 left-12 flex flex-column">
-            <div className="w-3 h-5 rounded border-[1px] border-[#000000] rotate-[160deg] bg-[#FFFF00] relative"></div>
-            <div className="w-3 h-5 rounded border-[1px] border-[#000000] rotate-[20deg] bg-[#FFFF00] left-[8px] top-[1px] absolute"></div>
+          <div className="absolute sm:top-12 sm:left-12 top-10 left-10 flex flex-column">
+            <div className="w-3 h-5 rounded border-[0.1px] border-[#454141] rotate-[160deg] bg-[#FFFF00] relative"></div>
+            <div className="w-3 h-5 rounded border-[0.1px] border-[#454141] rotate-[20deg] bg-[#FFFF00] left-[8px] top-[1px] absolute"></div>
           </div>
         ) : (
-          <div className="w-3 h-5 rounded absolute top-12 left-12 border-[1px] border-[#000000] bg-[#FF0000]"></div>
+          <div className="w-3 h-5 rounded absolute sm:top-12 sm:left-12 top-10 left-10 border-[0.1px] border-[#454141] bg-[#FF0000]"></div>
         )}
         {userRank === 1 ? (
-          <div className="sm:w-12 w-10 sm:h-12 h-10 rounded absolute top-8 sm:left-11 left-8 z-10">
+          <div className="sm:w-12 w-10 sm:h-12 h-10 rounded absolute top-8 sm:left-11 left-7 z-10">
             <img className="z-10" src="/images/1st.png" alt="1st"></img>
           </div>
         ) : userRank === 2 ? (
-          <div className="sm:w-12 w-10 sm:h-12 h-10 rounded absolute top-8 sm:left-11 left-8 z-10">
+          <div className="sm:w-12 w-10 sm:h-12 h-10 rounded absolute top-8 sm:left-11 left-7 z-10">
             <img className="z-10" src="/images/2nd.png" alt="2nd"></img>
           </div>
         ) : userRank === 3 ? (
-          <div className="sm:w-12 w-10 sm:h-12 h-10 rounded absolute top-8 sm:left-11 left-8 z-10">
+          <div className="sm:w-12 w-10 sm:h-12 h-10 rounded absolute top-8 sm:left-11 left-7 z-10">
             <img className="z-10" src="/images/3rd.png" alt="3rd"></img>
           </div>
         ) : (
