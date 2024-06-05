@@ -1,5 +1,4 @@
 import React from "react";
-import ReactModal from "react-modal";
 import { useRecoilState } from "recoil";
 
 import { readyToGameModalState } from "../../recoil/recoil";
@@ -21,7 +20,7 @@ const customModalStyles = {
   } as CSSProperties, // 전체 스타일 객체에 타입 적용
   content: {
     width: "50%",
-    maxWidth: "650px",
+    maxWidth: "550px",
     minWidth: "250px",
     height: "auto",
     minHeight: "310px",
@@ -42,7 +41,7 @@ interface ModalProps {
 const ReadyToGameModal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
   const [isOpen] = useRecoilState(readyToGameModalState);
 
-  const baseClassName = "w-1/2 max-w-[650px] min-w-[250px] h-auto min-h-[310px] max-h-[400px] z-150 rounded-lg shadow-md bg-light-bg dark:bg-dark-bg overflow-auto";
+  const baseClassName = "w-5/6 max-w-[650px] min-w-[250px] h-auto min-h-[310px] max-h-[400px] z-150 rounded-lg shadow-md bg-light-bg dark:bg-dark-bg overflow-auto";
 
   if (!isOpen) {
     return null;

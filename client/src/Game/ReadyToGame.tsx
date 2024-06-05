@@ -22,7 +22,6 @@ import {
   URL,
   UserAnswerDto,
   AnswerUserDto,
-  ReadyUserDto,
 } from "../types/dto";
 import { Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
@@ -119,7 +118,7 @@ const ReadyToGame = () => {
   const currentAnswerRef = useRef<any>(null); 
   const [currentUserAnswer, setCurrentUserAnswer] = useState<AnswerUserDto>(); //다음 유저의 정보를 바탕으로 정답어 받아놓기
 
-  const [isLocationLoading, setIsLocationLoading] = useState<boolean>(false);
+  const [, setIsLocationLoading] = useState<boolean>(false);
 
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
   useEffect(() => {
@@ -1071,43 +1070,44 @@ const ReadyToGame = () => {
           <Timer time={time} />
         </div>)
         }
-        <div className="m-auto mt-8 flex justify-center items-center relative">
+        <div className="m-auto sm:mt-8 mt-4 flex justify-center items-center relative">
           {!gameStart &&(
-            <div className="mr-5">
+            <div className="sm:mr-5 mr-3">
               <div className="text-base">입장코드</div>
               <div className="text-xl">{enterCode}</div>
             </div>
           )}
           {gameStart &&(
-            <div className="mr-5">
-              <div className="text-base">현재 라운드</div>
-              <div className="text-xl">{currentCycle}</div>
+            <div className="sm:mr-5 mr-3">
+              <div className="sm:text-base text-sm">현재</div>
+              <div className="sm:text-base text-sm">라운드</div>
+              <div className="sm:text-xl text-lg">{currentCycle}</div>
             </div>
           )}
-          <div className="w-1/2 h-16 shadow-lg text-[#353535] flex justify-center items-center rounded-lg bg-[#FFCCFF] shadow-xl">
+          <div className="w-7/12 h-16 shadow-lg text-[#353535] flex justify-center items-center rounded-lg bg-[#FFCCFF] shadow-xl">
             {countdown !== null ? ( // 카운트다운 중일 때
               <div className="text-xl font-semibold">{countdown}</div>
             ) : gameStart ? ( // 게임 시작 후
-              <div className="text-xl font-semibold">
-                현재 질문자 : <span className="text-[#5b33de]"> {currentUserAnswer?.nickname}</span>
+              <div className="font-semibold">
+                현재 질문자 : <span className="sm:text-xl text-base text-[#5b33de]"> {currentUserAnswer?.nickname}</span>
                 <br />
-                정답어 : <span className="text-[#c93290]"> {currentUserAnswer?.answer}</span>
+                정답어 : <span className="sm:text-xl text-base text-[#c93290]"> {currentUserAnswer?.answer}</span>
               </div>
             ) : ( // 게임 시작 전
               <div>
-                <div className="sm:text-xl text-lg font-semibold">게임 대기 중</div>
-                <div className="sm:text-xl text-lg font-semibold">카테고리 : {category}</div>
+                <div className="sm:text-xl text-base font-semibold">게임 대기 중</div>
+                <div className="sm:text-xl text-base font-semibold">카테고리 : {category}</div>
               </div>
             )}
           </div>
-          <div className="ml-5 text-base">
+          <div className="sm:ml-5 ml-3 sm:text-base text-sm">
             방 인원
-            <div className="text-lg">{joinUsers.length}/6</div>
+            <div className="sm:text-lg text-base">{joinUsers.length}/6</div>
           </div>
         </div>
 
         <div className="flex flex-col">
-          <div className="m-auto w-3/4 h-[384px] mt-10 pb-1 overflow-y-hidden rounded-t-2xl pl-0 flex flex-col tracking-wider bg-[#A072BC] overflow-y-scroll scrollbar-custom">
+          <div className="relative m-auto w-3/4 sm:h-[384px] h-[350px] sm:mt-10 mt-5 pb-1 overflow-y-hidden rounded-t-2xl pl-0 flex flex-col tracking-wider bg-[#A072BC] overflow-y-scroll scrollbar-custom">
             {chatMessages.map((m, index) => (
               <ChatRoom key={index} message={m} whoseTurn={currentUserAnswer?.nickname} />
             ))}
