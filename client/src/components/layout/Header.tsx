@@ -18,7 +18,7 @@ type ComponentProps = Props & PropsFromRedux;
 const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
 
   const [play, setPlay] = useState(false)
-  const [audio, setAudio] = useState<HTMLAudioElement>(new Audio('https://rr4---sn-3pm7kn7z.googlevideo.com/videoplayback?expire=1717540312&ei=eEFfZtXtF9Wji9oPs-GI2AY&ip=167.172.167.118&id=o-AHVgWoaXyY9iaQ75Vp1K7aHPEEzY_KdS65jz2Hfc5Y2f&itag=140&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&bui=AbKP-1M2I5U67Nd5vBVMwIfoUNYp4zoEGbf5mVfNxiuicQa0C9iYGjJ-YyqgrGXQpNLlVqJ-vGxxX1nG&spc=UWF9fzanhA98WDH-8H2AeiG5IY80dBfmSCQkRgDNme5nnJffdNQaHkAMzw&vprv=1&svpuc=1&mime=audio%2Fmp4&ns=TpfUfSBOrS3DVkIWOtjImD8Q&rqh=1&gir=yes&clen=607427681&dur=37532.825&lmt=1687252088977279&keepalive=yes&c=MWEB&sefc=1&txp=5532434&n=zonIiOEal32zAA&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Cgir%2Cclen%2Cdur%2Clmt&sig=AJfQdSswRQIgNewMUe4kMdG9YN8rzt7tT_R7iZaKhJ1tJVlvZZeyO4YCIQCBbv1aoan3w8QMJuPmejWwCyX3SYD6KxnDU0Qx07IGWw%3D%3D&title=Playlist+%7C+%EC%8B%9C%EC%9B%90%ED%95%9C+%EB%B3%B4%EC%82%AC%EB%85%B8%EB%B0%94+%EC%9E%AC%EC%A6%88%EC%97%90+%ED%92%8D%EB%8D%A9%F0%9F%8C%8A+%7C+Summer+Bossa+Nova+Jazz&redirect_counter=1&rm=sn-4g5e6l7z&fexp=24350458,24350467,24350477&req_id=a056172f6809a3ee&cms_redirect=yes&cmsv=e&ipbypass=yes&mh=CC&mip=222.96.226.78&mm=31&mn=sn-3pm7kn7z&ms=au&mt=1717517541&mv=u&mvi=4&pl=13&lsparams=ipbypass,mh,mip,mm,mn,ms,mv,mvi,pl&lsig=AHlkHjAwRgIhAKyKCFSOwpH1hgyp5ks1a7jRcq3GLfO4zh3USxBm3wZcAiEArVDE7ub2HzpWaDg_SFnzd9MdKPeBltvbMU_YWunA5Eo%3D'))
+  const [audio, setAudio] = useState<HTMLAudioElement>(new Audio('/audio/jazz_theme.mp3'))
   
   useEffect(() => {
     if (dark) {
