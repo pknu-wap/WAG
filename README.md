@@ -2,10 +2,12 @@
 
 
 # WAG - Web Appends Game
-![WAG-introduce](https://github.com/oesnuj/oesnuj/assets/112786665/982af141-19fe-4a37-8673-41ece7e3959b)
+![WAG_preview_image](https://github.com/pknu-wap/WAG/assets/112786665/64917f27-dc03-4d61-bd95-e5740b0c8dab)
 <br>
 <br>
 <br>
+
+
 
 ## 🎨 Introduction  
 
