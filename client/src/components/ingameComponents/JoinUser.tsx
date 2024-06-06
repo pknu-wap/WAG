@@ -41,6 +41,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
         window.removeEventListener("resize", handleResize);
       }
     },[])
+    
     const getGameAnswer = async () => {
       try {
         const response = await axios.get<IGetAnswerList>(
@@ -110,6 +111,9 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
      gameUserDto.forEach((dto) => {
       if (Nickname === dto.roomNickname) {
         setUserRank(dto.ranking)
+        if (1<= dto.ranking && dto.ranking <=3){
+          setPenaltyCount(0)
+        }
       }
      }) 
     }
@@ -172,6 +176,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
             disabled={gameStart && myName !== Nickname && userRank === 0 ? false : true}
             >
               {gameStart ? (
+                <>
                 {width > 650 ? (
                   <div className="w-20 h-6 rounded-md sm:text-lg text-[13px] text-[#FFA500] bg-[none] flex justify-center items-center sm:bottom-16 bottom-14 absolute z-50 ">
                   {answer}
