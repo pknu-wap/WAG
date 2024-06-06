@@ -6,6 +6,7 @@ import 'react-dropdown/style.css';
 const options = {
   gameCategories: [
     { value: '전체', label: '전체' },
+    { value: 'WAP 임원진', label: "WAP 임원진"},
     { value: 'lol', label: 'lol' },
     { value: '한국위인', label: '한국위인' },
     { value: '유명인', label: '유명인' },
