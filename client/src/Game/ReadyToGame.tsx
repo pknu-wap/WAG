@@ -1035,10 +1035,9 @@ const ReadyToGame = () => {
   );
 
   useEffect(() => {
-    // Assuming currentUserIndex needs to be set based on some logic or API response.
-    // Example:
-    const initialIndex = joinUsers.findIndex(user => user.roomNickname  === localStorage.getItem("nickName"));
-    setCurrentUserIndex(initialIndex !== -1 ? initialIndex : 1);
+      const initialIndex = joinUsers.findIndex(user => user.roomNickname  === localStorage.getItem("nickName"));
+      setCurrentUserIndex(initialIndex !== -1 ? initialIndex : 1);
+    
   }, [joinUsers]);
 
   const settings = {
@@ -1088,11 +1087,7 @@ const ReadyToGame = () => {
           </div>
         </motion.div>
     
-        <motion.div
-      className="box"
-      animate={{ y: 100 }}
-      transition={{ type: "spring" }}
-    >
+    
           {/* List of players */}
           <div style={{height: `${size/3}px`}}></div>
           <div className="m-auto w-3/4">
@@ -1111,7 +1106,8 @@ const ReadyToGame = () => {
             <Button className="mr-5 mb-5" size="sm" onClick={restartOnClick}>재시작하기</Button>
             <Button className="mr-5 mb-5" size="sm" onClick={exitOnClick}>메인페이지로 가기</Button>
           </div>
-          </motion.div>
+          
+
       </div>
       ) : (
       <div>
@@ -1144,7 +1140,7 @@ const ReadyToGame = () => {
             </>
           ) : (
             
-            <div className="w-1/2 h-1/2 mt-10 mb-5 mx-7">
+            <div className="w-1/2 h-1/2 mt-20 mb-5 mx-7">
   <Slider  ref={sliderRef} {...settings} initialSlide={currentUserIndex}>
     {joinUsers.map((info, index) => (
       
@@ -1292,16 +1288,34 @@ const ReadyToGame = () => {
         </div>
         
         {countdown === null && !gameStart && (
-        <div className="m-auto max-w-[700px] grid grid-cols-1 sm:grid-cols-2 mt-5">
-          <div className="mr-5 mb-5"><Button size="md" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>
-          <div className="mr-5 mb-5">
-            <ReadyStartButton
-              myState={myState}
-              allReady={allReady} // 모든 유저 준비 상태 확인
-              handleStart={clickGameStart}
-              handleReady={ClickReady}
-            />
-          </div>
+          <div className="m-auto max-w-[700px] grid grid-cols-1 sm:grid-cols-2 mt-5">
+        
+          {width > 650 ? (
+            <>
+              <div className= "mr-5 mb-5"><Button size="md" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>  
+              <div className="mr-5 mb-5">
+              <ReadyStartButton
+                myState={myState}
+                allReady={allReady} // 모든 유저 준비 상태 확인
+                handleStart={clickGameStart}
+                handleReady={ClickReady}
+              />
+            </div>
+            </>
+          ) : (
+            <>
+              <div className="mr-5 mb-5">
+              <ReadyStartButton
+                myState={myState}
+                allReady={allReady} // 모든 유저 준비 상태 확인
+                handleStart={clickGameStart}
+                handleReady={ClickReady}
+              />
+            </div>
+            <div className= "mr-5 mb-5"><Button size="md" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>  
+            </>
+          )}
+
         </div>
         )}
 
