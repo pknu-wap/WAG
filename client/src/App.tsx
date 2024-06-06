@@ -8,7 +8,7 @@ import CreateRoom from "./CreateRoom/CreateRoom";
 import ReadyToGame from "./Game/ReadyToGame";
 import WrongUrl from "./components/layout/404";
 import WrongBrowser from "./components/layout/ChromePage";
-
+import RouteChangeTracker from "./util/RouteChangeTracker";
 function isChrome() {
   const userAgent = window.navigator.userAgent;
   console.log(userAgent)
@@ -16,6 +16,7 @@ function isChrome() {
 }
 
 function App() {
+  RouteChangeTracker();
   return (
     <FullLayout>
       <AnimatePresence>
