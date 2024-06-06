@@ -42,6 +42,9 @@ import ReadyStartButton from "./RedayStartButton";
 import SliderComponent from "../components/slider/Slider";
 import Wrapper from "../components/Wrapper";
 import {motion} from "framer-motion";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import Slider from "react-slick";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -70,6 +73,14 @@ const ReadyToGame = () => {
   const navigate = useNavigate();
   const roomInfo = { ...location.state };
   
+  const [width, setWidth] = useState<number>(window.innerWidth); 
+  const sliderRef = useRef<Slider>(null);
+
+
+ const handleResize = () => {
+  setWidth(window.innerWidth);
+ };
+
   const closeModal = () => {
     setIsOpen(false);
   };
@@ -118,10 +129,15 @@ const ReadyToGame = () => {
   const currentAnswerRef = useRef<any>(null); 
   const [currentUserAnswer, setCurrentUserAnswer] = useState<AnswerUserDto>(); //다음 유저의 정보를 바탕으로 정답어 받아놓기
 
+  const [currentUserNickName, setCurrentUserNickName] = useState<string>("")
+  const [currentUserIndex, setCurrentUserIndex] = useState<number>();
+
   const [, setIsLocationLoading] = useState<boolean>(false);
 
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
   useEffect(() => {
+    window.addEventListener("resize", handleResize);
+
     if ("isCaptin" in roomInfo) {
       if (roomInfo.isCaptin === true) {
         console.log("Captain is in");
@@ -137,7 +153,12 @@ const ReadyToGame = () => {
         console.log("roomInfo : ", roomInfo)
       }
     }
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    }
   }, []);
+
   useEffect(() => {
     // ... (기존 useEffect 로직)
     setMyState({ isHost: isMeCaptain, isReady: isReady }); // 상태 업데이트
@@ -161,14 +182,14 @@ const ReadyToGame = () => {
   const nicknamePossibleClickRenderButton = () => {
     if (nickname === beforeNickname) {
       return (
-        <Button size="md" disabled={true} onClick={nicknamePossibleClick}>
-        닉네임 확인
+        <Button className ="mt-3 m-auto flex justify-center items-center" size="sm" disabled={false} onClick={nicknamePossibleClick}>
+          닉네임 확인
         </Button>
       )
     } else {
       return (
-        <Button size="md" disabled={false} onClick={nicknamePossibleClick}>
-        닉네임 확인
+        <Button className ="mt-3 m-auto flex justify-center items-center" size="sm" disabled={false} onClick={nicknamePossibleClick}>
+          닉네임 확인
         </Button>
       )
     }
@@ -986,7 +1007,7 @@ const ReadyToGame = () => {
           setSize(1024)
       }
     };
-
+    
     window.addEventListener('resize', handleResize);
 
     return () => {
@@ -1013,13 +1034,27 @@ const ReadyToGame = () => {
       </>
   );
 
+  useEffect(() => {
+      const initialIndex = joinUsers.findIndex(user => user.roomNickname  === localStorage.getItem("nickName"));
+      setCurrentUserIndex(initialIndex !== -1 ? initialIndex : 1);
+    
+  }, [joinUsers]);
+
+  const settings = {
+    dots: false,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+  };
+  
   return (
     <Wrapper>
     <FullLayout>
     <LoadingModal onRequestClose={loadingCloseModal}>
       <LoadingSpinner/>
     </LoadingModal>
-
+    
       {isGameEnd ? (
       <div>
         <motion.div className="relative"
@@ -1052,11 +1087,7 @@ const ReadyToGame = () => {
           </div>
         </motion.div>
     
-        <motion.div
-      className="box"
-      animate={{ y: 100 }}
-      transition={{ type: "spring" }}
-    >
+    
           {/* List of players */}
           <div style={{height: `${size/3}px`}}></div>
           <div className="m-auto w-3/4">
@@ -1075,35 +1106,76 @@ const ReadyToGame = () => {
             <Button className="mr-5 mb-5" size="sm" onClick={restartOnClick}>재시작하기</Button>
             <Button className="mr-5 mb-5" size="sm" onClick={exitOnClick}>메인페이지로 가기</Button>
           </div>
-          </motion.div>
+          
+
       </div>
       ) : (
       <div>
-        <div className="flex flex-row justify-around items-center mt-10 mb-5 mx-7 ">
-          {joinUsers.map((info, index) => {
-            return (
-              <div key={index} className="relative">
-                <JoinUser
-                  Nickname={info.roomNickname}
-                  isCaptain={info.captain}
-                  isReady={readyMessage}
-                  gameStart={gameStart}
-                  className={""}
-                  currentCycle={currentCycle}
-                  gameUserDto={gameUserDtos}
-                  whoseTurn={currentUserAnswer?.nickname}
-                  children={
-                    gameStart ? (
-                      <div className={""}>
-                        <Button size="sm"
-                          onClick={() => { socketPenaltyOnClick(info.roomNickname); }}>
-                          경고 주기
-                        </Button>
-                      </div> ) : ( <div></div> )}
-                />
+        <div className="flex flex-row justify-around items-center mt-5 mb-5 mx-7 ">
+          {(width > 650 || joinUsers.length ===1) ? (<>
+            {joinUsers.map((info, index) => {
+              return (
+                <div key={index} className="relative">
+                  <JoinUser
+                    Nickname={info.roomNickname}
+                    isCaptain={info.captain}
+                    isReady={readyMessage}
+                    gameStart={gameStart}
+                    className={""}
+                    currentCycle={currentCycle}
+                    gameUserDto={gameUserDtos}
+                    whoseTurn={currentUserAnswer?.nickname}
+                    children={
+                      gameStart ? (
+                        <div className={""}>
+                          <Button size="sm"
+                            onClick={() => { socketPenaltyOnClick(info.roomNickname); }}>
+                            경고 주기
+                          </Button>
+                        </div> ) : ( <div></div> )}
+                  />
+                </div>
+              );
+            })}
+            </>
+          ) : (
+            
+            <div className="w-1/2 h-1/2 mt-20 mb-5 mx-7">
+  <Slider  ref={sliderRef} {...settings} initialSlide={currentUserIndex}>
+    {joinUsers.map((info, index) => (
+      
+      <div key={index} className="relative">
+        <JoinUser
+          Nickname={info.roomNickname}
+          isCaptain={info.captain}
+          isReady={readyMessage}
+          gameStart={gameStart}
+          className={"mt-4"}
+          currentCycle={currentCycle}
+          gameUserDto={gameUserDtos}
+          whoseTurn={currentUserAnswer?.nickname}
+          children={
+            gameStart ? (
+              <div className={""}>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    socketPenaltyOnClick(info.roomNickname);
+                  }}
+                >
+                  경고 주기
+                </Button>
               </div>
-            );
-          })}
+            ) : (
+              <div></div>
+            )
+          }
+        />
+      </div>
+    ))}
+  </Slider>
+</div>
+        )}
         </div>
 
         {gameStart&&(
@@ -1220,16 +1292,34 @@ const ReadyToGame = () => {
         </div>
         
         {countdown === null && !gameStart && (
-        <div className="m-auto max-w-[700px] grid grid-cols-1 sm:grid-cols-2 mt-5">
-          <div className="mr-5 mb-5"><Button size="md" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>
-          <div className="mr-5 mb-5">
-            <ReadyStartButton
-              myState={myState}
-              allReady={allReady} // 모든 유저 준비 상태 확인
-              handleStart={clickGameStart}
-              handleReady={ClickReady}
-            />
-          </div>
+          <div className="m-auto max-w-[700px] grid grid-cols-1 sm:grid-cols-2 mt-5">
+        
+          {width > 650 ? (
+            <>
+              <div className= "mr-5 mb-5"><Button size="md" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>  
+              <div className="mr-5 mb-5">
+              <ReadyStartButton
+                myState={myState}
+                allReady={allReady} // 모든 유저 준비 상태 확인
+                handleStart={clickGameStart}
+                handleReady={ClickReady}
+              />
+            </div>
+            </>
+          ) : (
+            <>
+              <div className="mr-5 mb-5">
+              <ReadyStartButton
+                myState={myState}
+                allReady={allReady} // 모든 유저 준비 상태 확인
+                handleStart={clickGameStart}
+                handleReady={ClickReady}
+              />
+            </div>
+            <div className= "mr-5 mb-5"><Button size="md" disabled={false} onClick={exitOnClick} > 게임 나가기 </Button></div>  
+            </>
+          )}
+
         </div>
         )}
 
