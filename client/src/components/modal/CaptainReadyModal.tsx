@@ -23,7 +23,7 @@ const customModalStyles = {
     minWidth: "250px",
     height: "auto",
     minHeight: "310px",
-    maxHeight: "400px",
+    maxHeight: "500px",
     zIndex: 150,
     borderRadius: "10px",
     boxShadow: "2px 2px 2px rgba(0, 0, 0, 0.25)",
@@ -40,7 +40,7 @@ interface ModalProps {
 const CaptainReadyToModal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
   const [isOpen, setIsOpen] = useRecoilState(captainReadyToGameModalState);
 
-  const baseClassName = "w-5/6 max-w-[650px] min-w-[250px] h-auto min-h-[310px] max-h-[400px] z-150 rounded-lg shadow-md bg-light-bg dark:bg-dark-bg overflow-auto";
+  const baseClassName = "w-5/6 max-w-[650px] min-w-[250px] h-auto min-h-[310px] max-h-[600px] z-150 rounded-lg shadow-md bg-light-bg dark:bg-dark-bg overflow-auto";
 
   const closeModal = (e: React.MouseEvent) => {
     if ((e.target as Element).id === "overlay") {
