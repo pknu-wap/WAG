@@ -1153,7 +1153,7 @@ const ReadyToGame = () => {
               <ChatRoom key={index} message={m} whoseTurn={currentUserAnswer?.nickname} />
             ))}
           </div>
-            <div className="m-auto w-3/4 h-[52px] overflow-y-hidden rounded-b-2xl flex flex-col tracking-wider bg-[#A072BC] relative">
+            <div className="m-auto w-3/4 h-[53px] overflow-y-hidden rounded-b-2xl flex flex-col tracking-wider bg-[#A072BC] relative">
               <div className="w-full absolute bottom-1 px-1 flex juftify-center items-end">
                 {(!gameStart && isMeCaptain) ? (
                   <IconButton size="md" className="" onClick={captainOpenModal} isInput={true}>
@@ -1163,11 +1163,10 @@ const ReadyToGame = () => {
                     </svg>
                   </IconButton>
                 ) : (<div></div>)}
-                <input
+                <textarea
                   className={`${isCORRECTMode && isMyTurn ? 
-                    "w-full text-xs h-[42px] sm:text-base sm:h-[48px] rounded-2xl text-[#000000] border-[3px] border-[#FFA500]" 
-                    : "text-xs h-[42px] sm:text-base sm:h-[48px] w-full rounded-2xl text-[#000000]"}`}
-                  type="text"
+                    "w-full text-xs h-[42px] pt-[10px] pb-1 sm:text-base sm:h-[48px] rounded-2xl text-[#000000] border-[3px] border-[#FFA500]" 
+                    : "text-xs h-[42px] pt-[10px] pb-1 sm:text-base sm:h-[48px] w-full rounded-2xl text-[#000000]"}`}
                   placeholder={
                     gameStart // gameStart가 true인 경우에만 조건부 렌더링
                       ? isMyTurn
@@ -1180,15 +1179,20 @@ const ReadyToGame = () => {
                   value={myChatMessages}
                   onKeyDown={(e) => {
                     if (e.nativeEvent.isComposing) return; 
-                    if (e.key === "Enter" && myChatMessages.trim() !== "") {
-                      sendMessage();
-                    } else if (e.key === "Enter" && myChatMessages.trim() === "") {
-                      Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
+                    if (e.key === "Enter" && !e.shiftKey) {  // Enter 키를 누를 때 Shift 키가 눌려있지 않은 경우
+                      e.preventDefault();  // 기본 Enter 키 동작 방지 (줄 바꿈 방지)
+                      if (myChatMessages.trim() !== "") {
+                        sendMessage();
+                      } else {
+                        Toast({ message: "채팅 메시지를 입력해주세요!", type: "warn" });
+                      }
                     }
                   }}
                   onChange={(e) => {
                     setMyChatMessages(e.target.value);
                   }}
+                  rows={3}
+                  style={{resize: 'none'}}
                 />
                 <IconButton
                   className="right-0 bottom-0 absolute"
