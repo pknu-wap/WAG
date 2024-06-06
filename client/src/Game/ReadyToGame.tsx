@@ -1140,7 +1140,7 @@ const ReadyToGame = () => {
             </>
           ) : (
             
-            <div className="w-1/2 h-1/2 mt-20 mb-5 mx-7">
+            <div className="w-1/2 h-1/2 mb-5 mx-7">
   <Slider  ref={sliderRef} {...settings} initialSlide={currentUserIndex}>
     {joinUsers.map((info, index) => (
       
