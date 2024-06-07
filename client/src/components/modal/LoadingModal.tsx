@@ -12,7 +12,7 @@ const customModalStyles = {
     backgroundColor: "rgba(0, 0, 0, 0.4)",
     width: "100%",
     height: "100%", // 여기서 높이를 100%로 수정
-    zIndex: 10,
+    zIndex: 150,
     position: "fixed" as CSSProperties["position"], // 타입 명시
     top: 0,
     left: 0,
@@ -43,7 +43,7 @@ interface ModalProps {
 const LoadingModal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
   const [isOpen] = useRecoilState(loadingModalState);
 
-  const baseClassName = "w-1/2 justify-center items-center max-w-[650px] min-w-[250px] h-auto min-h-[310px] max-h-[400px] z-150 rounded-lg shadow-md bg-light-bg dark:bg-dark-bg overflow-auto";
+  const baseClassName = "w-1/2 relative z-20 justify-center items-center max-w-[650px] min-w-[250px] h-auto min-h-[310px] max-h-[400px] z-150 rounded-lg shadow-md bg-light-bg dark:bg-dark-bg overflow-auto";
   // 모달을 닫을 때 onRequestClose 함수 호출
   const closeModal = (e: React.MouseEvent) => {
     if ((e.target as Element).id === "overlay") {
