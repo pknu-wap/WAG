@@ -204,7 +204,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
           {width > 650 ? (
             <div className="w-3 h-5 rounded absolute sm:top-12 sm:left-12 top-10 left-10 border-[0.1px] border-[#454141] bg-[#FFFF00]"></div>
           ) : (
-            <div className="w-3 h-5 rounded absolute sm:top-12 sm:right-2 top-10 right-20 border-[0.1px] border-[#454141] bg-[#FFFF00]"></div>
+            <div className="w-3 h-5 rounded absolute sm:top-12 sm:right-2 top-10 right-10 border-[0.1px] border-[#454141] bg-[#FFFF00]"></div>
           )}
           </>
           
@@ -216,7 +216,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
             <div className="w-3 h-5 rounded border-[0.1px] border-[#454141] rotate-[20deg] bg-[#FFFF00] left-[8px] top-[1px] absolute"></div>
           </div>
           ) : (
-            <div className="absolute sm:top-12 sm:right-2 top-10 right-20 flex flex-column">
+            <div className="absolute sm:top-12 sm:right-2 top-10 right-10 flex flex-column">
             <div className="w-3 h-5 rounded border-[0.1px] border-[#454141] rotate-[160deg] bg-[#FFFF00] relative"></div>
             <div className="w-3 h-5 rounded border-[0.1px] border-[#454141] rotate-[20deg] bg-[#FFFF00] left-[8px] top-[1px] absolute"></div>
           </div>
@@ -228,7 +228,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
           {width > 650 ? (
             <div className="w-3 h-5 rounded absolute sm:top-12 sm:left-12 top-10 left-10 border-[0.1px] border-[#454141] bg-[#FF0000]"></div>
           ) : (
-            <div className="w-3 h-5 rounded absolute sm:top-12 sm:right-2 top-10 right-20 border-[0.1px] border-[#454141] bg-[#FF0000]"></div>
+            <div className="w-3 h-5 rounded absolute sm:top-12 sm:right-2 top-10 right-10 border-[0.1px] border-[#454141] bg-[#FF0000]"></div>
           )}
           </>
           
