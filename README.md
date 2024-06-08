@@ -15,8 +15,24 @@
 간편하고 빠르게 즐길 수 있는 **실시간 채팅 기반 웹 미니게임**을 제작하는 WAG 입니다!
 <br>
 <br>
+### 메인화면
+![메인화면](https://github.com/pknu-wap/WAG/assets/111286262/61824ea4-9e32-4497-b247-2071e0e2eaf4)
+### 방 생성
+![방생성](https://github.com/pknu-wap/WAG/assets/111286262/2f7ad50a-db32-44ad-b954-3801a65bee5c)
+### 게임방 설정
+![방 설정](https://github.com/pknu-wap/WAG/assets/111286262/d81c67c9-3eea-4f9a-ac8d-4c3114b2660f)
+### 레디 & 시작
+![레디 시작](https://github.com/pknu-wap/WAG/assets/111286262/f1a2edae-0cdd-4656-8bed-d76cfd265baa)
+### 질문 & 답변
+![질문 답변](https://github.com/pknu-wap/WAG/assets/111286262/f350ceaa-2fca-4c8c-9f14-dce5cb5f3aad)
+### 경고
+![경고](https://github.com/pknu-wap/WAG/assets/111286262/311edd3c-5634-45fd-85f9-17d3065666d4)
+### 정답 & 종료
+![정답 종료](https://github.com/pknu-wap/WAG/assets/111286262/ecf0e22a-10dc-4462-9e80-008ded46db79)
+### 재시작
+![재시작](https://github.com/pknu-wap/WAG/assets/111286262/4da3e394-e0be-4fdc-ac3c-7b86008fea7b)
 <br>
-
+<br>
 
 ## ✨ Stack
 ### Front End
