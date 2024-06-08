@@ -22,13 +22,13 @@
 ### 게임방 설정
 ![방 설정](https://github.com/pknu-wap/WAG/assets/111286262/ab5b5fc8-35ef-47b7-8ac9-836ff7789ae5)
 ### 레디 & 시작
-![레디 시작](https://github.com/pknu-wap/WAG/assets/111286262/f1a2edae-0cdd-4656-8bed-d76cfd265baa)
+![레디   시작](https://github.com/pknu-wap/WAG/assets/111286262/4e1d93d6-3a99-4bd3-9340-8432c346d077)
 ### 질문 & 답변
-![질문 답변](https://github.com/pknu-wap/WAG/assets/111286262/f350ceaa-2fca-4c8c-9f14-dce5cb5f3aad)
+![질문   답변](https://github.com/pknu-wap/WAG/assets/111286262/d09eac85-2580-415e-b12a-3046ad376ed6)
 ### 경고
 ![경고](https://github.com/pknu-wap/WAG/assets/111286262/311edd3c-5634-45fd-85f9-17d3065666d4)
 ### 정답 & 종료
-![정답 종료](https://github.com/pknu-wap/WAG/assets/111286262/ecf0e22a-10dc-4462-9e80-008ded46db79)
+![정답   종료](https://github.com/pknu-wap/WAG/assets/111286262/b7216f9a-914a-49f8-826d-c3767a9ab8a3)
 ### 재시작
 ![재시작](https://github.com/pknu-wap/WAG/assets/111286262/4da3e394-e0be-4fdc-ac3c-7b86008fea7b)
 <br>
