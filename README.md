@@ -18,7 +18,7 @@
 ### 메인화면
 ![메인화면](https://github.com/pknu-wap/WAG/assets/111286262/61824ea4-9e32-4497-b247-2071e0e2eaf4)
 ### 방 생성
-![방생성](https://github.com/pknu-wap/WAG/assets/111286262/2f7ad50a-db32-44ad-b954-3801a65bee5c)
+![방 생성](https://github.com/pknu-wap/WAG/assets/111286262/efff8b22-1f66-4274-bacf-c344330523b9)
 ### 게임방 설정
 ![방 설정](https://github.com/pknu-wap/WAG/assets/111286262/d81c67c9-3eea-4f9a-ac8d-4c3114b2660f)
 ### 레디 & 시작
