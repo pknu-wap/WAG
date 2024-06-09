@@ -17,6 +17,8 @@
 <br>
 언제 어디서든 친구들과 함께 양세찬 게임을 즐겨보세요!
 <br>
+[게임하러 가기!!](http://wwwag.co.kr/)
+<br>
 <br>
 ### 메인화면
 ![메인화면](https://github.com/pknu-wap/WAG/assets/111286262/61824ea4-9e32-4497-b247-2071e0e2eaf4)
