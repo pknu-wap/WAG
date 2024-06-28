@@ -107,7 +107,7 @@ public class ChatService {
 
         if(gameOrder.isNextTurn()){  // 질문일 경우 다음 턴으로 넘어감.
             int currentOrder = gameOrder.getUserOrder();
-            int nextOrder = getNextTurn(currentOrder, room.getUserCount(), room.getId());
+            int nextOrder = getNextTurn(currentOrder, room.getUserCount(), room);
             GameOrder nextGameOrder = gameOrderRepository.findByUserOrder(nextOrder, room.getId())
                     .orElseThrow(NoSuchGameOrderException::new);
 
@@ -123,9 +123,9 @@ public class ChatService {
             gameOrderRepository.save(nextGameOrder);
             roomRepository.save(room);  // 게임 메시지를 만든 후 저장한다.
 
-            if(gameOrder.getUserOrder() == room.getUserCount()){ // 질문자가 마지막 사람이면 사이클 추가
-                room.setCycle(room.getCycle()+1);
-            }
+//            if(gameOrder.getUserOrder() == room.getUserCount()){ // 질문자가 마지막 사람이면 사이클 추가
+//                room.setCycle(room.getCycle()+1);
+//            }
             chatGameMessage = makeChatGameMessage(chatMessage, room);
         }
         return chatGameMessage;
@@ -141,13 +141,15 @@ public class ChatService {
         return chatGameMessage;
     }
 
-    public int getNextTurn(int currentOrder, int endOrder, long roomId){
+    public int getNextTurn(int currentOrder, int endOrder, Room room){
         int nextOrder = currentOrder + 1;
         while(currentOrder != nextOrder){
             if(nextOrder > endOrder){
                 nextOrder = 1;
+                room.setCycle(room.getCycle()+1);
+                roomRepository.save(room);
             }
-            GameOrder nextGameOrder = gameOrderRepository.findByUserOrder(nextOrder, roomId)
+            GameOrder nextGameOrder = gameOrderRepository.findByUserOrder(nextOrder, room.getId())
                     .orElseThrow(NoSuchGameOrderException::new);
 
             if(nextGameOrder.getRanking() == 0){

@@ -29,6 +29,7 @@ import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -175,7 +176,7 @@ public class WebSocketEventListener {
         Room room = gameOrder.getRoom();
 
         // 이번 턴에 질문해야 하는 사람이 나간 사람과 같다면
-        if (room.getNowTurnUserId() == roomUser.getId()) {
+        if (Objects.equals(room.getNowTurnUserId(), roomUser.getId())) {
             // ChatMessage 생성
             ChatMessage chatMessage = new ChatMessage();
             chatMessage.setContent("");
@@ -185,7 +186,7 @@ public class WebSocketEventListener {
             // 만약 아직 질문을 하지 않았다면 -> 질문 처리
             if(nextTurn){
 
-                int nextOrder = chatService.getNextTurn(nowOrder, room.getCurrentOrder(), room.getId());
+                int nextOrder = chatService.getNextTurn(nowOrder, room.getCurrentOrder(), room);
                 GameOrder go = gameOrderRepository.findByUserOrder(nextOrder, room.getId())
                         .orElseThrow(NoSuchGameOrderException::new);
 
