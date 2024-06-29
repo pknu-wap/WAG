@@ -3,15 +3,14 @@ package com.example.server.service;
 import com.example.server.domain.Room;
 import com.example.server.domain.RoomUser;
 import com.example.server.domain.User;
+import com.example.server.dto.ChatMessage;
+import com.example.server.dto.ChatReadyMessage;
+import com.example.server.dto.ChatRoomModeMessage;
 import com.example.server.dto.UserDto;
-import com.example.server.exception.AlreadyStartedRoomException;
-import com.example.server.exception.MaxUserCountExceededException;
-import com.example.server.exception.NoSuchRoomException;
+import com.example.server.exception.*;
 import com.example.server.payload.request.RoomCreateRequest;
 import com.example.server.payload.response.RoomResponse;
-import com.example.server.repository.RoomRepository;
-import com.example.server.repository.RoomUserRepository;
-import com.example.server.repository.UserRepository;
+import com.example.server.repository.*;
 import com.example.server.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,9 +23,10 @@ import java.util.Optional;
 @Transactional
 @RequiredArgsConstructor
 public class RoomService {
-    private final RoomRepository roomRepository;
-    private final RoomUserRepository roomUserRepository;
-    private final UserRepository userRepository;
+    public static RoomRepository roomRepository;
+    public static RoomUserRepository roomUserRepository;
+    public static AnswerListRepository answerListRepository;
+    public static UserRepository userRepository;
 
     public RoomResponse create(RoomCreateRequest roomCreateRequest){ // 게임 방 생성
         Room room = new Room();
@@ -135,41 +135,71 @@ public class RoomService {
 
     }
 
+    public static ChatMessage setTimer(ChatMessage chatMessage){
+        Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
+        RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomUserException(chatMessage.getRoomId()));
+        if(!roomUser.isCaptain()){  // 방장이 아닌 사람이 변경 시도할 경우
+            throw new CategoryException("타이머 변경 권한이 없습니다. ");
+        }
+        if(room.getCategory().equals(chatMessage.getContent())){  // 기존의 카테고리와 같은 카테고리로 변경할 경우
+            throw new CategoryException("기존의 타이머와 같은 타이머입니다. ");
+        }
+        room.setTimer(Integer.parseInt(chatMessage.getContent()));
+        roomRepository.save(room);
+        return chatMessage;
+    }
 
-//    public RoomEnterResponse enterRandomRoom(String nickName, UserPrincipal userPrincipal){ // 랜덤으로 방 입장
-//        Optional<Room> optionalRoom = roomRepository.findByRandom();
-//        if(optionalRoom.isEmpty()){
-//            return RoomEnterResponse.cantCreate(1);
-//        }
-//        else{
-//            Room room = optionalRoom.get();
-//            addUser(room, nickName, userPrincipal);
-//
-//            List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
-//            return RoomEnterResponse.create(room, userDtos);
-//        }
-//    }
-//
-//
-//    public RoomEnterResponse enterRoom(String nickName, int enterCode, UserPrincipal userPrincipal){ // 코드로 방 입장
-//        Optional<Room> optionalRoom = roomRepository.findRoomByCode(enterCode);
-//        if(optionalRoom.isEmpty()){  // 해당 방이 존재 안함
-//            return RoomEnterResponse.cantCreate(3);
-//        }
-//        else{
-//            if(optionalRoom.get().isGameStatus()){  // 해당 방이 게임 진행 중임.
-//                return RoomEnterResponse.cantCreate(2);
-//            }
-//            if (!optionalRoom.get().isPrivateRoom()){
-//                return RoomEnterResponse.cantCreate(3);  // 사설방이 아니라 입장 불가
-//            }
-//            Room room = optionalRoom.get();
-//            addUser(room, nickName, userPrincipal);
-//
-//            List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
-//            return RoomEnterResponse.create(room, userDtos);
-//        }
-//    }
+    public static ChatMessage setCategory(ChatMessage chatMessage){
+        Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
+        RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomUserException(chatMessage.getRoomId()));
+        if(!roomUser.isCaptain()){  // 방장이 아닌 사람이 변경 시도할 경우
+            throw new CategoryException("카테고리 변경 권한이 없습니다. ");
+        }
+        if(room.getCategory().equals(chatMessage.getContent())){  // 기존의 카테고리와 같은 카테고리로 변경할 경우
+            throw new CategoryException("기존의 카테고리와 같은 카테고리입니다. ");
+        }
+        if(!chatMessage.getContent().equals("전체")){    // 카테고리가 전체인 경우를 제외하고 검사
+            answerListRepository.haveCategory(chatMessage.getContent())   // 존재하는 카테고리인지 확인 여부
+                    .orElseThrow(()->new NoSuchCategoryException(chatMessage.getContent()));
+        }
+        room.setCategory(chatMessage.getContent());
+        roomRepository.save(room);
+        return chatMessage;
+    }
 
+    public static ChatReadyMessage setReady(ChatMessage chatMessage){
+        Room room = roomRepository.findById(chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
+        RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomUserException(chatMessage.getRoomId()));
+        if(roomUser.isReady()){
+            roomUser.setReady(false);
+//            chatMessage.setContent(chatMessage.getSender() + " 님이 레디를 해제하셨습니다. ");
+        }
+        else {
+            roomUser.setReady(true);
+//            chatMessage.setContent(chatMessage.getSender() + " 님이 레디 하셨습니다. ");
+        }
+        roomUserRepository.save(roomUser);
+        chatMessage.setContent("");
+        return new ChatReadyMessage(chatMessage, UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId())));
+    }
 
+    public static ChatRoomModeMessage changeRoomMode(ChatMessage chatMessage){
+
+        if (chatMessage.getMessageType() != ChatMessage.MessageType.CHANGE) {
+            return null;
+        }
+        Room room = roomRepository.findById(chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
+
+        room.setPrivateRoom(!room.isPrivateRoom());
+
+        roomRepository.save(room);
+        return new ChatRoomModeMessage(chatMessage,room);
+    }
 }
