@@ -109,7 +109,6 @@ public class WebSocketEventListener {
                     messagingTemplate.convertAndSend(destination, chatGameMessage);
                 }
                 gameOrderRepository.delete(gameOrder);
-                roomUserRepository.delete(roomUser);
 
             } // if(gameStatus == True)문 종료
 
@@ -128,7 +127,7 @@ public class WebSocketEventListener {
                 chatRoomInfoMessage.setContent(username + " 님이 방을 떠나 " + nextCaption.getRoomNickname() + " 님이 방장이 되었습니다.");
             }
 
-            roomUserRepository.delete(roomUser); // RoomUser 삭제
+            roomUserRepository.delete(roomUser);
 
             roomRepository.save(room);  // 룸 정보 저장.
             List <RoomUser> roomUsers = roomUserRepository.findByRoomId(roomId);
