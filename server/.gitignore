@@ -17,7 +17,7 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 **/.DS_Store
-**/test/
+**/test
 ### IntelliJ IDEA ###
 application.properties
 

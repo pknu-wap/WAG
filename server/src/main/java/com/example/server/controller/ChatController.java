@@ -6,6 +6,7 @@ import com.example.server.payload.response.RoomResponse;
 import com.example.server.security.CurrentUser;
 import com.example.server.security.UserPrincipal;
 import com.example.server.service.ChatService;
+import com.example.server.service.GameService;
 import com.example.server.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,8 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Objects;
 
 @RestController
 public class ChatController {
@@ -50,7 +53,7 @@ public class ChatController {
     @MessageMapping("/chat.changeMode")
     public ChatRoomModeMessage changeGameMode(@Payload ChatMessage chatMessage) {
         String destination = "/topic/public/"+chatMessage.getRoomId();
-        ChatRoomModeMessage chatRoomModeMessage = chatService.changeRoomMode(chatMessage);
+        ChatRoomModeMessage chatRoomModeMessage = RoomService.changeRoomMode(chatMessage);
         messagingTemplate.convertAndSend(destination, chatRoomModeMessage);
         return chatRoomModeMessage;
     }
@@ -58,7 +61,7 @@ public class ChatController {
     @MessageMapping("/chat.ready")
     public ChatReadyMessage setReady(@Payload ChatMessage chatMessage) {
         String destination = "/topic/public/"+chatMessage.getRoomId();
-        ChatReadyMessage chatReadyMessage = chatService.setReady(chatMessage);
+        ChatReadyMessage chatReadyMessage = RoomService.setReady(chatMessage);
         chatReadyMessage.setMessageType(ChatMessage.MessageType.READY);
         messagingTemplate.convertAndSend(destination, chatReadyMessage);
         return chatReadyMessage;
@@ -67,7 +70,7 @@ public class ChatController {
     @MessageMapping("/chat.setCategory")
     public ChatMessage setCategory(@Payload ChatMessage chatMessage) {
         String destination = "/topic/public/"+chatMessage.getRoomId();
-        ChatMessage rechatMessage = chatService.setCategory(chatMessage);
+        ChatMessage rechatMessage = RoomService.setCategory(chatMessage);
         rechatMessage.setMessageType(ChatMessage.MessageType.CATEGORY);
         messagingTemplate.convertAndSend(destination, rechatMessage);
         return rechatMessage;
@@ -76,7 +79,7 @@ public class ChatController {
     @MessageMapping("/chat.setTimer")
     public ChatMessage setTimer(@Payload ChatMessage chatMessage) {
         String destination = "/topic/public/"+chatMessage.getRoomId();
-        ChatMessage rechatMessage = chatService.setTimer(chatMessage);
+        ChatMessage rechatMessage = RoomService.setTimer(chatMessage);
         rechatMessage.setMessageType(ChatMessage.MessageType.TIMER);
         messagingTemplate.convertAndSend(destination, rechatMessage);
         return rechatMessage;
@@ -106,7 +109,7 @@ public class ChatController {
     public ChatMessage addCaptainUser(@Payload ChatMessage chatMessage,
                                       SimpMessageHeaderAccessor headerAccessor) {
         String sender = chatMessage.getSender();
-        headerAccessor.getSessionAttributes().put("username", sender);
+        Objects.requireNonNull(headerAccessor.getSessionAttributes()).put("username", sender);
         headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
         chatMessage.setMessageType(ChatMessage.MessageType.JOIN);
         messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getRoomId(), chatMessage);
@@ -114,15 +117,9 @@ public class ChatController {
         return chatMessage;
     }
 
-//    @GetMapping("/chat/result")
-//    public ResponseEntity<ResultResponse> returnRoominfo(@RequestParam Long roomId){// 닉네임으로 게임 방 정보주기
-//        ResultResponse resultResponse = chatService.endGame(roomId);
-//        return new ResponseEntity<>(resultResponse, HttpStatus.OK);
-//    }
-//
     @GetMapping("/answer/list")
     public ResponseEntity<AnswerListResponse> getAnswerList(@RequestParam Long roomId, @RequestParam String nickname){// 닉네임으로 게임 방 정보주기
-        AnswerListResponse answerListResponse = chatService.getAnswerList(roomId, nickname);
+        AnswerListResponse answerListResponse = GameService.getAnswerList(roomId, nickname);
         return new ResponseEntity<>(answerListResponse, HttpStatus.OK);
     }
 

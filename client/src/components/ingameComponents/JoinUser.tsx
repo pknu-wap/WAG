@@ -45,7 +45,7 @@ const JoinUser = forwardRef<HTMLDivElement, JoinUserProps>(
     const getGameAnswer = async () => {
       try {
         const response = await axios.get<IGetAnswerList>(
-          "http://wwwag-backend.co.kr/answer/list",
+          "https://wwwag-backend.co.kr/answer/list",
           {
             params: {
               roomId: roomId,

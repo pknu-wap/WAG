@@ -15,8 +15,29 @@
 간편하고 빠르게 즐길 수 있는 **실시간 채팅 기반 웹 미니게임**을 제작하는 WAG 입니다!
 <br>
 <br>
+언제 어디서든 친구들과 함께 양세찬 게임을 즐겨보세요!
 <br>
-
+[게임하러 가기!!](http://wwwag.co.kr/)
+<br>
+<br>
+### 메인화면
+![메인화면](https://github.com/pknu-wap/WAG/assets/111286262/61824ea4-9e32-4497-b247-2071e0e2eaf4)
+### 방 생성
+![방 생성](https://github.com/pknu-wap/WAG/assets/111286262/efff8b22-1f66-4274-bacf-c344330523b9)
+### 게임방 설정
+![방 설정](https://github.com/pknu-wap/WAG/assets/111286262/ab5b5fc8-35ef-47b7-8ac9-836ff7789ae5)
+### 레디 & 시작
+![레디   시작](https://github.com/pknu-wap/WAG/assets/111286262/4e1d93d6-3a99-4bd3-9340-8432c346d077)
+### 질문 & 답변
+![질문   답변](https://github.com/pknu-wap/WAG/assets/111286262/d09eac85-2580-415e-b12a-3046ad376ed6)
+### 경고
+![경고](https://github.com/pknu-wap/WAG/assets/111286262/311edd3c-5634-45fd-85f9-17d3065666d4)
+### 정답 & 종료
+![정답   종료](https://github.com/pknu-wap/WAG/assets/111286262/b7216f9a-914a-49f8-826d-c3767a9ab8a3)
+### 재시작
+![재시작](https://github.com/pknu-wap/WAG/assets/111286262/4da3e394-e0be-4fdc-ac3c-7b86008fea7b)
+<br>
+<br>
 
 ## ✨ Stack
 ### Front End
