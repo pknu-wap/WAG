@@ -111,6 +111,10 @@ function MainPage({ dark }: ComponentProps) {
     navigate("/CreateRoom"); // 페이지 이동 처리
   };
   
+  const handleGoToSinglePlayground = () => {
+    window.open('https://splendorous-conkies-8e58b1.netlify.app/','_self');
+  }
+
   const handleLightLogoClick = () => {
     
     const playSound = () => {
@@ -153,7 +157,7 @@ function MainPage({ dark }: ComponentProps) {
       <div className="sm:mt-0 mt-20">
         {theme === "light" ? (
           <div className="flex justify-center items-center">
-            <img className={`relative w-2/3 ${isClicked ? 'clicked' : ''}`} src="images/WAG_white.2.png" 
+            <img className={`relative w-3/5 ${isClicked ? 'clicked' : ''}`} src="images/WAG_white.2.png" 
               alt="logo light mode"
               onClick={() => {
                 handleLightLogoClick();
@@ -165,7 +169,7 @@ function MainPage({ dark }: ComponentProps) {
           </div>
         ) : (
           <div className="flex justify-center items-center "> 
-            <img className={`relative w-2/3 ${isClicked ? 'clicked' : ''}`} src="images/WAG_dark.2.png" 
+            <img className={`relative w-3/5 ${isClicked ? 'clicked' : ''}`} src="images/WAG_dark.2.png" 
               alt="logo light mode"
               onClick={() => {
                 handleDarkLogoClick();
@@ -186,6 +190,9 @@ function MainPage({ dark }: ComponentProps) {
           </Button>
           <Button size="lg" onClick={openModal}>
             입장코드 입력
+          </Button>
+          <Button size="lg" onClick={handleGoToSinglePlayground}>
+            심심하잖아 드루와
           </Button>
         </div>
       </div>
