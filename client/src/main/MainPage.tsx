@@ -192,7 +192,7 @@ function MainPage({ dark }: ComponentProps) {
             입장코드 입력
           </Button>
           <Button size="lg" onClick={handleGoToSinglePlayground}>
-            심심하잖아 드루와
+            1인 미니게임
           </Button>
         </div>
       </div>
