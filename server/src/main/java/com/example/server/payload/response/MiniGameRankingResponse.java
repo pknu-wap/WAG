@@ -8,5 +8,6 @@ import java.util.List;
 
 @Getter @Builder
 public class MiniGameRankingResponse {
+    Boolean hasNextPage;
     List<MiniGameRankingDto> miniGameRankingDtos;
 }

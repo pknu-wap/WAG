@@ -7,6 +7,7 @@ import com.example.server.payload.response.MiniGameRankingResponse;
 import com.example.server.repository.MiniGameRepository;
 import lombok.AllArgsConstructor;
 import org.hibernate.query.criteria.JpaCriteriaUpdate;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -31,7 +32,8 @@ public class MiniGameService {
     public MiniGameRankingResponse getRanking(int pageNumber, int pageSize){
         Sort sort = Sort.by(Sort.Order.desc("stage"));
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-        List<MiniGameRanking> miniGameRankings = miniGameRepository.findAll(pageable).getContent();
+        Page<MiniGameRanking> miniGameRankingPage = miniGameRepository.findAll(pageable);
+        List<MiniGameRanking> miniGameRankings = miniGameRankingPage.getContent();
         List<MiniGameRankingDto> miniGameRankingDtos = new ArrayList<>();
         int idx = 1;
         for(MiniGameRanking miniGameRanking : miniGameRankings){
@@ -43,7 +45,12 @@ public class MiniGameService {
             miniGameRankingDtos.add(miniGameRankingDto);
         }
 
+        Boolean hasNextPage = true;
+        if(miniGameRankingPage.getNumber() == miniGameRankingPage.getTotalPages() - 1)
+            hasNextPage = false;
+
         return MiniGameRankingResponse.builder()
+                .hasNextPage(hasNextPage)
                 .miniGameRankingDtos(miniGameRankingDtos)
                 .build();
     }
