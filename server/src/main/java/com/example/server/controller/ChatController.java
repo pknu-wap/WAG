@@ -53,7 +53,7 @@ public class ChatController {
     @MessageMapping("/chat.changeMode")
     public ChatRoomModeMessage changeGameMode(@Payload ChatMessage chatMessage) {
         String destination = "/topic/public/"+chatMessage.getRoomId();
-        ChatRoomModeMessage chatRoomModeMessage = RoomService.changeRoomMode(chatMessage);
+        ChatRoomModeMessage chatRoomModeMessage = roomService.changeRoomMode(chatMessage);
         messagingTemplate.convertAndSend(destination, chatRoomModeMessage);
         return chatRoomModeMessage;
     }
@@ -61,7 +61,7 @@ public class ChatController {
     @MessageMapping("/chat.ready")
     public ChatReadyMessage setReady(@Payload ChatMessage chatMessage) {
         String destination = "/topic/public/"+chatMessage.getRoomId();
-        ChatReadyMessage chatReadyMessage = RoomService.setReady(chatMessage);
+        ChatReadyMessage chatReadyMessage = roomService.setReady(chatMessage);
         chatReadyMessage.setMessageType(ChatMessage.MessageType.READY);
         messagingTemplate.convertAndSend(destination, chatReadyMessage);
         return chatReadyMessage;
@@ -70,7 +70,7 @@ public class ChatController {
     @MessageMapping("/chat.setCategory")
     public ChatMessage setCategory(@Payload ChatMessage chatMessage) {
         String destination = "/topic/public/"+chatMessage.getRoomId();
-        ChatMessage rechatMessage = RoomService.setCategory(chatMessage);
+        ChatMessage rechatMessage = roomService.setCategory(chatMessage);
         rechatMessage.setMessageType(ChatMessage.MessageType.CATEGORY);
         messagingTemplate.convertAndSend(destination, rechatMessage);
         return rechatMessage;
@@ -79,7 +79,7 @@ public class ChatController {
     @MessageMapping("/chat.setTimer")
     public ChatMessage setTimer(@Payload ChatMessage chatMessage) {
         String destination = "/topic/public/"+chatMessage.getRoomId();
-        ChatMessage rechatMessage = RoomService.setTimer(chatMessage);
+        ChatMessage rechatMessage = roomService.setTimer(chatMessage);
         rechatMessage.setMessageType(ChatMessage.MessageType.TIMER);
         messagingTemplate.convertAndSend(destination, rechatMessage);
         return rechatMessage;

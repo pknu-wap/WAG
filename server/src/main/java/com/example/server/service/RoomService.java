@@ -24,10 +24,10 @@ import java.util.Optional;
 @Transactional
 @AllArgsConstructor
 public class RoomService {
-    public static RoomRepository roomRepository;
-    public static RoomUserRepository roomUserRepository;
-    public static AnswerListRepository answerListRepository;
-    public static UserRepository userRepository;
+    private final RoomRepository roomRepository;
+    private final RoomUserRepository roomUserRepository;
+    private final AnswerListRepository answerListRepository;
+    private final UserRepository userRepository;
 
     public RoomResponse create(RoomCreateRequest roomCreateRequest){ // 게임 방 생성
         Room room = new Room();
@@ -94,7 +94,7 @@ public class RoomService {
         roomRepository.save(room);
     }
 
-    private static RoomUser RoomUserInit(Room room, String nickName, Boolean isCaptain) {
+    private RoomUser RoomUserInit(Room room, String nickName, Boolean isCaptain) {
         RoomUser roomUser = new RoomUser();
         roomUser.setCaptain(isCaptain);
         roomUser.setRoom(room);
@@ -136,7 +136,7 @@ public class RoomService {
 
     }
 
-    public static ChatMessage setTimer(ChatMessage chatMessage){
+    public ChatMessage setTimer(ChatMessage chatMessage){
         Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
                 .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
         RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatMessage.getRoomId())
@@ -152,7 +152,7 @@ public class RoomService {
         return chatMessage;
     }
 
-    public static ChatMessage setCategory(ChatMessage chatMessage){
+    public ChatMessage setCategory(ChatMessage chatMessage){
         Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
                 .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
         RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatMessage.getRoomId())
@@ -172,7 +172,7 @@ public class RoomService {
         return chatMessage;
     }
 
-    public static ChatReadyMessage setReady(ChatMessage chatMessage){
+    public ChatReadyMessage setReady(ChatMessage chatMessage){
         Room room = roomRepository.findById(chatMessage.getRoomId())
                 .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
         RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatMessage.getRoomId())
@@ -190,7 +190,7 @@ public class RoomService {
         return new ChatReadyMessage(chatMessage, UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId())));
     }
 
-    public static ChatRoomModeMessage changeRoomMode(ChatMessage chatMessage){
+    public ChatRoomModeMessage changeRoomMode(ChatMessage chatMessage){
 
         if (chatMessage.getMessageType() != ChatMessage.MessageType.CHANGE) {
             return null;
