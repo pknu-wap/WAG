@@ -14,5 +14,5 @@ public class MiniGameRanking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nickname;
-    private String stage;
+    private Integer stage;
 }

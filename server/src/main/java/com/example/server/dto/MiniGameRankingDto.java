@@ -7,5 +7,5 @@ import lombok.Getter;
 public class MiniGameRankingDto {
     Integer rank;
     String nickname;
-    String stage;
+    Integer stage;
 }

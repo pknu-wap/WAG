@@ -5,5 +5,5 @@ import lombok.Getter;
 @Getter
 public class MiniGameRankingRequest {
     String nickname;
-    String stage;
+    Integer stage;
 }
