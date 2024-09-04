@@ -6,6 +6,7 @@ import IconButton from "../button/IconButton";
 import RulesModal from "../modal/RulesModal";
 import { useRecoilState } from "recoil";
 import { rulesModalState, soundEffectStatus } from "../../recoil/recoil";
+import FullLayout from "./FullLayout";
 const { useEffect, useState, useRef } = React;
 
 type Props = {
@@ -30,14 +31,17 @@ const Footer = ({ dark, toggleDarkMode }: ComponentProps) => {
 
 
   return (
-<footer className="m-5 z-30 flex absolute bottom-0 w-11/12 justify-between">
-  <div className="relative bottom-3">
-    © WAG!
-  </div>
-  <div className="relative bottom-3">
-    v1.0.0
-  </div>
-</footer>
+    <FullLayout>
+      <footer className={`w-full z-30 flex justify-between items-center pr-3 pl-3 `}>
+          <div>
+            © WAG!
+          </div>
+          <div>
+            v1.0.0
+          </div>
+      </footer>
+</FullLayout>
+
   );
 };
 
