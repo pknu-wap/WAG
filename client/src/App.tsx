@@ -11,7 +11,7 @@ import WrongBrowser from "./components/layout/ChromePage";
 import RouteChangeTracker from "./util/RouteChangeTracker";
 function isChrome() {
   const userAgent = window.navigator.userAgent;
-  console.log(userAgent)
+  //console.log(userAgent)
   return userAgent.includes('Chrome') || userAgent.includes('Safari');
 }
 

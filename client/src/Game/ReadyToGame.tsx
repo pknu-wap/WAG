@@ -142,17 +142,17 @@ const ReadyToGame = () => {
 
     if ("isCaptin" in roomInfo) {
       if (roomInfo.isCaptin === true) {
-        console.log("Captain is in");
+        //console.log("Captain is in");
         socketConnect();
         setSelectedOption(category)
         roomInfo.isCaptin = false;
-        console.log("roomInfo : ", roomInfo)
+        //console.log("roomInfo : ", roomInfo)
       }
     } else {
       if (roomInfo.userCount === 1) {
       } else {
         openModal();
-        console.log("roomInfo : ", roomInfo)
+        //console.log("roomInfo : ", roomInfo)
       }
     }
 
@@ -348,7 +348,7 @@ const ReadyToGame = () => {
   // const nicknamePossibleClick = async () => {
   //   setIsNicknameChecked(true);
   //   if (nickname === "" || nickname.includes(" ")) {
-  //     console.log("error with blank");
+  //     //console.log("error with blank");
   //     setPossible(false);
   //     return;
   //   }
@@ -369,7 +369,7 @@ const ReadyToGame = () => {
           },
         }
       );
-      console.log("방 정보 get api : ", response.data)
+      //console.log("방 정보 get api : ", response.data)
       setUserCount(response.data.userCount)
       return response.data;
     } catch (error) {
@@ -405,7 +405,7 @@ const ReadyToGame = () => {
   async function onConnected() {
     const roomId = localStorage.getItem("roomId");
     const nickName = localStorage.getItem("nickName");
-    console.log("roomId: ", roomId, "nickName: ", nickName);
+    //console.log("roomId: ", roomId, "nickName: ", nickName);
     stompClient.subscribe(`/topic/public/${roomId}`, onMessageReceived);
     sendMessageToSocket("/app/chat.addUser", "JOIN");
   }
@@ -431,9 +431,9 @@ const ReadyToGame = () => {
     } else if (messageType === "TIMER") {
       // nickname은 방장 이름으로만 send
       contentToSend = sliderValue.toString()
-      console.log(sliderValue)
+      //console.log(sliderValue)
     }
-    console.log(contentToSend, messageType)
+    //console.log(contentToSend, messageType)
     
     stompClient.send(
       socketURL,
@@ -482,49 +482,49 @@ const ReadyToGame = () => {
       setRoomInfo();
       setReadyMessage(message.roomResponse.userDtos);
       setAllReady(false) // 유저 추가입장 시 게임시작 버튼 비활성화
-      console.log(message.sender + " joined!");
-      console.log("JOIN 즉시 userCount : ", userCount)
+      //console.log(message.sender + " joined!");
+      //console.log("JOIN 즉시 userCount : ", userCount)
       getAllReady(message); //레디상태 재검사
-      console.log("JOIN으로 온 메세지", message);
+      //console.log("JOIN으로 온 메세지", message);
     } else if (message.messageType === "LEAVE") {
       //addJoinUser();
       setJoinUsers(message.roomResponse.userDtos);
       setRoomInfo();
       getAllReady(message); //레디상태 재검사
-      console.log("LEAVE 즉시 userCount : ", userCount)
-      console.log("LEAVE으로 온 메세지", message);
+      //console.log("LEAVE 즉시 userCount : ", userCount)
+      //console.log("LEAVE으로 온 메세지", message);
     } else if (message.messageType === "CHAT") {
-      console.log("CHAT으로 온 메세지", message);
+      //console.log("CHAT으로 온 메세지", message);
       setRoomInfo();
     } else if (message.messageType === "CATEGORY") {
-      console.log("CATEGORY로 온 메세지", message);
+      //console.log("CATEGORY로 온 메세지", message);
       setCategory(message.content)
     } else if (message.messageType === "TIMER") {
-      console.log("TIMER로 온 메세지", message);
+      //console.log("TIMER로 온 메세지", message);
       setIngameTimerRecoil(parseInt(message.content))
     }
     else if (message.messageType === "CHANGE") {
-      console.log("CHANGE로 온 메세지", message);
+      //console.log("CHANGE로 온 메세지", message);
       setRoomInfo();
       Toast({ message: message.privateRoom ? '방이 비공개로 설정되었습니다.' : '방이 공개로 설정되었습니다.', type: 'info' });
     } else if (message.messageType === "ASK") {
-      console.log("ASK로 온 메세지", message);
+      //console.log("ASK로 온 메세지", message);
       getGameCycle(message);
       getNextTurnInfo(message);
     } else if (message.messageType === "ANSWER") {
-      console.log("ANSWER로 온 메세지", message);
+      //console.log("ANSWER로 온 메세지", message);
     } else if (message.messageType === "CORRECT") {
       handleCorrectAnswer(message);
       setGameUserDtos(message.gameUserDtos);
-      console.log("CORRECT로 온 메세지", message);
+      //console.log("CORRECT로 온 메세지", message);
     } else if(message.messageType === "READY"){
-      console.log("READY로 온 메세지", message);
+      //console.log("READY로 온 메세지", message);
       setRoomInfo();
       setReadyMessage(message.userDtos)
       getAllReady(message);
     } else if (message.messageType === "START") {
       handleStartSound();
-      console.log("START로 온 메세지", message);
+      //console.log("START로 온 메세지", message);
       setCountdown(5);
       getGameAnswer();
       // API 응답을 받은 후에 5초를 기다립니다.
@@ -536,7 +536,7 @@ const ReadyToGame = () => {
       }, 5000);
     } else if (message.messageType === "PENALTY") {
       setGameUserDtos(message.gameUserDtos);
-      console.log("PENALTY로 온 메세지", message);
+      //console.log("PENALTY로 온 메세지", message);
     } else if(message.messageType === "END"){
       stopTimer();
       handleCorrectSound();
@@ -545,16 +545,16 @@ const ReadyToGame = () => {
       setTimeout(() => {
         setIsGameEnd(true)
       }, 5000);
-      console.log("END로 온 메세지", message);
+      //console.log("END로 온 메세지", message);
     } else if (message.messageType === "RESET") {
       stopTimer();
       resetTimer();
       handleTimerEnd();
       setIsCORRECTMode(false)
-      console.log("RESET으로 온 메세지", message);
+      //console.log("RESET으로 온 메세지", message);
   }
     else {
-      console.log(message);
+      //console.log(message);
     }
   }
 
@@ -576,7 +576,7 @@ const ReadyToGame = () => {
       setChangeIsPrivate(true);
     }
     setIsPrivateRoom(changeIsPrivate);
-    console.log("방 설정 바꾸기 완료, isPrivate : ", isPrivateRoom);
+    //console.log("방 설정 바꾸기 완료, isPrivate : ", isPrivateRoom);
   };
 
   // 대기방 방장 모달 공개/비공개 바꾸는 버튼
@@ -614,7 +614,7 @@ const ReadyToGame = () => {
   const [count, setCount] = useState(1)
   const handleOptionSelect = (option: Option) => {
     setSelectedOption(option.value);
-    console.log('Selected option:', option.value);
+    //console.log('Selected option:', option.value);
   };
   const sendCategoryOnClick = () => {
     handlePlaySound();
@@ -670,10 +670,10 @@ const ReadyToGame = () => {
         if (action !== "POP") return;
         history.push(pathname);
       });
-      console.log("entercode 존재");
+      //console.log("entercode 존재");
       return unlistenHistoryEvent;
     } else {
-      console.log("entercode 존재x");
+      //console.log("entercode 존재x");
     }
   }, [enterCode]);
 
@@ -834,7 +834,7 @@ const ReadyToGame = () => {
         handleCorrectSound();
         Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
         if(!hasSentAsk){
-          console.log("질문하지 않았을 때")
+          //console.log("질문하지 않았을 때")
           stompClient.send(
             "/app/chat.sendGameMessage",
             {},
@@ -904,7 +904,7 @@ const ReadyToGame = () => {
   const getNextTurnInfo = (socketMessage: any) => {
     const nextTurnUser = socketMessage.gameUserDtos.find((user: any) => user.nextTurn === true);
     if (!nextTurnUser) {
-      console.log("다음 턴 유저 정보를 찾을 수 없습니다.");
+      //console.log("다음 턴 유저 정보를 찾을 수 없습니다.");
       return; // 반환 값 없이 함수 종료
     }
     nextTurnUserRef.current = nextTurnUser; // nextTurnUserRef에 다음 턴 유저 정보 저장
@@ -946,8 +946,8 @@ const ReadyToGame = () => {
       );
       const answerList = response.data
       answerListRef.current = answerList;
-      console.log("answerList : ", answerList)
-      console.log("answerListRef.current : ", answerListRef.current)
+      //console.log("answerList : ", answerList)
+      //console.log("answerListRef.current : ", answerListRef.current)
       return response.data;
     } catch (error) {
       console.error("정답 리스트 get api 오류 발생 : ", error);

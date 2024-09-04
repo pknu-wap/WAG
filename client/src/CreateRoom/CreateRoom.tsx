@@ -20,7 +20,7 @@ function CreateRoom() {
   const navigate = useNavigate();
 
   // const radioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   console.log(event.target.value);
+  //   //console.log(event.target.value);
   // };
 
   const handlePlaySound = () => {
@@ -45,7 +45,7 @@ function CreateRoom() {
     }
 
     try {
-      console.log("11", isPrivate);
+      //console.log("11", isPrivate);
       const response = await axios.post<IRoomResponseInfo>(
         "https://wwwag-backend.co.kr/room/create",
         {
@@ -80,7 +80,7 @@ function CreateRoom() {
   const handleOptionSelect = (option: Option) => {
     setSelectedOption(option.value);
     setFirstCategory(option.value)
-    console.log('Selected option:', option.value);
+    //console.log('Selected option:', option.value);
   };
 
   // 타이머 세팅

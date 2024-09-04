@@ -68,7 +68,7 @@ function MainPage({ dark }: ComponentProps) {
   };
 
   const handlePlaySound = () => {
-    console.log(soundEffectStatusValue)
+    //console.log(soundEffectStatusValue)
 
     const playSound = () => {
       const audio = new Audio('audio/button_click.mp3'); // 새로운 audio 요소 생성

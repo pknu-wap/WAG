@@ -33,7 +33,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
 
   const [playSoundEffect, setPlaySoundEffect] = useRecoilState(soundEffectStatus);
   const handlePlaySoundEffect = () => {
-    console.log(!playSoundEffect)
+    //console.log(!playSoundEffect)
     setPlaySoundEffect(!playSoundEffect)
   }
 
@@ -61,7 +61,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
 
   function isChrome() {
     const userAgent = window.navigator.userAgent;
-    console.log(userAgent);
+    //console.log(userAgent);
     return userAgent.includes('Chrome') || userAgent.includes('Safari');
   }
 
