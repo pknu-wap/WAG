@@ -8,6 +8,7 @@ import com.example.server.security.UserPrincipal;
 import com.example.server.service.ChatService;
 import com.example.server.service.GameService;
 import com.example.server.service.RoomService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,20 +21,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Objects;
-
+@AllArgsConstructor
 @RestController
 public class ChatController {
     private final SimpMessageSendingOperations messagingTemplate;
     private final ChatService chatService;
     private final RoomService roomService;
-
-    @Autowired
-    public ChatController(SimpMessageSendingOperations messagingTemplate, ChatService chatService,
-                          RoomService roomService){
-        this.messagingTemplate = messagingTemplate;
-        this.chatService = chatService;
-        this.roomService = roomService;
-    }
+    private final GameService gameService;
 
     @MessageMapping("/chat.sendMessage")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
@@ -119,7 +113,7 @@ public class ChatController {
 
     @GetMapping("/answer/list")
     public ResponseEntity<AnswerListResponse> getAnswerList(@RequestParam Long roomId, @RequestParam String nickname){// 닉네임으로 게임 방 정보주기
-        AnswerListResponse answerListResponse = GameService.getAnswerList(roomId, nickname);
+        AnswerListResponse answerListResponse = gameService.getAnswerList(roomId, nickname);
         return new ResponseEntity<>(answerListResponse, HttpStatus.OK);
     }
 
