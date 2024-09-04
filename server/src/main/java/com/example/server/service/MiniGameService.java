@@ -25,11 +25,15 @@ public class MiniGameService {
     private final MiniGameRepository miniGameRepository;
 
     public String postRanking(MiniGameRankingRequest miniGameRankingRequest){
+        if(miniGameRankingRequest.getNickname().equals("") || miniGameRankingRequest.getNickname()==null)
+            miniGameRankingRequest.setNickname("---");
+
         Optional<MiniGameRanking> miniGameRankingOptional = miniGameRepository.findByNickname(miniGameRankingRequest.getNickname());
         if(miniGameRankingOptional.isPresent()){
             MiniGameRanking miniGameRanking = miniGameRankingOptional.get();
-            if(miniGameRanking.getStage() < miniGameRankingRequest.getStage()){
+            if(miniGameRanking.getScore() < miniGameRankingRequest.getScore()){
                 miniGameRanking.setStage(miniGameRankingRequest.getStage());
+                miniGameRanking.setScore(miniGameRanking.getScore());
                 miniGameRepository.save(miniGameRanking);
             }
         }
@@ -44,17 +48,18 @@ public class MiniGameService {
     }
 
     public MiniGameRankingResponse getRanking(int pageNumber, int pageSize){
-        Sort sort = Sort.by(Sort.Order.desc("stage"));
+        Sort sort = Sort.by(Sort.Order.desc("score"));
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         Page<MiniGameRanking> miniGameRankingPage = miniGameRepository.findAll(pageable);
         List<MiniGameRanking> miniGameRankings = miniGameRankingPage.getContent();
         List<MiniGameRankingDto> miniGameRankingDtos = new ArrayList<>();
-        int idx = 1;
+        int idx = pageNumber * pageSize;
         for(MiniGameRanking miniGameRanking : miniGameRankings){
             MiniGameRankingDto miniGameRankingDto = MiniGameRankingDto.builder()
-                    .rank(idx++)
+                    .rank((idx++) + 1)
                     .nickname(miniGameRanking.getNickname())
                     .stage(miniGameRanking.getStage())
+                    .score(miniGameRanking.getScore())
                     .build();
             miniGameRankingDtos.add(miniGameRankingDto);
         }

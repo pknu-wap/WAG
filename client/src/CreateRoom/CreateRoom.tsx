@@ -10,13 +10,13 @@ import DropdownSelect from "../components/dropDown/DropDown";
 import { Option } from "react-dropdown";
 import SliderComponent from "../components/slider/Slider";
 import { useRecoilState } from "recoil";
-import { firstCategoryRecoil, timerCount } from "../recoil/recoil";
+import { firstCategoryRecoil, timerCount, soundEffectStatus } from "../recoil/recoil";
 import Wrapper from "../components/Wrapper";
 
 function CreateRoom() {
   const [isPrivate, setIsPrivate] = useState<boolean | null>(false); //일단은 공개방을 default로
   const [nickName, setNickname] = useState<string>("");
-
+  const [soundEffectStatusValue, ] = useRecoilState(soundEffectStatus);
   const navigate = useNavigate();
 
   // const radioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,8 +26,11 @@ function CreateRoom() {
   const handlePlaySound = () => {
 
     const playSound = () => {
-      const audio = new Audio('audio/button_click.mp3')  
-      audio.play()
+      if (soundEffectStatusValue){
+        const audio = new Audio('audio/button_click.mp3')  
+        audio.play()
+      }
+      
     };
   
     playSound();

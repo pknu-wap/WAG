@@ -39,3 +39,8 @@ export let ingameTimerCount = atom<number>({
   key: 'ingameTimerCount',
   default: 20
 })
+
+export const soundEffectStatus = atom<boolean>({
+  key: 'soundEffectStatus',
+  default: true
+})

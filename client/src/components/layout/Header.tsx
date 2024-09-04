@@ -5,7 +5,8 @@ import { toggleDarkMode } from "../../modules/darkSlice";
 import IconButton from "../button/IconButton";
 import RulesModal from "../modal/RulesModal";
 import { useRecoilState } from "recoil";
-import { rulesModalState } from "../../recoil/recoil";
+import { rulesModalState, soundEffectStatus } from "../../recoil/recoil";
+import { faTruckField } from "@fortawesome/free-solid-svg-icons";
 const { useEffect, useState, useRef } = React;
 
 type Props = {
@@ -18,6 +19,8 @@ type ComponentProps = Props & PropsFromRedux;
 const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
 
   const [play, setPlay] = useState(false);
+  const [soundEffectStatusValue, ] = useState(soundEffectStatus);
+  const [isClicked, setIsClicked] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -27,6 +30,12 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
       document.documentElement.classList.remove("dark");
     }
   }, [dark]);
+
+  const [playSoundEffect, setPlaySoundEffect] = useRecoilState(soundEffectStatus);
+  const handlePlaySoundEffect = () => {
+    console.log(!playSoundEffect)
+    setPlaySoundEffect(!playSoundEffect)
+  }
 
   const handlePlayMusic = () => {
     const audio = audioRef.current;
@@ -56,12 +65,82 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
     return userAgent.includes('Chrome') || userAgent.includes('Safari');
   }
 
+  const handleLightLogoClick = () => {
+    
+    const playSound = () => {
+      const audio = new Audio('audio/lightmode_wag.mp3'); // 새로운 audio 요소 생성
+      audio.play(); // 소리를 재생합니다.
+    };
+    
+    if (soundEffectStatusValue){
+      playSound();
+    }
+    
+  }
+
+  const handleDarkLogoClick = () => {
+    
+    const playSound = () => {
+      const audio = new Audio('audio/darkmode_wag.mp3'); // 새로운 audio 요소 생성
+      audio.play(); // 소리를 재생합니다.
+    };
+    
+    if (soundEffectStatusValue){
+      playSound();
+    }
+    
+  }
+
   return (
     <header className="m-5 z-50">
       <div className="flex justify-end z-50">
+        <div className="absolute left-10 top-7">
+      {dark ? (
+
+<img className={`w-20 h-16 ${isClicked ? 'clicked' : ''}`} src="images/WAG_dark.2.png" 
+  alt="logo dark mode"
+  onClick={() => {
+    handleDarkLogoClick();
+    setIsClicked(true); // 클릭될 때마다 isClicked 상태를 true로 설정하여 애니메이션을 발생시킵니다.
+    setTimeout(() => setIsClicked(false), 200);
+    }}>
+
+  </img>
+  
+    ) : (
+      <img className={`w-20 h-16 ${isClicked ? 'clicked' : ''}`} src="images/WAG_white.2.png" 
+      alt="logo light mode"
+      onClick={() => {
+        handleLightLogoClick();
+        setIsClicked(true); // 클릭될 때마다 isClicked 상태를 true로 설정하여 애니메이션을 발생시킵니다.
+        setTimeout(() => setIsClicked(false), 200);
+        }}>
+
+      </img>
+    )}
+    </div>
         <audio ref={audioRef} src='audio/main_theme.mp3' loop />
         {isChrome() ? (
           <>
+              <IconButton
+              className="z-50 mr-3"
+              size="md"
+              onClick={() => {
+                handlePlaySoundEffect();
+              }}
+            >
+              {playSoundEffect ? (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />
+              </svg>
+              
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 9.75 19.5 12m0 0 2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6 4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />
+                </svg>
+              )}
+            </IconButton>
+
             <IconButton
               className="z-50 mr-3"
               size="md"
@@ -109,6 +188,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
                 </svg>
               )}
             </IconButton>
+            
 
             <RulesModal onRequestClose={closeModal}>
               <div className="text-light-text dark:text-dark-text flex justify-center items-center">

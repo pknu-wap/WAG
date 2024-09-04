@@ -6,6 +6,7 @@ import reportWebVitals from "./reportWebVitals";
 import { Provider } from "react-redux";
 import store from "./modules";
 import Header from "./components/layout/Header";
+import Footer from "./components/layout/Footer";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { RecoilRoot } from "recoil";
@@ -29,6 +30,7 @@ root.render(
             <App />
             <ToastContainer />
             </SquareBubble>
+            <Footer />
           </BrowserRouter>
         </RecoilRoot>
       </Provider>

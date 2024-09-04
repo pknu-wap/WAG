@@ -4,7 +4,7 @@ import FullLayout from "../components/layout/FullLayout";
 import { ConnectedProps, connect } from "react-redux";
 import { RootState } from "../modules";
 import { useRecoilState } from "recoil";
-import { modalState } from "../recoil/recoil";
+import { modalState, soundEffectStatus } from "../recoil/recoil";
 import Modal from "../components/modal/Modal";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -26,6 +26,7 @@ function MainPage({ dark }: ComponentProps) {
   const [theme, setTheme] = useState(localStorage.theme);
   const [enterCode, setEnterCode] = useState<number>();
   const [, setIsOpen] = useRecoilState(modalState);
+  const [soundEffectStatusValue, ] = useRecoilState(soundEffectStatus);
   const [isClicked, setIsClicked] = useState(false)
   const openModal = () => {
     handlePlaySound();
@@ -67,13 +68,17 @@ function MainPage({ dark }: ComponentProps) {
   };
 
   const handlePlaySound = () => {
-    
+    console.log(soundEffectStatusValue)
+
     const playSound = () => {
       const audio = new Audio('audio/button_click.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
   
-    playSound();
+    if (soundEffectStatusValue){
+      playSound();
+    }
+    
   }
 
   //랜덤입장 버튼 클릭
@@ -121,8 +126,11 @@ function MainPage({ dark }: ComponentProps) {
       const audio = new Audio('audio/lightmode_wag.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
-  
-    playSound();
+    
+    if (soundEffectStatusValue){
+      playSound();
+    }
+    
   }
 
   const handleDarkLogoClick = () => {
@@ -131,8 +139,10 @@ function MainPage({ dark }: ComponentProps) {
       const audio = new Audio('audio/darkmode_wag.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
-  
-    playSound();
+    if (soundEffectStatusValue){
+      playSound();
+    }
+    
   }
 
   useEffect(() => {
@@ -157,25 +167,17 @@ function MainPage({ dark }: ComponentProps) {
       <div className="sm:mt-0 mt-20">
         {theme === "light" ? (
           <div className="flex justify-center items-center">
-            <img className={`relative w-3/5 ${isClicked ? 'clicked' : ''}`} src="images/WAG_white.2.png" 
+            <img className={`relative w-2/4 ${isClicked ? 'clicked' : ''}`} src="images/yangSaeChanGame.png" 
               alt="logo light mode"
-              onClick={() => {
-                handleLightLogoClick();
-                setIsClicked(true); // 클릭될 때마다 isClicked 상태를 true로 설정하여 애니메이션을 발생시킵니다.
-                setTimeout(() => setIsClicked(false), 200);
-                }}>
+            >
 
               </img>
           </div>
         ) : (
           <div className="flex justify-center items-center "> 
-            <img className={`relative w-3/5 ${isClicked ? 'clicked' : ''}`} src="images/WAG_dark.2.png" 
+            <img className={`relative w-2/4 ${isClicked ? 'clicked' : ''}`} src="images/yangSaeChanGame.png" 
               alt="logo light mode"
-              onClick={() => {
-                handleDarkLogoClick();
-                setIsClicked(true); // 클릭될 때마다 isClicked 상태를 true로 설정하여 애니메이션을 발생시킵니다.
-                setTimeout(() => setIsClicked(false), 200);
-                }}>
+          >
 
               </img>
           </div>

@@ -8,6 +8,7 @@ import {
   loadingModalState,
   readyToGameModalState,
   timerCount,
+  soundEffectStatus,
 } from "../recoil/recoil";
 import { useEffect, useState, useRef } from "react";
 import ReadyToGameModal from "../components/modal/ReadyModal";
@@ -53,6 +54,7 @@ const ReadyToGame = () => {
   const [, setIsOpen] = useRecoilState(readyToGameModalState);
   const [, setCaptainIsOpen] = useRecoilState(captainReadyToGameModalState);
   const [, setLoadingIsOpen] = useRecoilState(loadingModalState);
+  const [soundEffectStatusValue, ] = useRecoilState(soundEffectStatus);
   const [nickname, setNickname] = useState<string>("");
   const [beforeNickname, setBeforeNickname] = useState("")
   const [possible, setPossible] = useState<boolean>();
@@ -220,8 +222,10 @@ const ReadyToGame = () => {
       const audio = new Audio('/audio/button_click.mp3')  
       audio.play()
     };
-  
-    playSound();
+    if (soundEffectStatusValue){
+      playSound();
+    }
+    
   };
 
   const handleCorrectSound = () => {
@@ -229,8 +233,10 @@ const ReadyToGame = () => {
       const audio = new Audio('/audio/correct_answer2.mp3')  
       audio.play()
     };
-  
-    playSound();
+    if (soundEffectStatusValue){
+      playSound();
+    }
+    
 
   };
 
@@ -239,8 +245,10 @@ const ReadyToGame = () => {
       const audio = new Audio('/audio/blip03.mp3')  
       audio.play()
     };
-  
-    playSound();
+    if (soundEffectStatusValue){
+      playSound();
+    }
+    
   };
 
   const handleQuestionSound = () => {
@@ -248,8 +256,10 @@ const ReadyToGame = () => {
       const audio = new Audio('/audio/question.mp3')  
       audio.play()
     };
-  
-    playSound();
+    if (soundEffectStatusValue){
+      playSound();
+    }
+    
     
   };
 
@@ -260,8 +270,10 @@ const ReadyToGame = () => {
       audio.play()
       audioFire.play()
     };
-  
-    playSound();
+    if (soundEffectStatusValue){
+      playSound();
+    }
+    
   };
 
   const handleBooSound = () => {
@@ -269,8 +281,10 @@ const ReadyToGame = () => {
       const audio = new Audio('/audio/fail.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
-  
-    playSound();
+    if (soundEffectStatusValue){
+      playSound();
+    }
+    
   }
 
   const handleStartSound = () => {
@@ -279,8 +293,10 @@ const ReadyToGame = () => {
       const audio = new Audio('/audio/start.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
-  
-    playSound();
+    if (soundEffectStatusValue){
+      playSound();
+    }
+    
   }
 
   const handleGameStartSound = () => {
@@ -289,8 +305,10 @@ const ReadyToGame = () => {
       const audio = new Audio('/audio/startGame.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
-  
-    playSound();
+    if (soundEffectStatusValue){
+      playSound();
+    }
+    
   }
 
   const handleWarningSound = () => {
@@ -299,8 +317,10 @@ const ReadyToGame = () => {
       const audio = new Audio('/audio/warning.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
-  
-    playSound();
+    if (soundEffectStatusValue){
+      playSound();
+    }
+    
   }
 
   const nicknamePossibleClick = async () => {
@@ -1383,7 +1403,7 @@ const ReadyToGame = () => {
             
           </div>
 
-          <div className="mt-3 m-auto" onClick={() => {navigate(location.state?.from || "/")}}>딛자</div>
+          <div className="mt-3 m-auto" onClick={() => {navigate(location.state?.from || "/")}}>닫자</div>
         </div>
       </ReadyToGameModal>
 

@@ -15,4 +15,5 @@ public class MiniGameRanking {
     private Long id;
     private String nickname;
     private Integer stage;
+    private Long score;
 }

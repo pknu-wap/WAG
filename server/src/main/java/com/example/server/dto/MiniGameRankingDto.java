@@ -8,4 +8,5 @@ public class MiniGameRankingDto {
     Integer rank;
     String nickname;
     Integer stage;
+    Long score;
 }
