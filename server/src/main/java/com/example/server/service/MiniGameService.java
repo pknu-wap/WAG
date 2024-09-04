@@ -12,20 +12,34 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+@Transactional
 @AllArgsConstructor
 @Service
 public class MiniGameService {
     private final MiniGameRepository miniGameRepository;
 
     public String postRanking(MiniGameRankingRequest miniGameRankingRequest){
-        MiniGameRanking miniGameRanking = new MiniGameRanking();
-        miniGameRanking.setNickname(miniGameRankingRequest.getNickname());
-        miniGameRanking.setStage(miniGameRankingRequest.getStage());
-        miniGameRepository.save(miniGameRanking);
+        Optional<MiniGameRanking> miniGameRankingOptional = miniGameRepository.findByNickname(miniGameRankingRequest.getNickname());
+        if(miniGameRankingOptional.isPresent()){
+            MiniGameRanking miniGameRanking = miniGameRankingOptional.get();
+            if(miniGameRanking.getStage() < miniGameRankingRequest.getStage()){
+                miniGameRanking.setStage(miniGameRankingRequest.getStage());
+                miniGameRepository.save(miniGameRanking);
+            }
+        }
+        else{
+            MiniGameRanking miniGameRanking = new MiniGameRanking();
+            miniGameRanking.setNickname(miniGameRankingRequest.getNickname());
+            miniGameRanking.setStage(miniGameRankingRequest.getStage());
+            miniGameRepository.save(miniGameRanking);
+        }
+
         return "success post ranking";
     }
 
