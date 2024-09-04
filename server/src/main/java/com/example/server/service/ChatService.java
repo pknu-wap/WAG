@@ -26,6 +26,7 @@ public class ChatService {
     private final RoomUserRepository roomUserRepository;
     private final GameOrderRepository gameOrderRepository;
     private final GameService gameService;
+    private final MessageService messageService;
 
     public ChatGameMessage setGame(ChatMessage chatMessage) {
         if(chatMessage.getMessageType()==ChatMessage.MessageType.START){
@@ -57,7 +58,7 @@ public class ChatService {
 
         roomRepository.save(room);
 
-        ChatGameMessage chatGameMessage = MessageService.makeChatGameMessage(chatMessage, room);
+        ChatGameMessage chatGameMessage = messageService.makeChatGameMessage(chatMessage, room);
         chatGameMessage.setMessageType(ChatMessage.MessageType.START);
 
         return chatGameMessage;
@@ -85,7 +86,7 @@ public class ChatService {
 
         Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
                         .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
-        ChatGameMessage chatGameMessage = MessageService.makeChatGameMessage(chatMessage, room);
+        ChatGameMessage chatGameMessage = messageService.makeChatGameMessage(chatMessage, room);
         chatGameMessage.setContent(chatMessage.getContent() + " 님이 경고를 받았습니다. ");
         chatGameMessage.setMessageType(ChatMessage.MessageType.PENALTY);
 
@@ -114,7 +115,7 @@ public class ChatService {
             if(room.getCorrectMemberCnt() >= 3 || room.getUserCount()-1 <= room.getCorrectMemberCnt()){ // 게임 끝나는 경우
                 room.setGameStatus(false);
                 roomRepository.save(room);
-                ChatGameMessage chatGameMessage = MessageService.makeEndChatGameMessage(chatMessage, room);
+                ChatGameMessage chatGameMessage = messageService.makeEndChatGameMessage(chatMessage, room);
                 chatGameMessage.setMessageType(ChatMessage.MessageType.END);
 
                 // 모든 gameOrder 삭제
@@ -124,13 +125,13 @@ public class ChatService {
                 return  chatGameMessage;
             }
             else {
-                ChatGameMessage chatGameMessage = MessageService.makeChatGameMessage(chatMessage, room);
+                ChatGameMessage chatGameMessage = messageService.makeChatGameMessage(chatMessage, room);
                 chatGameMessage.setMessageType(ChatMessage.MessageType.CORRECT);
                 return chatGameMessage;
             }
         }
         else{ // 오답
-            ChatGameMessage chatGameMessage = MessageService.makeChatGameMessage(chatMessage, room);
+            ChatGameMessage chatGameMessage = messageService.makeChatGameMessage(chatMessage, room);
             chatGameMessage.setMessageType(ChatMessage.MessageType.CORRECT);
             return chatGameMessage;
         }
@@ -165,7 +166,7 @@ public class ChatService {
             gameOrderRepository.save(nextGameOrder);
             roomRepository.save(room);  // 게임 메시지를 만든 후 저장한다.
 
-            chatGameMessage = MessageService.makeChatGameMessage(chatMessage, room);
+            chatGameMessage = messageService.makeChatGameMessage(chatMessage, room);
         }
         return chatGameMessage;
     }
@@ -176,7 +177,7 @@ public class ChatService {
         room.setNowTurnUserId(gameOrderRepository.findNextOrderByRoomId(room.getId())
                 .orElseThrow(()->new NoSuchRoomUserException(room.getId())));
         roomRepository.save(room);
-        ChatGameMessage chatGameMessage = MessageService.makeChatGameMessage(chatMessage, room);
+        ChatGameMessage chatGameMessage = messageService.makeChatGameMessage(chatMessage, room);
         chatGameMessage.setMessageType(ChatMessage.MessageType.RESET);
         return chatGameMessage;
     }
@@ -185,7 +186,7 @@ public class ChatService {
         Room room = roomRepository.findById(chatMessage.getRoomId())
                 .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
 
-        ChatGameMessage chatGameMessage = MessageService.makeChatGameMessage(chatMessage, room);;
+        ChatGameMessage chatGameMessage = messageService.makeChatGameMessage(chatMessage, room);;
 
         return chatGameMessage;
     }

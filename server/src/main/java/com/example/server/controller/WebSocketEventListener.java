@@ -14,6 +14,7 @@ import com.example.server.payload.response.RoomResponse;
 import com.example.server.repository.GameOrderRepository;
 import com.example.server.repository.RoomRepository;
 import com.example.server.repository.RoomUserRepository;
+import com.example.server.service.ChatService;
 import com.example.server.service.GameService;
 import com.example.server.service.MessageService;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,7 @@ public class WebSocketEventListener {
     private final RoomRepository roomRepository;
     private final GameOrderRepository gameOrderRepository;
     private final GameService gameService;
+    private final MessageService messageService;
 
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
@@ -86,7 +88,7 @@ public class WebSocketEventListener {
                     chatMessage.setSender(roomUser.getRoomNickname());
 
                     // END ChatGameMessage 전송
-                    chatGameMessage = MessageService.makeChatGameMessage(chatMessage,room);
+                    chatGameMessage = messageService.makeChatGameMessage(chatMessage,room);
                     messagingTemplate.convertAndSend(destination, chatGameMessage);
                     room.setGameStatus(false);
                     roomRepository.save(room);
@@ -106,7 +108,7 @@ public class WebSocketEventListener {
                     chatMessage.setSender("");
                     chatMessage.setContent("질문자 탈주하여 다음 턴으로 넘어갑니다");
                     chatMessage.setRoomId(roomId);
-                    ChatGameMessage chatGameMessage = MessageService.makeChatGameMessage(chatMessage, room);
+                    ChatGameMessage chatGameMessage = messageService.makeChatGameMessage(chatMessage, room);
                     messagingTemplate.convertAndSend(destination, chatGameMessage);
                 }
                 gameOrderRepository.delete(gameOrder);
@@ -170,7 +172,7 @@ public class WebSocketEventListener {
 
                 // 강제 ASK 전송
                 chatMessage.setMessageType(ChatMessage.MessageType.ASK);
-                ChatGameMessage chatGameMessage = MessageService.makeChatGameMessage(chatMessage, room);
+                ChatGameMessage chatGameMessage = messageService.makeChatGameMessage(chatMessage, room);
                 messagingTemplate.convertAndSend("/topic/public/"+room.getId(), chatGameMessage);
 
                 // 전송 후 프론트가 읽을 때까지 잠시 대기
@@ -187,7 +189,7 @@ public class WebSocketEventListener {
 
             // 기존에 보냈던 chatMessage에 MessageType만 RESET으로 바꿔 다시 전송
             chatMessage.setMessageType(ChatMessage.MessageType.RESET);
-            ChatGameMessage chatGameMessage = MessageService.makeChatGameMessage(chatMessage, room);
+            ChatGameMessage chatGameMessage = messageService.makeChatGameMessage(chatMessage, room);
             messagingTemplate.convertAndSend("/topic/public/"+room.getId(), chatGameMessage);
         }
 
