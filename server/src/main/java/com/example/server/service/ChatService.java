@@ -25,6 +25,7 @@ public class ChatService {
     private final RoomRepository roomRepository;
     private final RoomUserRepository roomUserRepository;
     private final GameOrderRepository gameOrderRepository;
+    private final GameService gameService;
 
     public ChatGameMessage setGame(ChatMessage chatMessage) {
         if(chatMessage.getMessageType()==ChatMessage.MessageType.START){
@@ -48,7 +49,7 @@ public class ChatService {
     }
 
     public ChatGameMessage startGame(ChatMessage chatMessage) {
-        GameService.makeGameOrder(chatMessage);
+        gameService.makeGameOrder(chatMessage);
 
         Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
                 .orElseThrow(() -> new NoSuchRoomException(chatMessage.getRoomId()));
@@ -148,11 +149,11 @@ public class ChatService {
 
         if(gameOrder.isNextTurn()){  // 질문일 경우 다음 턴으로 넘어감.
             int currentOrder = gameOrder.getUserOrder();
-            int nextOrder = GameService.getNextTurn(currentOrder, room.getUserCount(), room);
+            int nextOrder = gameService.getNextTurn(currentOrder, room.getUserCount(), room);
             GameOrder nextGameOrder = gameOrderRepository.findByUserOrder(nextOrder, room.getId())
                     .orElseThrow(NoSuchGameOrderException::new);
 
-            GameService.changeNowTurn(currentOrder, room.getUserCount(), room.getId());
+            gameService.changeNowTurn(currentOrder, room.getUserCount(), room.getId());
 
             gameOrder.setNowTurn(true);
             gameOrder.setNextTurn(false);

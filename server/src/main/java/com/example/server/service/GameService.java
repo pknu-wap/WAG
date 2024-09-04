@@ -22,13 +22,13 @@ import java.util.List;
 @AllArgsConstructor
 public class GameService {
 
-    public static RoomRepository roomRepository;
-    public static RoomUserRepository roomUserRepository;
-    public static AnswerListRepository answerListRepository;
-    public static GameOrderRepository gameOrderRepository;
+    private final RoomRepository roomRepository;
+    private final RoomUserRepository roomUserRepository;
+    private final AnswerListRepository answerListRepository;
+    private final GameOrderRepository gameOrderRepository;
 
 
-    public static void makeGameOrder(ChatMessage chatMessage){  // 게임 순서 & 정답어 설정
+    public void makeGameOrder(ChatMessage chatMessage){  // 게임 순서 & 정답어 설정
         Long roomId = chatMessage.getRoomId();
         List<RoomUser> roomUsers = roomUserRepository.findRandomByRoomId(roomId);
         List<AnswerList> answerLists;
@@ -69,7 +69,7 @@ public class GameService {
         }
     }
 
-    private static GameOrder gameOrderInit(RoomUser roomUser, Room room) {
+    private GameOrder gameOrderInit(RoomUser roomUser, Room room) {
         GameOrder gameOrder = new GameOrder();
         gameOrder.setRoom(room);
         gameOrder.setRoomUser(roomUser);
@@ -80,7 +80,7 @@ public class GameService {
         return gameOrder;
     }
 
-    public static AnswerListResponse getAnswerList(Long roomId, String nickname){
+    public AnswerListResponse getAnswerList(Long roomId, String nickname){
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(()->new NoSuchRoomException(roomId));
         int round = room.getCycle();
@@ -101,7 +101,7 @@ public class GameService {
         return new AnswerListResponse(gameOrderRepository.findAnswerNotMe(roomId), nickname, myAnswer);
     }
 
-    public static String setHint(int idx,String myRealAnswer){
+    public String setHint(int idx,String myRealAnswer){
         StringBuilder sb = new StringBuilder();
         for(int i = 0; i < myRealAnswer.length(); i++){
             char ch = myRealAnswer.charAt(i);
@@ -124,7 +124,7 @@ public class GameService {
         return sb.toString();
     }
 
-    public static String getLength(String myRealAnswer){
+    public String getLength(String myRealAnswer){
         StringBuilder sb = new StringBuilder();
         for(int i = 0; i < myRealAnswer.length(); i++){
             if(myRealAnswer.charAt(i)==' ')
@@ -135,7 +135,7 @@ public class GameService {
         return sb.toString();
     }
 
-    public static int getNextTurn(int currentOrder, int endOrder, Room room){
+    public int getNextTurn(int currentOrder, int endOrder, Room room){
         int nextOrder = currentOrder + 1;
         while(currentOrder != nextOrder){
             if(nextOrder > endOrder){
@@ -154,7 +154,7 @@ public class GameService {
         return nextOrder;
     }
 
-    public static void changeNowTurn(int currentOrder, int endOrder, long roomId){
+    public void changeNowTurn(int currentOrder, int endOrder, long roomId){
         int nowOrder = currentOrder - 1;
         while(currentOrder != nowOrder){
             if(nowOrder < 1){
