@@ -39,6 +39,7 @@ public class WebSocketEventListener {
     private final RoomUserRepository roomUserRepository;
     private final RoomRepository roomRepository;
     private final GameOrderRepository gameOrderRepository;
+    private final GameService gameService;
 
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
@@ -158,7 +159,7 @@ public class WebSocketEventListener {
             // 만약 아직 질문을 하지 않았다면 -> 질문 처리
             if(nextTurn){
 
-                int nextOrder = GameService.getNextTurn(nowOrder, room.getCurrentOrder(), room);
+                int nextOrder = gameService.getNextTurn(nowOrder, room.getCurrentOrder(), room);
                 GameOrder go = gameOrderRepository.findByUserOrder(nextOrder, room.getId())
                         .orElseThrow(NoSuchGameOrderException::new);
 
@@ -178,7 +179,7 @@ public class WebSocketEventListener {
 
             // 질문을 한 유저가 나갔거나 질문 처리를 하지 않은 유저의 질문 처리 후 처리
             // 다음 턴 인원을 찾아 room의 NowTurnUserId에 저장
-            int nt = GameService.getNextTurn(nowOrder, room.getUserCount(), room);
+            int nt = gameService.getNextTurn(nowOrder, room.getUserCount(), room);
             Long roomUserId = gameOrderRepository.findByUserOrder(nt, room.getId())
                     .orElseThrow(NoSuchGameOrderException::new).getRoomUser().getId();
             room.setNowTurnUserId(roomUserId);
