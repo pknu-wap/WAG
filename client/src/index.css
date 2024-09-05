@@ -35,7 +35,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
   @apply transition-colors duration-200 bg-light-bg dark:bg-dark-bg;
   max-width: 1024px;
-  padding-bottom: 7vh;
+  /* padding-bottom: 7vh; */
+}
+
+footer {
+  max-width: 1024px;
 }
 
 code {

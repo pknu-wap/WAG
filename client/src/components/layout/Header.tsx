@@ -19,7 +19,6 @@ type ComponentProps = Props & PropsFromRedux;
 const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
 
   const [play, setPlay] = useState(false);
-  const [soundEffectStatusValue, ] = useState(soundEffectStatus);
   const [isClicked, setIsClicked] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -72,7 +71,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
       audio.play(); // 소리를 재생합니다.
     };
     
-    if (soundEffectStatusValue){
+    if (playSoundEffect){
       playSound();
     }
     
@@ -85,7 +84,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
       audio.play(); // 소리를 재생합니다.
     };
     
-    if (soundEffectStatusValue){
+    if (playSoundEffect){
       playSound();
     }
     
@@ -93,8 +92,8 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
 
   return (
     <header className="m-5 z-50">
-      <div className="flex justify-end z-50">
-        <div className="absolute left-10 top-7">
+      <div className="flex justify-between z-50">
+        <div className="relative top-2">
       {dark ? (
 
 <img className={`w-20 h-16 ${isClicked ? 'clicked' : ''}`} src="images/WAG_dark.2.png" 
@@ -119,6 +118,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
       </img>
     )}
     </div>
+    <div className="flex justify-between z-50">
         <audio ref={audioRef} src='audio/main_theme.mp3' loop />
         {isChrome() ? (
           <>
@@ -207,6 +207,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
             </RulesModal>
           </>
         ) : null}
+        </div>
       </div>
     </header>
   );

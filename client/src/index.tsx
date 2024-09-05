@@ -6,7 +6,6 @@ import reportWebVitals from "./reportWebVitals";
 import { Provider } from "react-redux";
 import store from "./modules";
 import Header from "./components/layout/Header";
-import Footer from "./components/layout/Footer";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { RecoilRoot } from "recoil";
@@ -14,6 +13,7 @@ import ReactModal from "react-modal";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SquareBubble from "./components/layout/SquareBubble";
+import Footer from "./components/layout/Footer";
 
 const queryClient = new QueryClient();
 const rootElement = document.getElementById("root") as HTMLElement; // id가 'root'인 엘리먼트를 찾는 코드를 변수에 할당
@@ -28,9 +28,9 @@ root.render(
             <SquareBubble>
             <Header />
             <App />
+            <Footer/>
             <ToastContainer />
             </SquareBubble>
-            <Footer />
           </BrowserRouter>
         </RecoilRoot>
       </Provider>
