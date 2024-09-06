@@ -2,7 +2,7 @@
 
 
 # WAG - Web Appends Game
-![WAG_preview_image](https://github.com/pknu-wap/WAG/assets/112786665/64917f27-dc03-4d61-bd95-e5740b0c8dab)
+![image](https://github.com/user-attachments/assets/808bc148-ddb7-490c-b87a-9ed151981847)
 <br>
 <br>
 <br>
@@ -22,21 +22,24 @@
 <br>
 
 ### 메인화면
-![메인화면](https://github.com/pknu-wap/WAG/assets/111286262/61824ea4-9e32-4497-b247-2071e0e2eaf4)
+![메인 화면](https://github.com/user-attachments/assets/5b014b11-e7f6-4a30-9073-de70ed9e24b1)
 ### 방 생성
-![방 생성](https://github.com/pknu-wap/WAG/assets/111286262/efff8b22-1f66-4274-bacf-c344330523b9)
+![방 생성](https://github.com/user-attachments/assets/eae12a7b-dd28-464a-97a7-420c7cc1bac4)
 ### 게임방 설정
-![방 설정](https://github.com/pknu-wap/WAG/assets/111286262/ab5b5fc8-35ef-47b7-8ac9-836ff7789ae5)
+![방 설정](https://github.com/user-attachments/assets/17007b50-ddc3-4c0c-9de5-e0a2787c8bd0)
 ### 레디 & 시작
-![레디   시작](https://github.com/pknu-wap/WAG/assets/111286262/4e1d93d6-3a99-4bd3-9340-8432c346d077)
-### 질문 & 답변
-![질문   답변](https://github.com/pknu-wap/WAG/assets/111286262/d09eac85-2580-415e-b12a-3046ad376ed6)
+![게임 준비   시작](https://github.com/user-attachments/assets/7087182e-ecb5-46b8-9438-6b84fe4813b5)
+### 질문
+![질문](https://github.com/user-attachments/assets/838a09f6-20ec-4783-9fd8-6bec38836620)
 ### 경고
-![경고](https://github.com/pknu-wap/WAG/assets/111286262/311edd3c-5634-45fd-85f9-17d3065666d4)
-### 정답 & 종료
-![정답   종료](https://github.com/pknu-wap/WAG/assets/111286262/b7216f9a-914a-49f8-826d-c3767a9ab8a3)
+![경고주기](https://github.com/user-attachments/assets/b7551bf6-6ffb-4a62-9ae2-0e453959a0ce)
+### 정답
+![정답](https://github.com/user-attachments/assets/f8645d17-27c4-4c5c-a4e6-d4ad2b61e53d)
+### 종료
+![종료](https://github.com/user-attachments/assets/c63dea14-d8c4-4b1c-99f7-131ff10c62d2)
 ### 재시작
-![재시작](https://github.com/pknu-wap/WAG/assets/111286262/4da3e394-e0be-4fdc-ac3c-7b86008fea7b)
+![재시작](https://github.com/user-attachments/assets/fc1efc09-f976-495b-9710-ca904532e849)
+
 <br>
 <br>
 

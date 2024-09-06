@@ -14,6 +14,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SquareBubble from "./components/layout/SquareBubble";
 import Footer from "./components/layout/Footer";
+import FullLayout from "./components/layout/FullLayout";
 
 const queryClient = new QueryClient();
 const rootElement = document.getElementById("root") as HTMLElement; // id가 'root'인 엘리먼트를 찾는 코드를 변수에 할당
@@ -26,9 +27,11 @@ root.render(
         <RecoilRoot>
           <BrowserRouter>
             <SquareBubble>
+            <FullLayout>
             <Header />
             <App />
             <Footer/>
+            </FullLayout>
             <ToastContainer />
             </SquareBubble>
           </BrowserRouter>

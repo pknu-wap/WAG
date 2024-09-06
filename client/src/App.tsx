@@ -18,7 +18,7 @@ function isChrome() {
 function App() {
   RouteChangeTracker();
   return (
-    <FullLayout>
+
       <AnimatePresence>
         {isChrome() ? (
             <Routes>
@@ -34,7 +34,7 @@ function App() {
         )}
         
       </AnimatePresence>
-    </FullLayout>
+
   );
 }
 

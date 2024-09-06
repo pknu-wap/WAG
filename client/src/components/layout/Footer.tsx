@@ -31,17 +31,14 @@ const Footer = ({ dark, toggleDarkMode }: ComponentProps) => {
 
 
   return (
-    <FullLayout>
-      <footer className={`absolute bottom-10 w-full flex justify-between items-center pr-3 pl-3 `}>
-          <div>
-            © WAG!
-          </div>
-          <div>
-            v1.0.1
-          </div>
+      <footer className={`fixed bottom-3 w-full flex justify-between items-center pr-3 pl-3 pb-3`}>
+        <div>
+          © WAG!
+        </div>
+        <div>
+          v1.0.2
+        </div>        
       </footer>
-</FullLayout>
-
   );
 };
 

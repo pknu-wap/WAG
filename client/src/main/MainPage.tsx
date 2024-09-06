@@ -164,24 +164,16 @@ function MainPage({ dark }: ComponentProps) {
   return (
     <Wrapper>
     <FullLayout>
-      <div className="sm:mt-0 mt-20">
-        {theme === "light" ? (
-          <div className="flex justify-center items-center">
-            <img className={`relative w-2/4 ${isClicked ? 'clicked' : ''}`} src="images/yangSaeChanGame.png" 
-              alt="logo light mode"
-            >
+      <div className="">
+      
+        <div className="flex justify-center items-center "> 
+          <img className={`relative w-2/4`} src="images/yangSaeChanGame.png" 
+            alt="logo light mode"
+        >
 
-              </img>
-          </div>
-        ) : (
-          <div className="flex justify-center items-center "> 
-            <img className={`relative w-2/4 ${isClicked ? 'clicked' : ''}`} src="images/yangSaeChanGame.png" 
-              alt="logo light mode"
-          >
-
-              </img>
-          </div>
-        )}
+            </img>
+        </div>
+        
         
         <div className="flex flex-col items-center justify-center space-y-5 mt-0">
           <Button size="lg" onClick={handleRandomEnterClick}>
