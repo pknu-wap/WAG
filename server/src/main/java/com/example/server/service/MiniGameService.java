@@ -60,7 +60,7 @@ public class MiniGameService {
                     .rank((idx++) + 1)
                     .nickname(miniGameRanking.getNickname())
                     .stage(miniGameRanking.getStage())
-                    .score(miniGameRanking.getScore())
+                    .score(String.format("%,d", miniGameRanking.getScore()))
                     .build();
             miniGameRankingDtos.add(miniGameRankingDto);
         }
