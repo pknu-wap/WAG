@@ -33,7 +33,7 @@ public class MiniGameService {
             MiniGameRanking miniGameRanking = miniGameRankingOptional.get();
             if(miniGameRanking.getScore() < miniGameRankingRequest.getScore()){
                 miniGameRanking.setStage(miniGameRankingRequest.getStage());
-                miniGameRanking.setScore(miniGameRanking.getScore());
+                miniGameRanking.setScore(miniGameRankingRequest.getScore());
                 miniGameRepository.save(miniGameRanking);
             }
         }
@@ -41,6 +41,7 @@ public class MiniGameService {
             MiniGameRanking miniGameRanking = new MiniGameRanking();
             miniGameRanking.setNickname(miniGameRankingRequest.getNickname());
             miniGameRanking.setStage(miniGameRankingRequest.getStage());
+            miniGameRanking.setScore(miniGameRankingRequest.getScore());
             miniGameRepository.save(miniGameRanking);
         }
 

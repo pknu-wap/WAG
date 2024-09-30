@@ -62,10 +62,10 @@
 
 <div align="center">
 
-|  <img src="https://avatars.githubusercontent.com/u/112786665?v=4" alt="3_pano" width="120" height="120">  | <img src="https://avatars.githubusercontent.com/u/80705329?v=4" alt="3_jumo" width="120" height="120"> | <img src="https://avatars.githubusercontent.com/u/111286262?v=4" alt="3_simba" width="120" height="120">  | <img src="https://avatars.githubusercontent.com/u/35947667?v=4" alt="3_pano" width="120" height="120"> | <img src="https://avatars.githubusercontent.com/u/130421104?v=4" alt="3_miki" width="120" height="120"> |
+|  <img src="https://avatars.githubusercontent.com/u/112786665?v=4" alt="3_pano" width="120" height="120">  | <img src="https://avatars.githubusercontent.com/u/80705329?v=4" alt="3_jumo" width="120" height="120"> | <img src="https://avatars.githubusercontent.com/u/35947667?v=4" alt="3_pano" width="120" height="120">  | <img src="https://avatars.githubusercontent.com/u/111286262?v=4" alt="3_simba" width="120" height="120"> | <img src="https://avatars.githubusercontent.com/u/130421104?v=4" alt="3_miki" width="120" height="120"> |
 | :------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: |
-|  [김준서](https://github.com/oesnuj)   |    [하준서](https://github.com/dev-junseo)     |    [김종경](https://github.com/JONG-KYEONG)   |     [장홍준](https://github.com/wkdghdwns199)   |      [함규빈](https://github.com/PororoAndFriends)      |
-| Front-End |  Front-End |  Back-End  |  Back-End |  Back-End
+|  [김준서](https://github.com/oesnuj)   |    [하준서](https://github.com/dev-junseo)     |    [장홍준](https://github.com/wkdghdwns199)   |     [김종경](https://github.com/JONG-KYEONG)   |      [함규빈](https://github.com/PororoAndFriends)      |
+| Front-End |  Front-End |  Full-Stack  |  Back-End |  Back-End
 
 </div>
 <br>
