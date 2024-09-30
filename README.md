@@ -11,11 +11,13 @@
 
 ## 🎨 Introduction  
 
-
-간편하고 빠르게 즐길 수 있는 **실시간 채팅 기반 웹 미니게임**을 제작하는 WAG 입니다!
+간편하고 빠르게 즐길 수 있는 **실시간 채팅 기반 웹 미니게임**을 제작하는 WAG입니다!
 <br>
 <br>
-언제 어디서든 친구들과 함께 양세찬 게임을 즐겨보세요!
+언제 어디서든 친구들과 함께 즐길 수 있는 양세찬 게임을 만나보세요. 실시간으로 연결되어 채팅하면서 플레이할 수 있는 재미있는 게임을 제공합니다.
+<br>
+<br>
+빠른 접근성, 간단한 규칙, 그리고 실시간 상호작용으로 누구나 쉽게 즐길 수 있는 게임을 목표로 하고 있습니다. WAG와 함께 친구들과의 게임 시간을 더욱 특별하게 만들어보세요!
 <br>
 ### [🕹게임하러 가기](https://wwwag.co.kr/)
 
@@ -55,6 +57,14 @@
 
 ### Coop
 <img src="https://img.shields.io/badge/figma-E7157B?style=for-the-badge&logo=figma&logoColor=white"> <img src="https://img.shields.io/badge/github-000000?style=for-the-badge&logo=github&logoColor=white"> <img src="https://img.shields.io/badge/notion-000000?style=for-the-badge&logo=notion&logoColor=white"> 
+
+<br>
+
+## ⏳ Development period
+- 전체 개발 기간 : 2024-02-10 ~ ing
+- 아이디어 선정 및 기획 : 2024-02-10 ~ 2024-03-20
+- 기능 구현 : 2024-03-22 ~ 2024-06-07
+- 유지 보수 : 2024-06-07 ~ ing
 
 <br>
 
