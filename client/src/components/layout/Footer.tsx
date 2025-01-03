@@ -31,13 +31,13 @@ const Footer = ({ dark, toggleDarkMode }: ComponentProps) => {
 
 
   return (
-      <footer className={`fixed bottom-3 w-full flex justify-between items-center pr-3 pl-3 pb-3`}>
+      <footer className={`fixed bottom-0 w-full flex justify-between items-center pr-3 pl-3 pb-3`}>
         <div>
           © WAG!
         </div>
         <div>
           v1.0.2
-        </div>        
+        </div>         
       </footer>
   );
 };
