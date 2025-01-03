@@ -4,7 +4,7 @@
 
 import { UserInfo } from "os";
 
-export const URL = "https://wwwag-backend:5000.co.kr/ws";
+export const URL = "https://wwwag-backend.co.kr:5000/ws";
 
 // 닉네임 중복확인 get response
 export interface INicknamePossible {

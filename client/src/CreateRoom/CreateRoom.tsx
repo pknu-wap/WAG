@@ -47,7 +47,7 @@ function CreateRoom() {
     try {
       //console.log("11", isPrivate);
       const response = await axios.post<IRoomResponseInfo>(
-        "https://wwwag-backend:5000.co.kr/room/create",
+        "https://wwwag-backend.co.kr:5000/room/create",
         {
           privateRoom: isPrivate,
           userNickName: nickName,
