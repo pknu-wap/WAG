@@ -571,12 +571,27 @@ code {
 }
 
 .circles{
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 데스크탑에서만 최소 높이를 970px로 설정 */
+@media (min-width: 769px) {
+.circles {
+  min-height: 970px; /* 데스크탑에서 최소 높이 설정 */
+}
+}
+
+/* 모바일 디바이스에서는 높이를 자유롭게 조절 */
+@media (max-width: 768px) {
+.circles {
+  height: 100vh; /* 모바일에서는 높이를 자동으로 설정 */
+  min-height: unset; /* 최소 높이 제거 */
+}
 }
 
 .circles li{
