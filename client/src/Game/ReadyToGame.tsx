@@ -201,7 +201,7 @@ const ReadyToGame = () => {
   const getNicknamePossible = async () => {
     try {
       const response = await axios.get<INicknamePossible>(
-        "https://wwwag-backend.co.kr:5000/nickname/possible",
+        "https://wwwag.co.kr:8000/nickname/possible",
         {
           params: {
             roomId: Number(params.roomId),
@@ -362,7 +362,7 @@ const ReadyToGame = () => {
   const getRoomInfo = async () => {
     try {
       const response = await axios.get<IRoomResponseInfo>(
-        "https://wwwag-backend.co.kr:5000/room/info",
+        "https://wwwag.co.kr:8000/room/info",
         {
           params: {
             roomId: Number(params.roomId),
@@ -936,7 +936,7 @@ const ReadyToGame = () => {
     const nickname = localStorage.getItem("nickName");
     try {
       const response = await axios.get<UserAnswerDto>(
-        "https://wwwag-backend.co.kr:5000/answer/list",
+        "https://wwwag.co.kr:8000/answer/list",
         {
           params: {
             roomId: Number(params.roomId),
