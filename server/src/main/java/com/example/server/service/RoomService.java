@@ -84,10 +84,10 @@ public class RoomService {
     public void addUser(Room room, String nickName,Boolean isCaptain, UserPrincipal userPrincipal){  // 방에 유저 추가 로직
         RoomUser roomUser = RoomUserInit(room, nickName, isCaptain);
 
-        if (userPrincipal != null && userPrincipal.getId() != null) {
-            Optional<User> userOptional = userRepository.findById((userPrincipal.getId()));
-            userOptional.ifPresent(roomUser::setUser);
-        }
+        // if (userPrincipal != null && userPrincipal.getId() != null) {
+        //     Optional<User> userOptional = userRepository.findById((userPrincipal.getId()));
+        //     userOptional.ifPresent(roomUser::setUser);
+        // }
         room.setUserCount(room.getUserCount()+1);
 
         roomUserRepository.save(roomUser);
