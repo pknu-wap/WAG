@@ -22,6 +22,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.setApplicationDestinationPrefixes("/app");     // 주제 앞에 /app경로를 고정합니다.
-        registry.enableSimpleBroker("/topic");   // topic이라는 주제를 생성
+//        registry.enableSimpleBroker("/topic");   // topic이라는 주제를 생성 // Kafka를 사용할 것이므로 SimpleBroker는 제거
     }
 }
