@@ -6,8 +6,6 @@ import { UserInfo } from "os";
 
 export const URL = `${process.env.REACT_APP_API_URL}/ws`;
 
-
-
 // 닉네임 중복확인 get response
 export interface INicknamePossible {
   possible: boolean;

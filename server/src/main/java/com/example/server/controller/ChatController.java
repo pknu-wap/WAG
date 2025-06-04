@@ -87,13 +87,12 @@ public class ChatController {
 
     @MessageMapping("/chat.addUser")
     public ChatRoomInfoMessage addUser(@Payload ChatMessage chatMessage,
-                                       SimpMessageHeaderAccessor headerAccessor,
-                                       @CurrentUser UserPrincipal userPrincipal) {   // 방장 아닌 유저 소켓 연결
+                                       SimpMessageHeaderAccessor headerAccessor) {   // 방장 아닌 유저 소켓 연결
         String sender = chatMessage.getSender();
         headerAccessor.getSessionAttributes().put("username", sender);
         headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
 
-        RoomResponse roomResponse = roomService.enterRoomByRoomId(chatMessage.getSender(),chatMessage.getRoomId(), userPrincipal);  // 해당 방에 입장하는 로직
+        RoomResponse roomResponse = roomService.enterRoomByRoomId(chatMessage.getSender(),chatMessage.getRoomId(), null);  // 해당 방에 입장하는 로직
         ChatRoomInfoMessage chatRoomInfoMessage = new ChatRoomInfoMessage();
         chatRoomInfoMessage.setMessageType(ChatMessage.MessageType.JOIN);
         chatRoomInfoMessage.setSender(sender);
