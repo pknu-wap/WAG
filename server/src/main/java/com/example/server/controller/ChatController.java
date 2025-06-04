@@ -7,15 +7,14 @@ import com.example.server.security.CurrentUser;
 import com.example.server.security.UserPrincipal;
 import com.example.server.service.ChatService;
 import com.example.server.service.GameService;
+import com.example.server.kafka.KafkaProducerService;
 import com.example.server.service.RoomService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,58 +23,65 @@ import java.util.Objects;
 @AllArgsConstructor
 @RestController
 public class ChatController {
-    private final SimpMessageSendingOperations messagingTemplate;
+//    private final SimpMessageSendingOperations messagingTemplate;
+    private final KafkaProducerService kafkaProducerService;
     private final ChatService chatService;
     private final RoomService roomService;
     private final GameService gameService;
 
     @MessageMapping("/chat.sendMessage")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
-        String destination = "/topic/public/"+chatMessage.getRoomId();
-        messagingTemplate.convertAndSend(destination, chatMessage);
+//        String destination = "/topic/public/"+chatMessage.getRoomId();
+//        messagingTemplate.convertAndSend(destination, chatMessage);
+        kafkaProducerService.send("chat-topic", chatMessage);
         return chatMessage;
     }
 
     @MessageMapping("/chat.sendGameMessage")
     public ChatGameMessage sendGameMessage(@Payload ChatMessage chatMessage) {
-        String destination = "/topic/public/"+chatMessage.getRoomId();
+//        String destination = "/topic/public/"+chatMessage.getRoomId();
         ChatGameMessage chatGameMessage = chatService.setGame(chatMessage);
-        messagingTemplate.convertAndSend(destination, chatGameMessage);
+//        messagingTemplate.convertAndSend(destination, chatGameMessage);
+        kafkaProducerService.send("game-topic", chatGameMessage);
         return chatGameMessage;
     }
 
     @MessageMapping("/chat.changeMode")
     public ChatRoomModeMessage changeGameMode(@Payload ChatMessage chatMessage) {
-        String destination = "/topic/public/"+chatMessage.getRoomId();
+//        String destination = "/topic/public/"+chatMessage.getRoomId();
         ChatRoomModeMessage chatRoomModeMessage = roomService.changeRoomMode(chatMessage);
-        messagingTemplate.convertAndSend(destination, chatRoomModeMessage);
+//        messagingTemplate.convertAndSend(destination, chatRoomModeMessage);
+        kafkaProducerService.send("mode-topic", chatRoomModeMessage);
         return chatRoomModeMessage;
     }
 
     @MessageMapping("/chat.ready")
     public ChatReadyMessage setReady(@Payload ChatMessage chatMessage) {
-        String destination = "/topic/public/"+chatMessage.getRoomId();
+//        String destination = "/topic/public/"+chatMessage.getRoomId();
         ChatReadyMessage chatReadyMessage = roomService.setReady(chatMessage);
         chatReadyMessage.setMessageType(ChatMessage.MessageType.READY);
-        messagingTemplate.convertAndSend(destination, chatReadyMessage);
+//        messagingTemplate.convertAndSend(destination, chatReadyMessage);
+        kafkaProducerService.send("ready-topic", chatReadyMessage);
         return chatReadyMessage;
     }
 
     @MessageMapping("/chat.setCategory")
     public ChatMessage setCategory(@Payload ChatMessage chatMessage) {
-        String destination = "/topic/public/"+chatMessage.getRoomId();
+//        String destination = "/topic/public/"+chatMessage.getRoomId();
         ChatMessage rechatMessage = roomService.setCategory(chatMessage);
         rechatMessage.setMessageType(ChatMessage.MessageType.CATEGORY);
-        messagingTemplate.convertAndSend(destination, rechatMessage);
+//        messagingTemplate.convertAndSend(destination, rechatMessage);
+        kafkaProducerService.send("category-topic", rechatMessage);
         return rechatMessage;
     }
 
     @MessageMapping("/chat.setTimer")
     public ChatMessage setTimer(@Payload ChatMessage chatMessage) {
-        String destination = "/topic/public/"+chatMessage.getRoomId();
+//        String destination = "/topic/public/"+chatMessage.getRoomId();
         ChatMessage rechatMessage = roomService.setTimer(chatMessage);
         rechatMessage.setMessageType(ChatMessage.MessageType.TIMER);
-        messagingTemplate.convertAndSend(destination, rechatMessage);
+//        messagingTemplate.convertAndSend(destination, rechatMessage);
+        kafkaProducerService.send("timer-topic", rechatMessage);
         return rechatMessage;
     }
 
@@ -94,7 +100,8 @@ public class ChatController {
         chatRoomInfoMessage.setContent(sender + " 님이 입장하셨습니다.");
         chatRoomInfoMessage.setRoomId(chatMessage.getRoomId());
         chatRoomInfoMessage.setRoomResponse(roomResponse);
-        messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getRoomId(), chatRoomInfoMessage);
+//        messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getRoomId(), chatRoomInfoMessage);
+        kafkaProducerService.send("add-topic", chatRoomInfoMessage);
 
         return chatRoomInfoMessage;
     }
@@ -106,8 +113,8 @@ public class ChatController {
         Objects.requireNonNull(headerAccessor.getSessionAttributes()).put("username", sender);
         headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
         chatMessage.setMessageType(ChatMessage.MessageType.JOIN);
-        messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getRoomId(), chatMessage);
-
+//        messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getRoomId(), chatMessage);
+        kafkaProducerService.send("add-captain-topic", chatMessage);
         return chatMessage;
     }
 

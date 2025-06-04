@@ -95,20 +95,7 @@ public class SecurityConfig {
                         .permitAll()
                     .anyRequest()
                         .authenticated()
-                    .and()
-                .oauth2Login()
-                    .authorizationEndpoint()
-                        .baseUri("/oauth2/authorization")
-                        .authorizationRequestRepository(cookieAuthorizationRequestRepository())
-                        .and()
-                    .redirectionEndpoint()
-                        .baseUri("/oauth2/callback/*")
-                        .and()
-                    .userInfoEndpoint()
-                        .userService(customOAuth2UserService) //로그인 후 후처리
-                        .and()
-                    .successHandler(oAuth2AuthenticationSuccessHandler)
-                    .failureHandler(oAuth2AuthenticationFailureHandler);
+                    .and();
 
         // Add our custom Token based authentication filter
         http.addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
