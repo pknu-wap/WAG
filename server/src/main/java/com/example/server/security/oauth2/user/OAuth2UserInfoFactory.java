@@ -25,7 +25,7 @@ public class OAuth2UserInfoFactory {
             return new FacebookOAuth2UserInfo(attributes);
         } else if (registrationId.equalsIgnoreCase(AuthProvider.github.toString())) {
             if(attributes.get("email")==null){
-                 return new GithubOAuth2UserInfo(setAttributesGithubEmail(attributes,oAuth2UserRequest.getAccessToken().getTokenValue()));
+                return new GithubOAuth2UserInfo(setAttributesGithubEmail(attributes,oAuth2UserRequest.getAccessToken().getTokenValue()));
             }
             return new GithubOAuth2UserInfo(attributes);
         }  else if (registrationId.equalsIgnoreCase(AuthProvider.kakao.toString())) {
