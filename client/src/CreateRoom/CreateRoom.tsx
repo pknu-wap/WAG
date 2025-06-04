@@ -16,7 +16,7 @@ import Wrapper from "../components/Wrapper";
 function CreateRoom() {
   const [isPrivate, setIsPrivate] = useState<boolean | null>(false); //일단은 공개방을 default로
   const [nickName, setNickname] = useState<string>("");
-  const [soundEffectStatusValue, ] = useRecoilState(soundEffectStatus);
+  const [soundEffectStatusValue,] = useRecoilState(soundEffectStatus);
   const navigate = useNavigate();
 
   // const radioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,20 +26,20 @@ function CreateRoom() {
   const handlePlaySound = () => {
 
     const playSound = () => {
-      if (soundEffectStatusValue){
-        const audio = new Audio('audio/button_click.mp3')  
+      if (soundEffectStatusValue) {
+        const audio = new Audio('audio/button_click.mp3')
         audio.play()
       }
-      
+
     };
-  
+
     playSound();
-    
+
   };
 
   const createRoom = async () => {
     handlePlaySound();
-    if (await nicknamePossibleClick()=== false){
+    if (await nicknamePossibleClick() === false) {
       Toast({ message: "사용 불가한 닉네임입니다!", type: "warn" });
       return;
     }
@@ -47,7 +47,7 @@ function CreateRoom() {
     try {
       //console.log("11", isPrivate);
       const response = await axios.post<IRoomResponseInfo>(
-        "https://wwwag.co.kr:8000/room/create",
+        `${process.env.REACT_APP_API_URL}/room/create`,
         {
           privateRoom: isPrivate,
           userNickName: nickName,
@@ -100,7 +100,7 @@ function CreateRoom() {
         <Button size="lg" onClick={createRoom}>
           공개방 생성
         </Button>
-      );  
+      );
     } else {
       return (
         <Button size="lg" onClick={createRoom}>
@@ -120,58 +120,58 @@ function CreateRoom() {
 
   return (
     <Wrapper>
-    <FullLayout>
-      <div className="p-4">
-        <div className="justify-center text-6xl mb-20">방 만들기</div>
-        <div className="rounded-xl font-extrabold min-w-44 ">
-          방 공개 / 비공개 여부 선택
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 mt-5 mb-8 gap-2">
-          <RadioButton
-            id="public"
-            label="공개"
-            value="false"
-            name="roomType"
-            onChange={() => setIsPrivate(false)}
-            checked={isPrivate === false}
-          />
-          <RadioButton
-            id="private"
-            label="비공개"
-            value="true"
-            name="roomType"
-            onChange={() => setIsPrivate(true)}
-          />
-        </div>
-        <div className="mb-8">
-          <div className="rounded-xl font-extrabold min-w-44 mb-3">게임 카테고리 설정</div>
-          <DropdownSelect onOptionSelect={handleOptionSelect} defaultValue="전체" />
-        </div>
-        <div>
-          <div className="rounded-xl font-extrabold min-w-44 mb-3">턴 당 진행시간</div>
-          <SliderComponent value={sliderValue} onChange={handleSliderChange} />
-        </div>
-        <input
-          className="relative z-10 w-3/4 h-12 mb-5 mt-5 rounded shadow-md pl-5 text-[#000000]"
-          type="error"
-          required
-          placeholder={"닉네임을 입력해주세요"}
-          onChange={(e) => {
-            setNickname(e.target.value);
-          }}
-          onKeyDown={async (e) => {
-            if (e.nativeEvent.isComposing) return ;
-            if (e.key === "Enter" && nickName?.trim() !== "") {
-              createRoom()  
-            } else if (e.key === "Enter" && nickName?.trim() === "") {
-              Toast({ message: "사용 불가한 닉네임입니다!", type: "warn" });
-            }
-          }}
-        ></input>
+      <FullLayout>
+        <div className="p-4">
+          <div className="justify-center text-6xl mb-20">방 만들기</div>
+          <div className="rounded-xl font-extrabold min-w-44 ">
+            방 공개 / 비공개 여부 선택
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 mt-5 mb-8 gap-2">
+            <RadioButton
+              id="public"
+              label="공개"
+              value="false"
+              name="roomType"
+              onChange={() => setIsPrivate(false)}
+              checked={isPrivate === false}
+            />
+            <RadioButton
+              id="private"
+              label="비공개"
+              value="true"
+              name="roomType"
+              onChange={() => setIsPrivate(true)}
+            />
+          </div>
+          <div className="mb-8">
+            <div className="rounded-xl font-extrabold min-w-44 mb-3">게임 카테고리 설정</div>
+            <DropdownSelect onOptionSelect={handleOptionSelect} defaultValue="전체" />
+          </div>
+          <div>
+            <div className="rounded-xl font-extrabold min-w-44 mb-3">턴 당 진행시간</div>
+            <SliderComponent value={sliderValue} onChange={handleSliderChange} />
+          </div>
+          <input
+            className="relative z-10 w-3/4 h-12 mb-5 mt-5 rounded shadow-md pl-5 text-[#000000]"
+            type="error"
+            required
+            placeholder={"닉네임을 입력해주세요"}
+            onChange={(e) => {
+              setNickname(e.target.value);
+            }}
+            onKeyDown={async (e) => {
+              if (e.nativeEvent.isComposing) return;
+              if (e.key === "Enter" && nickName?.trim() !== "") {
+                createRoom()
+              } else if (e.key === "Enter" && nickName?.trim() === "") {
+                Toast({ message: "사용 불가한 닉네임입니다!", type: "warn" });
+              }
+            }}
+          ></input>
 
-        <div className="mt-12">{renderButton()}</div>
-      </div>
-    </FullLayout>
+          <div className="mt-12">{renderButton()}</div>
+        </div>
+      </FullLayout>
     </Wrapper>
   );
 }

@@ -26,7 +26,7 @@ function MainPage({ dark }: ComponentProps) {
   const [theme, setTheme] = useState(localStorage.theme);
   const [enterCode, setEnterCode] = useState<number>();
   const [, setIsOpen] = useRecoilState(modalState);
-  const [soundEffectStatusValue, ] = useRecoilState(soundEffectStatus);
+  const [soundEffectStatusValue,] = useRecoilState(soundEffectStatus);
   const [isClicked, setIsClicked] = useState(false)
   const openModal = () => {
     handlePlaySound();
@@ -42,7 +42,7 @@ function MainPage({ dark }: ComponentProps) {
   const getRoomIdCode = async () => {
     try {
       const response = await axios.get(
-        "https://wwwag.co.kr:8000/roomId/code",
+        `${process.env.REACT_APP_API_URL}/roomId/code`,
         {
           params: {
             enterCode: enterCode,
@@ -59,7 +59,7 @@ function MainPage({ dark }: ComponentProps) {
   //빠른 입장으로 roomid받기
   const getRandomRoomId = async () => {
     try {
-      const response = await axios.get("https://wwwag.co.kr:8000/roomId");
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/roomId`);
       return response.data;
     } catch (error) {
       console.error("랜덤 입장 요청 중 오류 발생:", error);
@@ -74,11 +74,11 @@ function MainPage({ dark }: ComponentProps) {
       const audio = new Audio('audio/button_click.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
-  
-    if (soundEffectStatusValue){
+
+    if (soundEffectStatusValue) {
       playSound();
     }
-    
+
   }
 
   //랜덤입장 버튼 클릭
@@ -89,13 +89,13 @@ function MainPage({ dark }: ComponentProps) {
     if (roomId !== "no available room") {
       localStorage.setItem("roomId", roomId);
       navigate(`/ReadyToGame/${roomId}`);
-    } else{ 
+    } else {
       Toast({ message: "입장 가능한 방이 없습니다.", type: "error" });
       Toast({ message: "방을 생성하여 주시길 바랍니다.", type: "error" });
     }
   };
 
-  
+
   //코드입장시 버튼 클릭
   const buttonCheckHandler = async () => {
     handlePlaySound();
@@ -115,34 +115,34 @@ function MainPage({ dark }: ComponentProps) {
     handlePlaySound();
     navigate("/CreateRoom"); // 페이지 이동 처리
   };
-  
+
   const handleGoToSinglePlayground = () => {
-    window.open('https://splendorous-conkies-8e58b1.netlify.app/','_self');
+    window.open('https://splendorous-conkies-8e58b1.netlify.app/', '_self');
   }
 
   const handleLightLogoClick = () => {
-    
+
     const playSound = () => {
       const audio = new Audio('audio/lightmode_wag.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
-    
-    if (soundEffectStatusValue){
+
+    if (soundEffectStatusValue) {
       playSound();
     }
-    
+
   }
 
   const handleDarkLogoClick = () => {
-    
+
     const playSound = () => {
       const audio = new Audio('audio/darkmode_wag.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
-    if (soundEffectStatusValue){
+    if (soundEffectStatusValue) {
       playSound();
     }
-    
+
   }
 
   useEffect(() => {
@@ -163,78 +163,78 @@ function MainPage({ dark }: ComponentProps) {
 
   return (
     <Wrapper>
-    <FullLayout>
-      <div className="">
-      
-        <div className="flex justify-center items-center "> 
-          <img className={`relative w-2/4`} src="images/yangSaeChanGame.png" 
-            alt="logo light mode"
-        >
+      <FullLayout>
+        <div className="">
+
+          <div className="flex justify-center items-center ">
+            <img className={`relative w-2/4`} src="images/yangSaeChanGame.png"
+              alt="logo light mode"
+            >
             </img>
-        </div>
-        
-        
-        <div className="flex flex-col items-center justify-center space-y-5 mt-0">
-          <Button size="lg" onClick={handleRandomEnterClick}>
-            랜덤 입장
-          </Button>
-          <Button size="lg" onClick={handleCreateRoomClick}>
-            방 생성
-          </Button>
-          <Button size="lg" onClick={openModal}>
-            입장코드 입력
-          </Button>
-          <Button size="lg" onClick={handleGoToSinglePlayground}>
-            1인 미니게임
-          </Button>
-        </div>
-      </div>
-
-      <Modal onRequestClose={closeModal}>
-        <div className="relative z-10 flex flex-col justify-between">
-          <div className="my-5 flex flex-row justify-between items-center">
-            <div className="text-4xl">JOIN</div>
-            
           </div>
-          <div className="text-lg">입장코드 형식 : 랜덤 숫자 4자리</div>
-          <br />
-          <input
-            className="w-full h-12 mb-5 rounded shadow-md pl-5 text-[#000000]"
-            type="error"
-            required
-            placeholder={"입장코드를 숫자로 입력해주세요"}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                buttonCheckHandler();
-              }
-            }}
-            onChange={(e) => {
-              const value = e.target.value;
-              const regex = /^[0-9]*$/; // 숫자만 허용하는 정규식
-              if (regex.test(value) || value === "") {
-                setEnterCode(parseInt(value, 10));
-              }
-            }}
-          ></input>
 
-          <div className="m-auto flex justify-end items-end">
-            {!disabled ? (
-              <Button
-                disabled={disabled}
-                size="lg"
-                onClick={buttonCheckHandler}
-              >
-                드가자
-              </Button>
-            ) : (
-              <Button className="" disabled={disabled} size="lg">
-                아직 멀었다
-              </Button>
-            )}
+
+          <div className="flex flex-col items-center justify-center space-y-5 mt-0">
+            <Button size="lg" onClick={handleRandomEnterClick}>
+              랜덤 입장
+            </Button>
+            <Button size="lg" onClick={handleCreateRoomClick}>
+              방 생성
+            </Button>
+            <Button size="lg" onClick={openModal}>
+              입장코드 입력
+            </Button>
+            <Button size="lg" onClick={handleGoToSinglePlayground}>
+              1인 미니게임
+            </Button>
           </div>
         </div>
-      </Modal>
-    </FullLayout>
+
+        <Modal onRequestClose={closeModal}>
+          <div className="relative z-10 flex flex-col justify-between">
+            <div className="my-5 flex flex-row justify-between items-center">
+              <div className="text-4xl">JOIN</div>
+
+            </div>
+            <div className="text-lg">입장코드 형식 : 랜덤 숫자 4자리</div>
+            <br />
+            <input
+              className="w-full h-12 mb-5 rounded shadow-md pl-5 text-[#000000]"
+              type="error"
+              required
+              placeholder={"입장코드를 숫자로 입력해주세요"}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  buttonCheckHandler();
+                }
+              }}
+              onChange={(e) => {
+                const value = e.target.value;
+                const regex = /^[0-9]*$/; // 숫자만 허용하는 정규식
+                if (regex.test(value) || value === "") {
+                  setEnterCode(parseInt(value, 10));
+                }
+              }}
+            ></input>
+
+            <div className="m-auto flex justify-end items-end">
+              {!disabled ? (
+                <Button
+                  disabled={disabled}
+                  size="lg"
+                  onClick={buttonCheckHandler}
+                >
+                  드가자
+                </Button>
+              ) : (
+                <Button className="" disabled={disabled} size="lg">
+                  아직 멀었다
+                </Button>
+              )}
+            </div>
+          </div>
+        </Modal>
+      </FullLayout>
     </Wrapper>
   );
 }

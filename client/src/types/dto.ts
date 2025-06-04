@@ -4,7 +4,7 @@
 
 import { UserInfo } from "os";
 
-export const URL = "https://wwwag.co.kr:8000/ws";
+export const URL = `${process.env.REACT_APP_API_URL}/ws`;
 
 // 닉네임 중복확인 get response
 export interface INicknamePossible {
@@ -86,7 +86,7 @@ export interface ChatMessage {
   sender: string; // 사용자 이름
   content: string; // 메시지 텍스트
   roomId: number;
-  isPrivateRoom: boolean; 
+  isPrivateRoom: boolean;
   gameUserDtos?: GameUserDto[];
 }
 
