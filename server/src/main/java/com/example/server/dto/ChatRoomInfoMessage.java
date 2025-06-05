@@ -2,9 +2,11 @@ package com.example.server.dto;
 
 import com.example.server.payload.response.RoomResponse;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter @Setter
+@NoArgsConstructor
 public class ChatRoomInfoMessage {
     private ChatMessage.MessageType messageType;
     private String content;
