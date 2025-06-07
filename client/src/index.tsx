@@ -13,7 +13,6 @@ import ReactModal from "react-modal";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SquareBubble from "./components/layout/SquareBubble";
-import Footer from "./components/layout/Footer";
 import FullLayout from "./components/layout/FullLayout";
 
 const queryClient = new QueryClient();
@@ -30,7 +29,6 @@ root.render(
             <FullLayout>
             <Header />
             <App />
-            <Footer/>
             </FullLayout>
             <ToastContainer />
             </SquareBubble>

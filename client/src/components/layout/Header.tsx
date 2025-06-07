@@ -7,6 +7,7 @@ import RulesModal from "../modal/RulesModal";
 import { useRecoilState } from "recoil";
 import { rulesModalState, soundEffectStatus } from "../../recoil/recoil";
 import { faTruckField } from "@fortawesome/free-solid-svg-icons";
+import Footer from "./Footer";
 const { useEffect, useState, useRef } = React;
 
 type Props = {
@@ -202,6 +203,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
                   <div className="text-base mb-5">5. 다만, 1라운드에는 질문만 가능합니다!</div>
                   <div className="text-sm font-bold mb-5">⚠️ 편안한 게임 환경을 위해 Chrome 브라우저로 접속하시는 것을 권장드립니다</div>
                   <div className="text-sm font-bold mb-5">🙋 더 자세한 설명은 <a className="italic underline" href="https://charming-scooter-24d.notion.site/d36c86d7665247e2bcf2a73a02e096b4">이 링크</a> 를 참고해주세요!</div>
+                  <Footer/>
                 </div>
               </div>
             </RulesModal>
