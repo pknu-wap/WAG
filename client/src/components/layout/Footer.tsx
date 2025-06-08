@@ -31,7 +31,7 @@ const Footer = ({ dark, toggleDarkMode }: ComponentProps) => {
 
 
   return (
-      <footer className={`relative bottom-0 w-full flex justify-between items-center pr-3 pl-3 pb-3`}>
+      <footer className={`relative bottom-0 w-full flex justify-between items-center `}>
         <div>
           © WAG!
         </div>
