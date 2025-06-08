@@ -174,7 +174,7 @@ function MainPage({ dark }: ComponentProps) {
           </div>
 
 
-          <div className="flex flex-col items-center justify-center space-y-5 mt-0">
+          <div className="flex flex-col items-center justify-center space-y-5 mt-6">
             <Button size="lg" onClick={handleRandomEnterClick}>
               랜덤 입장
             </Button>
