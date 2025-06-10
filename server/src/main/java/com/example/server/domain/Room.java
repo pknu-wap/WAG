@@ -2,6 +2,7 @@ package com.example.server.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -40,5 +41,6 @@ public class Room {
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<GameOrder> gameOrders;
 
-
+    @NotNull
+    private LocalDateTime lastStartedTime;
 }

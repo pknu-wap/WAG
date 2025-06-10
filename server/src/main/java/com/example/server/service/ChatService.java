@@ -12,6 +12,7 @@ import com.example.server.exception.NoSuchRoomUserException;
 import com.example.server.repository.GameOrderRepository;
 import com.example.server.repository.RoomRepository;
 import com.example.server.repository.RoomUserRepository;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,6 +71,7 @@ public class ChatService {
         room.setCurrentOrder(1);
         room.setCorrectMemberCnt(0);
         room.setLeftCorrectMember(0);
+        room.setLastStartedTime(LocalDateTime.now());
     }
 
     public ChatGameMessage penaltyUser(ChatMessage chatMessage){
