@@ -1,6 +1,8 @@
 package com.example.server.repository;
 
 import com.example.server.domain.Room;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,6 +23,8 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
     @Query("SELECT r FROM Room r WHERE r.id=:roomId")
     Optional<Room> findByRoomId(Long roomId);
+
+    List<Room> findBylastStartedTimeBefore(LocalDateTime thresholdTime);
 
 //    @Query(value = "SELECT r.id FROM Room r WHERE r.gameStatus = false AND r.isPrivateRoom = false AND r.userCount <= 5 ORDER BY RAND() LIMIT 1")
 //    Optional<Long> findRandomRoomId();

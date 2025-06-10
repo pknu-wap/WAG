@@ -12,6 +12,7 @@ import com.example.server.payload.request.RoomCreateRequest;
 import com.example.server.payload.response.RoomResponse;
 import com.example.server.repository.*;
 import com.example.server.security.UserPrincipal;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,7 @@ public class RoomService {
         room.setUserCount(0);
         room.setCategory(roomCreateRequest.getCategory());
         room.setTimer(roomCreateRequest.getTimer());
+        room.setLastStartedTime(LocalDateTime.now());
         room = roomRepository.save(room);  // 방 생성
         return room;
     }
