@@ -23,7 +23,7 @@ public class RoomSchedulerService {
     @Transactional
     @Scheduled(cron = "${scheduler.room.check-ghost.cron}")
     public void checkGhostRoom(){
-        List<Room> roomsToDelete = roomRepository.findBylastStartedTimeBefore(LocalDateTime.now().minusHours(roomLifetimeMinutes));
+        List<Room> roomsToDelete = roomRepository.findBylastStartedTimeBefore(LocalDateTime.now().minusMinutes(roomLifetimeMinutes));
         roomRepository.deleteAll(roomsToDelete);
     }
 }
