@@ -15,6 +15,7 @@ public class AnswerList {
     private Long id;
 
     @NotNull
+    @Column(unique = true)
     private String name;
     @NotNull
     private String answerGroup;
