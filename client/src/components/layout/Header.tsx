@@ -68,7 +68,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
   const handleLightLogoClick = () => {
     
     const playSound = () => {
-      const audio = new Audio('audio/lightmode_wag.mp3'); // 새로운 audio 요소 생성
+      const audio = new Audio('/audio/lightmode_wag.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
     
@@ -81,7 +81,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
   const handleDarkLogoClick = () => {
     
     const playSound = () => {
-      const audio = new Audio('audio/darkmode_wag.mp3'); // 새로운 audio 요소 생성
+      const audio = new Audio('/audio/darkmode_wag.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
     
