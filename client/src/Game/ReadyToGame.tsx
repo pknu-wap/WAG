@@ -160,6 +160,17 @@ const ReadyToGame = () => {
   };
 
   // TODO : 새로고침 시 처리할 방법 고민
+    // 지금은 방장이 혼자 있을 때 새로고침을 하면 방이 DB에서 없어지고 
+    // 아무것도 동작이 안되는 채팅 화면 UI만 사용자 없이 남아있다.
+    // 두 명 이상 남아 있을 때는 방장 측에서 새로고침을 하면 그냥 일반 사용자로 바뀐다.
+      // 이름은 따로 설정 할 필요 없이 바로 일반 사용자로 바뀐다.
+  // 원하는 기능 : 새로고침을 하면 방장이든 누구든 다시 그 방에 이름을 입력하고 접속이 됐으면 좋겠다..!
+
+  // TODO : 바로 접속 가능 QR 생성기 삽입
+  
+  // TODO : 공개는 code 없이도 가능하게, 비공개는 code가 파라미터로 있어야 들어갈 수 있게?
+    // -> 필요할까? 어차피 QR로 들어가거나, 공개는 랜덤으로 사용자들이 들어오게 되는데..
+
   useEffect(() => {
     window.addEventListener("resize", handleResize);
     if ("isCaptin" in roomInfo) {
@@ -188,7 +199,7 @@ const ReadyToGame = () => {
       Toast({ message: "잘못된 접근입니다!", type: "error" })
       navigate("/");
     } else if (roomId === "already started") {
-      Toast({ message: "잘못된 접근입니다!", type: "error" });
+      Toast({ message: "이미 게임이 시작되었습니다!", type: "error" });
       navigate("/");
     } else {
       localStorage.setItem("roomId", roomId);
