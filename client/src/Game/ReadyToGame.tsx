@@ -46,6 +46,7 @@ import { motion } from "framer-motion";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
+import QRCodeGenerator from '../components/qrGenerator/QRCodeGenerator';
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -137,18 +138,65 @@ const ReadyToGame = () => {
   const [, setIsLocationLoading] = useState<boolean>(false);
 
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
+
+   const query = new URLSearchParams(location.search);
+
+  //입장코드로 입력으로 roomid받기
+  const getRoomIdCode = async (enterCode : number) => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/roomId/code`,
+        {
+          params: {
+            enterCode: enterCode,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  // TODO : 새로고침 시 처리할 방법 고민
   useEffect(() => {
     window.addEventListener("resize", handleResize);
-
     if ("isCaptin" in roomInfo) {
       if (roomInfo.isCaptin === true) {
-        //console.log("Captain is in");
+        // console.log("Captain is in");
+        console.log(roomInfo);
         socketConnect();
         setSelectedOption(category)
         roomInfo.isCaptin = false;
         //console.log("roomInfo : ", roomInfo)
       }
+
     } else {
+
+      const code = query.get("code");
+      
+      if (code === null){
+          Toast({ message: "잘못된 접근입니다!", type: "error" })
+          navigate("/");
+          return;
+      }
+      
+      const checkRoomIdCode = async() =>{ 
+      const roomId = await getRoomIdCode(parseInt(code,10));
+      if (roomId === "invalid enterCode") {
+      Toast({ message: "잘못된 접근입니다!", type: "error" })
+      navigate("/");
+    } else if (roomId === "already started") {
+      Toast({ message: "잘못된 접근입니다!", type: "error" });
+      navigate("/");
+    } else {
+      localStorage.setItem("roomId", roomId);
+    }
+     }
+
+      checkRoomIdCode();
+
       if (roomInfo.userCount === 1) {
       } else {
         openModal();
@@ -388,6 +436,7 @@ const ReadyToGame = () => {
     setIngameTimerRecoil(roomInfo.timer)
     let userDtos = roomInfo.userDtos;
     setReadyMessage(userDtos);
+    
     userDtos.forEach((dto) => {
       const nickName = localStorage.getItem("nickName");
       if (dto.captain && dto.roomNickname === nickName) setIsMeCaptain(true);
