@@ -182,9 +182,6 @@ const ReadyToGame = () => {
     if ("isCaptin" in roomInfo) {
       if (roomInfo.isCaptin === true) {
         // console.log("Captain is in");
-        
-        console.log({...location.state})
-        console.log(roomInfo);
 
         socketConnect();
         setSelectedOption(category)
@@ -1119,9 +1116,6 @@ const ReadyToGame = () => {
   );
 
   useEffect(() => {
-    
-    console.log(roomInfo)
-    console.log(joinUsers)
     if ("isCaptin" in roomInfo && joinUsers.length===0) {
       navigate(
         // 같은 경로 + 쿼리스트링 유지
