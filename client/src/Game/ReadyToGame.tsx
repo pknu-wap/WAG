@@ -73,7 +73,7 @@ const ReadyToGame = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const roomInfo = { ...location.state };
+  let roomInfo = { ...location.state };
 
   const [width, setWidth] = useState<number>(window.innerWidth);
   const sliderRef = useRef<Slider>(null);
@@ -177,13 +177,6 @@ const ReadyToGame = () => {
     // -> 필요할까? 어차피 QR로 들어가거나, 공개는 랜덤으로 사용자들이 들어오게 되는데..
 
   useEffect(() => {
-
-    const navEntries = performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
-    const navType = navEntries.length > 0 ? navEntries[0].type : null;
-    if (navType === "reload") {
-      // 현재 URL 그대로, state만 빈 객체로 덮어쓰기
-      window.history.replaceState({}, "", window.location.pathname + window.location.search);
-    }
 
     window.addEventListener("resize", handleResize);
     if ("isCaptin" in roomInfo) {
@@ -1129,6 +1122,18 @@ const ReadyToGame = () => {
     
     console.log(roomInfo)
     console.log(joinUsers)
+    if ("isCaptin" in roomInfo && joinUsers.length===0) {
+      navigate(
+        // 같은 경로 + 쿼리스트링 유지
+        location.pathname + location.search,
+        {
+          replace: true,
+          state: {}
+        }
+      );
+      return;
+    }
+
     const initialIndex = joinUsers.findIndex(user => user.roomNickname === localStorage.getItem("nickName"));
     setCurrentUserIndex(initialIndex !== -1 ? initialIndex : 1);
   }, [joinUsers]);
