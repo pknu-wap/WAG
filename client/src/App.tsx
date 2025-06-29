@@ -20,19 +20,14 @@ function App() {
   return (
 
       <AnimatePresence>
-        {isChrome() ? (
-            <Routes>
-              <Route path="/" element={<MainPage />} />
-              <Route path="/CreateRoom" element={<CreateRoom />} />
-              <Route path="/JoinGame" element={<JoinGame />} />
-              <Route path="/ReadyToGame/:roomId" element={<ReadyToGame />} />
-              <Route path="/GamePlaying" element={<GamePlaying />} />
-              <Route path="/*" element={<WrongUrl />} />
-            </Routes>
-        ):(
-            <WrongBrowser />
-        )}
-        
+          <Routes>
+            <Route path="/" element={<MainPage />} />
+            <Route path="/CreateRoom" element={<CreateRoom />} />
+            <Route path="/JoinGame" element={<JoinGame />} />
+            <Route path="/ReadyToGame/:roomId" element={<ReadyToGame />} />
+            <Route path="/GamePlaying" element={<GamePlaying />} />
+            <Route path="/*" element={<WrongUrl />} />
+          </Routes>
       </AnimatePresence>
 
   );
