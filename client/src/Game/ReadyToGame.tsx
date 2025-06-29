@@ -78,7 +78,6 @@ const ReadyToGame = () => {
   const [width, setWidth] = useState<number>(window.innerWidth);
   const sliderRef = useRef<Slider>(null);
 
-
   const handleResize = () => {
     setWidth(window.innerWidth);
   };
@@ -137,18 +136,94 @@ const ReadyToGame = () => {
   const [, setIsLocationLoading] = useState<boolean>(false);
 
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
-  useEffect(() => {
-    window.addEventListener("resize", handleResize);
 
+   const query = new URLSearchParams(location.search);
+
+  //입장코드로 입력으로 roomid받기
+  const getRoomIdCode = async (enterCode : number) => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/roomId/code`,
+        {
+          params: {
+            enterCode: enterCode,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  // TODO : 바로 접속 가능 QR 생성기 삽입
+
+  // TODO : 공개는 code 없이도 가능하게, 비공개는 code가 파라미터로 있어야 들어갈 수 있게?
+    // -> 필요할까? 어차피 QR로 들어가거나, 공개는 랜덤으로 사용자들이 들어오게 되는데..
+
+
+
+    // TODO : 새로고침 시 처리할 방법 고민
+    // 지금은 방장이 혼자 있을 때 새로고침을 하면 방이 DB에서 없어지고 
+    // 아무것도 동작이 안되는 채팅 화면 UI만 사용자 없이 남아있다.
+    // 두 명 이상 남아 있을 때는 방장 측에서 새로고침을 하면 그냥 일반 사용자로 바뀐다.
+      // 이름은 따로 설정 할 필요 없이 바로 일반 사용자로 바뀐다.
+  // 원하는 기능 : 새로고침을 하면 방장이든 누구든 다시 그 방에 이름을 입력하고 접속이 됐으면 좋겠다..!
+
+  // TODO : 바로 접속 가능 QR 생성기 삽입
+  
+  // TODO : 공개는 code 없이도 가능하게, 비공개는 code가 파라미터로 있어야 들어갈 수 있게?
+    // -> 필요할까? 어차피 QR로 들어가거나, 공개는 랜덤으로 사용자들이 들어오게 되는데..
+
+  useEffect(() => {
+
+    const navEntries = performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
+    const navType = navEntries.length > 0 ? navEntries[0].type : null;
+    if (navType === "reload") {
+      // 현재 URL 그대로, state만 빈 객체로 덮어쓰기
+      window.history.replaceState({}, "", window.location.pathname + window.location.search);
+    }
+
+    window.addEventListener("resize", handleResize);
     if ("isCaptin" in roomInfo) {
       if (roomInfo.isCaptin === true) {
-        //console.log("Captain is in");
+        // console.log("Captain is in");
+        
+        console.log({...location.state})
+        console.log(roomInfo);
+
         socketConnect();
         setSelectedOption(category)
         roomInfo.isCaptin = false;
         //console.log("roomInfo : ", roomInfo)
       }
+
     } else {
+
+      const code = query.get("code");
+      
+      if (code === null){
+          Toast({ message: "잘못된 접근입니다!", type: "error" })
+          navigate("/");
+          return;
+      }
+      
+      const checkRoomIdCode = async() =>{ 
+      const roomId = await getRoomIdCode(parseInt(code,10));
+      if (roomId === "invalid enterCode") {
+      Toast({ message: "잘못된 접근입니다!", type: "error" })
+      navigate("/");
+    } else if (roomId === "already started") {
+      Toast({ message: "이미 게임이 시작되었습니다!", type: "error" });
+      navigate("/");
+    } else {
+      localStorage.setItem("roomId", roomId);
+    }
+     }
+
+      checkRoomIdCode();
+
       if (roomInfo.userCount === 1) {
       } else {
         openModal();
@@ -388,6 +463,7 @@ const ReadyToGame = () => {
     setIngameTimerRecoil(roomInfo.timer)
     let userDtos = roomInfo.userDtos;
     setReadyMessage(userDtos);
+    
     userDtos.forEach((dto) => {
       const nickName = localStorage.getItem("nickName");
       if (dto.captain && dto.roomNickname === nickName) setIsMeCaptain(true);
@@ -1050,9 +1126,11 @@ const ReadyToGame = () => {
   );
 
   useEffect(() => {
+    
+    console.log(roomInfo)
+    console.log(joinUsers)
     const initialIndex = joinUsers.findIndex(user => user.roomNickname === localStorage.getItem("nickName"));
     setCurrentUserIndex(initialIndex !== -1 ? initialIndex : 1);
-
   }, [joinUsers]);
 
   const settings = {
@@ -1081,7 +1159,7 @@ const ReadyToGame = () => {
                 damping: 20
               }}>
               {/* Bottom section with purple semi-circle */}
-              <div className="w-full h-[96px] absolute -top-[96px] bg-light-btn dark:bg-dark-btn"></div>
+              <div className="w-full h-[110px] absolute -top-[110px] bg-light-btn dark:bg-dark-btn"></div>
               <div
                 style={{
                   width: '100%',

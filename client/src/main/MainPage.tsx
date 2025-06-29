@@ -107,7 +107,7 @@ function MainPage({ dark }: ComponentProps) {
       Toast({ message: "이미 게임이 시작되었습니다!", type: "error" });
     } else {
       localStorage.setItem("roomId", roomId);
-      navigate(`/ReadyToGame/${roomId}`);
+      navigate(`/ReadyToGame/${roomId}?code=${enterCode}`);
     }
   };
 
@@ -144,6 +144,10 @@ function MainPage({ dark }: ComponentProps) {
     }
 
   }
+
+  useEffect(() => {
+    localStorage.clear();
+  }, []);
 
   useEffect(() => {
     if (enterCode === undefined || Number.isNaN(enterCode)) {

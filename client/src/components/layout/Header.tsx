@@ -68,7 +68,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
   const handleLightLogoClick = () => {
     
     const playSound = () => {
-      const audio = new Audio('audio/lightmode_wag.mp3'); // 새로운 audio 요소 생성
+      const audio = new Audio('/audio/lightmode_wag.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
     
@@ -81,7 +81,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
   const handleDarkLogoClick = () => {
     
     const playSound = () => {
-      const audio = new Audio('audio/darkmode_wag.mp3'); // 새로운 audio 요소 생성
+      const audio = new Audio('/audio/darkmode_wag.mp3'); // 새로운 audio 요소 생성
       audio.play(); // 소리를 재생합니다.
     };
     
@@ -97,7 +97,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
         <div className="relative top-2">
       {dark ? (
 
-<img className={`w-20 h-16 ${isClicked ? 'clicked' : ''}`} src="images/WAG_dark.2.png" 
+<img className={`w-20 h-16 ${isClicked ? 'clicked' : ''}`} src="/images/WAG_dark.2.png" 
   alt="logo dark mode"
   onClick={() => {
     handleDarkLogoClick();
@@ -108,7 +108,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
   </img>
   
     ) : (
-      <img className={`w-20 h-16 ${isClicked ? 'clicked' : ''}`} src="images/WAG_white.2.png" 
+      <img className={`w-20 h-16 ${isClicked ? 'clicked' : ''}`} src="/images/WAG_white.2.png" 
       alt="logo light mode"
       onClick={() => {
         handleLightLogoClick();
@@ -120,7 +120,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
     )}
     </div>
     <div className="flex justify-between z-50">
-        <audio ref={audioRef} src='audio/main_theme.mp3' loop />
+        <audio ref={audioRef} src='/audio/main_theme.mp3' loop />
         {isChrome() ? (
           <>
               <IconButton
