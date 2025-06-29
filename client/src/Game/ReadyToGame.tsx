@@ -1140,7 +1140,7 @@ const ReadyToGame = () => {
                 damping: 20
               }}>
               {/* Bottom section with purple semi-circle */}
-              <div className="w-full h-[96px] absolute -top-[96px] bg-light-btn dark:bg-dark-btn"></div>
+              <div className="w-full h-[110px] absolute -top-[110px] bg-light-btn dark:bg-dark-btn"></div>
               <div
                 style={{
                   width: '100%',
