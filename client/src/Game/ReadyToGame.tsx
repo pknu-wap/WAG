@@ -46,7 +46,6 @@ import { motion } from "framer-motion";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
-import QRCodeGenerator from '../components/qrGenerator/QRCodeGenerator';
 
 var stompClient: any = null; //웹소켓 변수 선언
 
