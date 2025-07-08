@@ -1039,6 +1039,15 @@ const ReadyToGame = () => {
   const [myRank, setMyRank] = useState<number>()
   const myName = localStorage.getItem("nickName");
 
+ // 광고 슬롯이 DOM에 렌더링된 직후에 adsbygoogle.push 호출
+ useEffect(() => {
+   if (isGameEnd || !gameStart) {
+     // adsbygoogle 스크립트가 로드되어 있다면 슬롯 렌더링 트리거
+     (window as any).adsbygoogle = (window as any).adsbygoogle || [];
+     ;(window as any).adsbygoogle.push({});
+   }
+ }, [isGameEnd, gameStart]);
+  
   const haveParty = () => {
     gameUserDtos.forEach((user) => {
       if (user.roomNickname === myName) {
@@ -1143,6 +1152,16 @@ const ReadyToGame = () => {
   return (
     <Wrapper>
       <FullLayout>
+
+          {/* isGameEnd 이거나 gameStart 가 false 일 때만 광고 노출 */}
+        {(isGameEnd || !gameStart) && (
+          <ins
+            className="adsbygoogle"
+            style={{ display: "block" }}
+            /* …data-ad-* props… */
+          />
+        )}
+
         <LoadingModal onRequestClose={loadingCloseModal}>
           <LoadingSpinner />
         </LoadingModal>
