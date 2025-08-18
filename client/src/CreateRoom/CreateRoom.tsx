@@ -10,42 +10,45 @@ import DropdownSelect from "../components/dropDown/DropDown";
 import { Option } from "react-dropdown";
 import SliderComponent from "../components/slider/Slider";
 import { useRecoilState } from "recoil";
-import { firstCategoryRecoil, timerCount, soundEffectStatus } from "../recoil/recoil";
+import {
+  firstCategoryRecoil,
+  timerCount,
+  soundEffectStatus,
+} from "../recoil/recoil";
 import Wrapper from "../components/Wrapper";
+import { trackEvent } from "../util/googleAnalytics/trackEvent";
+import { GA_EVENT } from "../constants/GA_EVENT";
 
 function CreateRoom() {
-  const [isPrivate, setIsPrivate] = useState<boolean | null>(false); //일단은 공개방을 default로
+  const [isPrivate, setIsPrivate] = useState<boolean | null>(false);
   const [nickName, setNickname] = useState<string>("");
-  const [soundEffectStatusValue,] = useRecoilState(soundEffectStatus);
+  const [soundEffectStatusValue] = useRecoilState(soundEffectStatus);
   const navigate = useNavigate();
 
-  // const radioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   //console.log(event.target.value);
-  // };
-
   const handlePlaySound = () => {
-
     const playSound = () => {
       if (soundEffectStatusValue) {
-        const audio = new Audio('audio/button_click.mp3')
-        audio.play()
+        const audio = new Audio("audio/button_click.mp3");
+        audio.play();
       }
-
     };
-
     playSound();
-
   };
 
   const createRoom = async () => {
     handlePlaySound();
-    if (await nicknamePossibleClick() === false) {
+    if ((await nicknamePossibleClick()) === false) {
       Toast({ message: "사용 불가한 닉네임입니다!", type: "warn" });
       return;
     }
 
+    trackEvent({
+      action: GA_EVENT.CREATE_ROOM.SUBMIT_CREATE,
+      category: "create_room",
+      label: `nickname: ${nickName}, category: ${selectedOption}, timer: ${sliderValue}, private: ${isPrivate}`,
+    });
+
     try {
-      //console.log("11", isPrivate);
       const response = await axios.post<IRoomResponseInfo>(
         `${process.env.REACT_APP_API_URL}/room/create`,
         {
@@ -59,7 +62,7 @@ function CreateRoom() {
       const roomId = response.data.roomId;
       localStorage.setItem("nickName", nickName ?? "");
       localStorage.setItem("roomId", roomId.toString());
-      // socketConnect();
+
       const newResponse = {
         isPrivateRoom: response.data.privateRoom,
         userNickName: nickName,
@@ -69,42 +72,33 @@ function CreateRoom() {
 
       navigate(`/ReadyToGame/${roomId}`, { state: newResponse });
     } catch (error) {
-      console.error("랜덤 입장 요청 중 오류 발생:", error);
+      console.error("방 생성 요청 중 오류 발생:", error);
       throw error;
     }
   };
 
-  // 카테고리 select
-  const [, setFirstCategory] = useRecoilState(firstCategoryRecoil)
+  const [, setFirstCategory] = useRecoilState(firstCategoryRecoil);
   const [selectedOption, setSelectedOption] = useState<string>("전체");
   const handleOptionSelect = (option: Option) => {
     setSelectedOption(option.value);
-    setFirstCategory(option.value)
-    //console.log('Selected option:', option.value);
+    setFirstCategory(option.value);
   };
 
-  // 타이머 세팅
   const [sliderValue, setSliderValue] = useState(30);
-  const [, setTimerRecoil] = useRecoilState(timerCount)
+  const [, setTimerRecoil] = useRecoilState(timerCount);
 
   const handleSliderChange = (value: number) => {
     setSliderValue(value);
-    setTimerRecoil(value)
+    setTimerRecoil(value);
   };
 
   const renderButton = () => {
     if (isPrivate === null) {
-      return <p>방 공개 / 비공개 여부를 선택해주십시오</p>; //체크가 안된 상태를 defult로 만들 수도 있음
-    } else if (isPrivate === false) {
-      return (
-        <Button size="lg" onClick={createRoom}>
-          공개방 생성
-        </Button>
-      );
+      return <p>방 공개 / 비공개 여부를 선택해주십시오</p>;
     } else {
       return (
         <Button size="lg" onClick={createRoom}>
-          비공개방 생성
+          {isPrivate ? "비공개방 생성" : "공개방 생성"}
         </Button>
       );
     }
@@ -115,7 +109,6 @@ function CreateRoom() {
       return false;
     }
     return true;
-
   };
 
   return (
@@ -123,6 +116,7 @@ function CreateRoom() {
       <FullLayout>
         <div className="p-4">
           <div className="justify-center text-6xl mb-20">방 만들기</div>
+
           <div className="rounded-xl font-extrabold min-w-44 ">
             방 공개 / 비공개 여부 선택
           </div>
@@ -132,7 +126,9 @@ function CreateRoom() {
               label="공개"
               value="false"
               name="roomType"
-              onChange={() => setIsPrivate(false)}
+              onChange={() => {
+                setIsPrivate(false);
+              }}
               checked={isPrivate === false}
             />
             <RadioButton
@@ -140,17 +136,29 @@ function CreateRoom() {
               label="비공개"
               value="true"
               name="roomType"
-              onChange={() => setIsPrivate(true)}
+              onChange={() => {
+                setIsPrivate(true);
+              }}
             />
           </div>
+
           <div className="mb-8">
-            <div className="rounded-xl font-extrabold min-w-44 mb-3">게임 카테고리 설정</div>
-            <DropdownSelect onOptionSelect={handleOptionSelect} defaultValue="전체" />
+            <div className="rounded-xl font-extrabold min-w-44 mb-3">
+              게임 카테고리 설정
+            </div>
+            <DropdownSelect
+              onOptionSelect={handleOptionSelect}
+              defaultValue="전체"
+            />
           </div>
+
           <div>
-            <div className="rounded-xl font-extrabold min-w-44 mb-3">턴 당 진행시간</div>
+            <div className="rounded-xl font-extrabold min-w-44 mb-3">
+              턴 당 진행시간
+            </div>
             <SliderComponent value={sliderValue} onChange={handleSliderChange} />
           </div>
+
           <input
             className="relative z-10 w-3/4 h-12 mb-5 mt-5 rounded shadow-md pl-5 text-[#000000]"
             type="error"
@@ -162,7 +170,7 @@ function CreateRoom() {
             onKeyDown={async (e) => {
               if (e.nativeEvent.isComposing) return;
               if (e.key === "Enter" && nickName?.trim() !== "") {
-                createRoom()
+                createRoom();
               } else if (e.key === "Enter" && nickName?.trim() === "") {
                 Toast({ message: "사용 불가한 닉네임입니다!", type: "warn" });
               }
