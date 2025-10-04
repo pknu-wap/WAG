@@ -140,7 +140,8 @@ const ReadyToGame = () => {
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
 
   const query = new URLSearchParams(location.search);
-
+  const loc = useLocation();
+  const fromRandom = loc.state?.fromRandom;
   //입장코드로 입력으로 roomid받기
   const getRoomIdCode = async (enterCode: number) => {
     try {
@@ -198,24 +199,35 @@ const ReadyToGame = () => {
     } else {
 
       const code = query.get("code");
-
-      if (code === null) {
-        Toast({ message: "잘못된 접근입니다!", type: "error" })
-        navigate("/");
-        return;
-      }
+      
+      console.log(code);
+      console.log(fromRandom);
 
       const checkRoomIdCode = async () => {
-        const roomId = await getRoomIdCode(parseInt(code, 10));
-        if (roomId === "invalid enterCode") {
-          Toast({ message: "잘못된 접근입니다!", type: "error" })
-          navigate("/");
-        } else if (roomId === "already started") {
-          Toast({ message: "이미 게임이 시작되었습니다!", type: "error" });
-          navigate("/");
-        } else {
-          localStorage.setItem("roomId", roomId);
+        if (code === null){
+          if(fromRandom===true){
+            console.log(fromRandom);
+            return ;   
+          } 
+          else {
+             Toast({ message: "잘못된 접근입니다!", type: "error" })
+              navigate("/");
+          }
+          
         }
+        else {
+          const roomId = await getRoomIdCode(parseInt(code, 10));
+          if (roomId === "invalid enterCode") {
+            Toast({ message: "잘못된 접근입니다!", type: "error" })
+            navigate("/");
+          } else if (roomId === "already started") {
+            Toast({ message: "이미 게임이 시작되었습니다!", type: "error" });
+            navigate("/");
+          } else {
+            localStorage.setItem("roomId", roomId);
+          }
+        }
+        
       }
 
       checkRoomIdCode();

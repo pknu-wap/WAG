@@ -84,7 +84,7 @@ function MainPage({ dark }: ComponentProps) {
         label: roomId,
       });
       localStorage.setItem("roomId", roomId);
-      navigate(`/ReadyToGame/${roomId}`);
+      navigate(`/ReadyToGame/${roomId}`, { state: { fromRandom: true }});
     } else {
       Toast({ message: "입장 가능한 방이 없습니다.", type: "error" });
       Toast({ message: "방을 생성하여 주시길 바랍니다.", type: "error" });
