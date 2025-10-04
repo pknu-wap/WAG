@@ -200,8 +200,8 @@ const ReadyToGame = () => {
 
       const code = query.get("code");
       
-      console.log(code);
-      console.log(fromRandom);
+      //console.log(code);
+      //console.log(fromRandom);
 
       const checkRoomIdCode = async () => {
         if (code === null){
