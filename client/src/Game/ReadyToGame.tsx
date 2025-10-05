@@ -46,6 +46,8 @@ import { motion } from "framer-motion";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
+import { trackEvent } from "../util/googleAnalytics/trackEvent";
+import { GA_EVENT } from "../constants/GA_EVENT";
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -137,10 +139,11 @@ const ReadyToGame = () => {
 
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
 
-   const query = new URLSearchParams(location.search);
-
+  const query = new URLSearchParams(location.search);
+  const loc = useLocation();
+  const fromRandom = loc.state?.fromRandom;
   //입장코드로 입력으로 roomid받기
-  const getRoomIdCode = async (enterCode : number) => {
+  const getRoomIdCode = async (enterCode: number) => {
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}/roomId/code`,
@@ -160,21 +163,21 @@ const ReadyToGame = () => {
   // TODO : 바로 접속 가능 QR 생성기 삽입
 
   // TODO : 공개는 code 없이도 가능하게, 비공개는 code가 파라미터로 있어야 들어갈 수 있게?
-    // -> 필요할까? 어차피 QR로 들어가거나, 공개는 랜덤으로 사용자들이 들어오게 되는데..
+  // -> 필요할까? 어차피 QR로 들어가거나, 공개는 랜덤으로 사용자들이 들어오게 되는데..
 
 
 
-    // TODO : 새로고침 시 처리할 방법 고민
-    // 지금은 방장이 혼자 있을 때 새로고침을 하면 방이 DB에서 없어지고 
-    // 아무것도 동작이 안되는 채팅 화면 UI만 사용자 없이 남아있다.
-    // 두 명 이상 남아 있을 때는 방장 측에서 새로고침을 하면 그냥 일반 사용자로 바뀐다.
-      // 이름은 따로 설정 할 필요 없이 바로 일반 사용자로 바뀐다.
+  // TODO : 새로고침 시 처리할 방법 고민
+  // 지금은 방장이 혼자 있을 때 새로고침을 하면 방이 DB에서 없어지고 
+  // 아무것도 동작이 안되는 채팅 화면 UI만 사용자 없이 남아있다.
+  // 두 명 이상 남아 있을 때는 방장 측에서 새로고침을 하면 그냥 일반 사용자로 바뀐다.
+  // 이름은 따로 설정 할 필요 없이 바로 일반 사용자로 바뀐다.
   // 원하는 기능 : 새로고침을 하면 방장이든 누구든 다시 그 방에 이름을 입력하고 접속이 됐으면 좋겠다..!
 
   // TODO : 바로 접속 가능 QR 생성기 삽입
-  
+
   // TODO : 공개는 code 없이도 가능하게, 비공개는 code가 파라미터로 있어야 들어갈 수 있게?
-    // -> 필요할까? 어차피 QR로 들어가거나, 공개는 랜덤으로 사용자들이 들어오게 되는데..
+  // -> 필요할까? 어차피 QR로 들어가거나, 공개는 랜덤으로 사용자들이 들어오게 되는데..
 
   useEffect(() => {
 
@@ -182,7 +185,11 @@ const ReadyToGame = () => {
     if ("isCaptin" in roomInfo) {
       if (roomInfo.isCaptin === true) {
         // console.log("Captain is in");
-
+        trackEvent({
+          action: GA_EVENT.ROOM.ROOM_INFO_ON_START,
+          category: "room",
+          label: `roomId: ${localStorage.getItem("roomId")}`,
+        });
         socketConnect();
         setSelectedOption(category)
         roomInfo.isCaptin = false;
@@ -193,24 +200,35 @@ const ReadyToGame = () => {
 
       const code = query.get("code");
       
-      if (code === null){
-          Toast({ message: "잘못된 접근입니다!", type: "error" })
-          navigate("/");
-          return;
+      //console.log(code);
+      //console.log(fromRandom);
+
+      const checkRoomIdCode = async () => {
+        if (code === null){
+          if(fromRandom===true){
+            console.log(fromRandom);
+            return ;   
+          } 
+          else {
+             Toast({ message: "잘못된 접근입니다!", type: "error" })
+              navigate("/");
+          }
+          
+        }
+        else {
+          const roomId = await getRoomIdCode(parseInt(code, 10));
+          if (roomId === "invalid enterCode") {
+            Toast({ message: "잘못된 접근입니다!", type: "error" })
+            navigate("/");
+          } else if (roomId === "already started") {
+            Toast({ message: "이미 게임이 시작되었습니다!", type: "error" });
+            navigate("/");
+          } else {
+            localStorage.setItem("roomId", roomId);
+          }
+        }
+        
       }
-      
-      const checkRoomIdCode = async() =>{ 
-      const roomId = await getRoomIdCode(parseInt(code,10));
-      if (roomId === "invalid enterCode") {
-      Toast({ message: "잘못된 접근입니다!", type: "error" })
-      navigate("/");
-    } else if (roomId === "already started") {
-      Toast({ message: "이미 게임이 시작되었습니다!", type: "error" });
-      navigate("/");
-    } else {
-      localStorage.setItem("roomId", roomId);
-    }
-     }
 
       checkRoomIdCode();
 
@@ -453,7 +471,7 @@ const ReadyToGame = () => {
     setIngameTimerRecoil(roomInfo.timer)
     let userDtos = roomInfo.userDtos;
     setReadyMessage(userDtos);
-    
+
     userDtos.forEach((dto) => {
       const nickName = localStorage.getItem("nickName");
       if (dto.captain && dto.roomNickname === nickName) setIsMeCaptain(true);
@@ -605,6 +623,11 @@ const ReadyToGame = () => {
       stopTimer();
       handleCorrectSound();
       Toast({ message: "게임이 끝났습니다!", type: "success" });
+      trackEvent({
+        action: GA_EVENT.GAME.GAME_END,
+        category: "game",
+        label: `roomId: ${localStorage.getItem("roomId")}`,
+      });
       setGameUserDtos(message.gameUserDtos);
       setTimeout(() => {
         setIsGameEnd(true)
@@ -826,8 +849,15 @@ const ReadyToGame = () => {
 
   const exitOnClick = () => {
     handlePlaySound();
-    window.location.replace("/")
+    trackEvent({
+      action: GA_EVENT.RESULT.CLICK_GO_MAIN,
+      category: "result",
+      label: `nickname: ${myName}, roomId: ${localStorage.getItem("roomId")}`,
+    });
+
+    window.location.replace("/");
   };
+
   const {
     time,
     startTimer,
@@ -855,6 +885,11 @@ const ReadyToGame = () => {
     if (time < 0) {
       stopTimer();
       resetTimer();
+      trackEvent({
+        action: GA_EVENT.GAME.TIMEOUT,
+        category: "game",
+        label: `nickname: ${localStorage.getItem("nickName")}, reason: timer expired`,
+      });
       if (isMyTurn) //질문을 30초 안에 하지 않는다면 강제로 턴을 넘긴다
         sendMessageToSocket("/app/chat.sendGameMessage", "RESET");
     }
@@ -1059,6 +1094,11 @@ const ReadyToGame = () => {
 
   const restartOnClick = () => {
     handlePlaySound();
+    trackEvent({
+      action: GA_EVENT.RESULT.CLICK_RESTART,
+      category: "result",
+      label: `nickname: ${myName}, roomId: ${localStorage.getItem("roomId")}`,
+    });
     setIsLocationLoading(true)
     loadingOpenModal()
     setTimeout(() => {
@@ -1116,7 +1156,7 @@ const ReadyToGame = () => {
   );
 
   useEffect(() => {
-    if ("isCaptin" in roomInfo && joinUsers.length===0) {
+    if ("isCaptin" in roomInfo && joinUsers.length === 0) {
       navigate(
         // 같은 경로 + 쿼리스트링 유지
         location.pathname + location.search,
