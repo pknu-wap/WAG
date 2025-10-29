@@ -328,14 +328,44 @@ pipeline {
                                 echo "=========================================="
                                 dir("${SERVER_DIR}") {
                                     script {
-                                        withCredentials([
-                                            file(credentialsId: 'application.properties', variable: 'APP_PROPS')
-                                        ]) {
-                                            sh """
-                                                echo "Copying application.properties from Jenkins credentials..."
-                                                cp \${APP_PROPS} src/main/resources/application.properties
-                                                echo "✅ application.properties copied successfully"
-                                            """
+                                        try {
+                                            withCredentials([
+                                                file(credentialsId: 'application.properties', variable: 'APP_PROPS')
+                                            ]) {
+                                                sh """
+                                                    set +e
+                                                    echo "📍 Current directory: \$(pwd)"
+                                                    echo "📁 Checking src/main/resources directory:"
+                                                    if [ -d "src/main/resources" ]; then
+                                                        echo "✅ src/main/resources exists"
+                                                        ls -la src/main/resources
+                                                    else
+                                                        echo "⚠️  src/main/resources does NOT exist, creating it..."
+                                                        mkdir -p src/main/resources
+                                                        echo "✅ Created src/main/resources"
+                                                    fi
+                                                    echo ""
+                                                    echo "Copying application.properties from Jenkins credentials..."
+                                                    echo "APP_PROPS path: \${APP_PROPS}"
+                                                    if [ -z "\${APP_PROPS}" ]; then
+                                                        echo "⚠️  APP_PROPS is empty"
+                                                    elif [ ! -f "\${APP_PROPS}" ]; then
+                                                        echo "⚠️  APP_PROPS does not exist: \${APP_PROPS}"
+                                                    else
+                                                        cp "\${APP_PROPS}" src/main/resources/application.properties
+                                                        if [ \$? -eq 0 ]; then
+                                                            echo "✅ application.properties copied successfully"
+                                                            ls -la src/main/resources/application.properties
+                                                        else
+                                                            echo "⚠️  Could not copy application.properties"
+                                                        fi
+                                                    fi
+                                                    set -e
+                                                """
+                                            }
+                                        } catch (Exception e) {
+                                            echo "⚠️  Credential access warning: ${e.message}"
+                                            echo "💡 Continuing without application.properties..."
                                         }
                                     }
                                 }
