@@ -51,8 +51,16 @@ def deployNewContainer(containerName, port, imageName, imageTag) {
         docker stop ${containerName} || true
         docker rm ${containerName} || true
         
+        # 네트워크가 없으면 생성
+        docker network create wag-network || true
+        
+        # Kafka와 Zookeeper를 같은 네트워크에 연결
+        docker network connect wag-network kafka 2>/dev/null || true
+        docker network connect wag-network zookeeper 2>/dev/null || true
+        
         docker run -d \\
             --name ${containerName} \\
+            --network wag-network \\
             -p ${port}:8080 \\
             --add-host=host.docker.internal:host-gateway \\
             --restart unless-stopped \\
@@ -455,10 +463,14 @@ pipeline {
                                     echo "✅ Deploying to ${deployBranch} branch..."
                                     
                                     sh """
+                                        # 네트워크가 없으면 생성
+                                        docker network create wag-network || true
+                                        
                                         docker stop wag-client-container || true
                                         docker rm wag-client-container || true
                                         docker run -d \\
                                             --name wag-client-container \\
+                                            --network wag-network \\
                                             -p 3000:80 \\
                                             --restart unless-stopped \\
                                             ${CLIENT_IMAGE_NAME}:${IMAGE_TAG}
