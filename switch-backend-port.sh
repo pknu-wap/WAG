@@ -41,32 +41,49 @@ fi
 # 백업 생성
 BACKUP_FILE="${NGINX_CONFIG}.backup.$(date +%Y%m%d_%H%M%S)"
 echo -e "${YELLOW}📋 설정 파일 백업 중: $BACKUP_FILE${NC}"
-sudo cp "$NGINX_CONFIG" "$BACKUP_FILE"
+cp "$NGINX_CONFIG" "$BACKUP_FILE"
 
 # 포트 변경 (wwwag-backend.co.kr 서버 블록 내의 proxy_pass만 변경)
 echo -e "${YELLOW}🔧 포트 변경 중...${NC}"
 # 기존 포트(18080 또는 18081)를 새 포트($PORT)로 변경
 # wwwag-backend.co.kr 서버 블록 내의 모든 proxy_pass 변경
-sudo sed -i "/server_name wwwag-backend\.co\.kr/,/^\s*listen 443 ssl/s|proxy_pass http://localhost:18080|proxy_pass http://localhost:$PORT|g" "$NGINX_CONFIG"
-sudo sed -i "/server_name wwwag-backend\.co\.kr/,/^\s*listen 443 ssl/s|proxy_pass http://localhost:18081|proxy_pass http://localhost:$PORT|g" "$NGINX_CONFIG"
+sed -i "/server_name wwwag-backend\.co\.kr/,/^\s*listen 443 ssl/s|proxy_pass http://localhost:18080|proxy_pass http://localhost:$PORT|g" "$NGINX_CONFIG"
+sed -i "/server_name wwwag-backend\.co\.kr/,/^\s*listen 443 ssl/s|proxy_pass http://localhost:18081|proxy_pass http://localhost:$PORT|g" "$NGINX_CONFIG"
 
 # 변경 확인
 UPDATED_PORT=$(grep -B 5 -A 15 "server_name wwwag-backend.co.kr" "$NGINX_CONFIG" | grep "proxy_pass" | grep -oP "localhost:\K[0-9]+" | head -1 || echo "")
 
 if [ "$UPDATED_PORT" != "$PORT" ]; then
     echo -e "${RED}❌ 포트 변경 실패!${NC}"
-    echo -e "${YELLOW}백업에서 복원: sudo cp $BACKUP_FILE $NGINX_CONFIG${NC}"
+    echo -e "${YELLOW}백업에서 복원: cp $BACKUP_FILE $NGINX_CONFIG${NC}"
     exit 1
 fi
 
 # Nginx 설정 테스트
 echo -e "${YELLOW}🔍 Nginx 설정 테스트 중...${NC}"
-if sudo nginx -t; then
+if nginx -t; then
     echo -e "${GREEN}✅ Nginx 설정이 올바릅니다.${NC}"
     
     # Nginx reload
     echo -e "${YELLOW}🔄 Nginx 재시작 중...${NC}"
-    if sudo systemctl reload nginx; then
+    # Jenkins 컨테이너에서 실행 중인 경우 호스트의 systemctl 사용
+    if [ -f "/.dockerenv" ]; then
+        # Docker 컨테이너 내부인 경우 - 호스트 systemd 접근
+        if nsenter --target 1 --mount --uts --ipc --net --pid -- systemctl reload nginx 2>/dev/null; then
+            echo "Reloaded via nsenter"
+        elif systemctl reload nginx 2>/dev/null; then
+            echo "Reloaded via systemctl"
+        elif nginx -s reload 2>/dev/null; then
+            echo "Reloaded via nginx -s reload"
+        else
+            false
+        fi
+    else
+        # 호스트에서 직접 실행인 경우
+        systemctl reload nginx || nginx -s reload
+    fi
+    
+    if [ $? -eq 0 ]; then
         echo -e "${GREEN}✅ 성공적으로 포트를 $PORT로 변경했습니다!${NC}"
         echo ""
         echo -e "${GREEN}📋 변경 사항:${NC}"
@@ -78,12 +95,12 @@ if sudo nginx -t; then
         echo "   docker ps | grep wag-server"
     else
         echo -e "${RED}❌ Nginx reload 실패!${NC}"
-        echo -e "${YELLOW}백업에서 복원: sudo cp $BACKUP_FILE $NGINX_CONFIG${NC}"
+        echo -e "${YELLOW}백업에서 복원: cp $BACKUP_FILE $NGINX_CONFIG${NC}"
         exit 1
     fi
 else
     echo -e "${RED}❌ Nginx 설정 오류!${NC}"
-    echo -e "${YELLOW}백업에서 복원: sudo cp $BACKUP_FILE $NGINX_CONFIG${NC}"
+    echo -e "${YELLOW}백업에서 복원: cp $BACKUP_FILE $NGINX_CONFIG${NC}"
     exit 1
 fi
 
