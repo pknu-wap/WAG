@@ -113,8 +113,27 @@ pipeline {
                     echo "Changed files:\n${changes}"
                     
                     // 각 폴더별 변경사항 확인 (자동 감지)
-                    def autoClientChanged = changes.contains('client/') || changes == 'FIRST_BUILD'
-                    def autoServerChanged = changes.contains('server/') || changes == 'FIRST_BUILD'
+                    // 변경 파일 목록을 줄 단위로 확인
+                    def clientChanged = false
+                    def serverChanged = false
+                    
+                    if (changes == 'FIRST_BUILD') {
+                        clientChanged = true
+                        serverChanged = true
+                    } else {
+                        // 각 줄을 확인하여 client/ 또는 server/로 시작하는지 체크
+                        changes.split('\n').each { file ->
+                            if (file.startsWith('client/')) {
+                                clientChanged = true
+                            }
+                            if (file.startsWith('server/')) {
+                                serverChanged = true
+                            }
+                        }
+                    }
+                    
+                    def autoClientChanged = clientChanged
+                    def autoServerChanged = serverChanged
                     
                     // 파라미터에 따라 빌드 타겟 결정
                     def buildTarget = params.BUILD_TARGET ?: 'auto'
@@ -140,6 +159,8 @@ pipeline {
                             env.CLIENT_CHANGED = autoClientChanged ? 'true' : 'false'
                             env.SERVER_CHANGED = autoServerChanged ? 'true' : 'false'
                             echo "📋 Build target: Auto (detected from changes)"
+                            echo "   - Client changes detected: ${autoClientChanged}"
+                            echo "   - Server changes detected: ${autoServerChanged}"
                             break
                     }
                     
