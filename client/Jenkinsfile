@@ -98,6 +98,31 @@ pipeline {
             }
         }
         
+        stage('Prepare Environment Variables') {
+            steps {
+                echo "=========================================="
+                echo "🔐 Setting up .env file"
+                echo "=========================================="
+                dir("${CLIENT_DIR}") {
+                    script {
+                        // Jenkins Credentials에서 .env 파일 가져오기
+                        withCredentials([
+                            file(credentialsId: '.env', variable: 'ENV_FILE')
+                        ]) {
+                            sh """
+                                echo "Copying .env file from Jenkins credentials..."
+                                cp \${ENV_FILE} .env
+                                echo "✅ .env file copied successfully"
+                                echo ""
+                                echo "Environment variables in .env file:"
+                                cat .env | grep -v '^#' | grep -v '^\$' | sed 's/=.*/=***/'
+                            """
+                        }
+                    }
+                }
+            }
+        }
+        
         stage('Build Docker Image') {
             steps {
                 echo "=========================================="
