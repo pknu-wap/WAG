@@ -284,14 +284,22 @@ pipeline {
                                 echo "=========================================="
                                 script {
                                     echo "Checking deployment conditions..."
-                                    echo "Current GIT_BRANCH: ${env.GIT_BRANCH}"
+                                    echo "Current GIT_BRANCH (raw): ${env.GIT_BRANCH}"
                                     
-                                    if (env.GIT_BRANCH != 'develop' && env.GIT_BRANCH != 'main') {
-                                        echo "⏭️  Skipping deployment: Branch '${env.GIT_BRANCH}' is not 'develop' or 'main'"
+                                    // 브랜치 이름 정규화
+                                    def deployBranch = env.GIT_BRANCH
+                                        .replaceAll('origin/', '')
+                                        .replaceAll('remotes/origin/', '')
+                                        .replaceAll('refs/heads/', '')
+                                    
+                                    echo "Current GIT_BRANCH (normalized): ${deployBranch}"
+                                    
+                                    if (deployBranch != 'develop' && deployBranch != 'main') {
+                                        echo "⏭️  Skipping deployment: Branch '${deployBranch}' is not 'develop' or 'main'"
                                         return
                                     }
                                     
-                                    echo "✅ Deploying to ${env.GIT_BRANCH} branch..."
+                                    echo "✅ Deploying to ${deployBranch} branch..."
                                     
                                     sh """
                                         docker stop wag-client-container || true
@@ -420,14 +428,22 @@ pipeline {
                                 echo "=========================================="
                                 script {
                                     echo "Checking deployment conditions..."
-                                    echo "Current GIT_BRANCH: ${env.GIT_BRANCH}"
+                                    echo "Current GIT_BRANCH (raw): ${env.GIT_BRANCH}"
                                     
-                                    if (env.GIT_BRANCH != 'develop' && env.GIT_BRANCH != 'main') {
-                                        echo "⏭️  Skipping deployment: Branch '${env.GIT_BRANCH}' is not 'develop' or 'main'"
+                                    // 브랜치 이름 정규화
+                                    def deployBranch = env.GIT_BRANCH
+                                        .replaceAll('origin/', '')
+                                        .replaceAll('remotes/origin/', '')
+                                        .replaceAll('refs/heads/', '')
+                                    
+                                    echo "Current GIT_BRANCH (normalized): ${deployBranch}"
+                                    
+                                    if (deployBranch != 'develop' && deployBranch != 'main') {
+                                        echo "⏭️  Skipping deployment: Branch '${deployBranch}' is not 'develop' or 'main'"
                                         return
                                     }
                                     
-                                    echo "✅ Deploying to ${env.GIT_BRANCH} branch..."
+                                    echo "✅ Deploying to ${deployBranch} branch..."
                                     
                                     def BLUE_PORT = 8080
                                     def GREEN_PORT = 8081
