@@ -1,3 +1,151 @@
+// Blue-Green 배포 함수들
+def getCurrentActiveContainer(blueContainer, greenContainer) {
+    def blueState = sh(
+        script: "docker inspect --format='{{.State.Status}}' ${blueContainer} 2>/dev/null || echo 'none'",
+        returnStdout: true
+    ).trim()
+    
+    def greenState = sh(
+        script: "docker inspect --format='{{.State.Status}}' ${greenContainer} 2>/dev/null || echo 'none'",
+        returnStdout: true
+    ).trim()
+    
+    echo "🔍 Container states - Blue: ${blueState}, Green: ${greenState}"
+    
+    if (blueState == 'running' && greenState != 'running') {
+        echo "✅ Blue is running, will deploy to Green"
+        return ['blue', greenContainer]
+    } else if (greenState == 'running' && blueState != 'running') {
+        echo "✅ Green is running, will deploy to Blue"
+        return ['green', blueContainer]
+    } else if (blueState == 'running' && greenState == 'running') {
+        // 둘 다 running이면 시작 시간 비교
+        def blueStarted = sh(
+            script: "docker inspect --format='{{.State.StartedAt}}' ${blueContainer}",
+            returnStdout: true
+        ).trim()
+        def greenStarted = sh(
+            script: "docker inspect --format='{{.State.StartedAt}}' ${greenContainer}",
+            returnStdout: true
+        ).trim()
+        
+        echo "⚖️  Both containers running - Blue: ${blueStarted}, Green: ${greenStarted}"
+        
+        if (blueStarted.compareTo(greenStarted) > 0) {
+            echo "➡️  Blue is newer, treating Blue as active"
+            return ['blue', greenContainer]
+        } else {
+            echo "➡️  Green is newer, treating Green as active"
+            return ['green', blueContainer]
+        }
+    } else {
+        echo "ℹ️  No active container found, will deploy to Blue"
+        return ['none', blueContainer]
+    }
+}
+
+def deployNewContainer(containerName, port, imageName, imageTag) {
+    echo "🚀 Deploying new container: ${containerName} on port ${port}"
+    
+    sh """
+        docker stop ${containerName} || true
+        docker rm ${containerName} || true
+        
+        docker run -d \\
+            --name ${containerName} \\
+            -p ${port}:8080 \\
+            -e SPRING_PROFILES_ACTIVE=prod \\
+            --restart unless-stopped \\
+            ${imageName}:${imageTag}
+    """
+    
+    echo "✅ Container ${containerName} started"
+}
+
+def performHealthCheck(containerName, port, maxRetries = 60, intervalSeconds = 3) {
+    echo "🏥 Starting health check for ${containerName} on port ${port}"
+    
+    def healthCheckPassed = false
+    
+    for (int i = 0; i < maxRetries; i++) {
+        sleep(intervalSeconds)
+        
+        def healthStatus = sh(
+            script: "curl -sf http://localhost:${port}/actuator/health > /dev/null && echo 'OK' || echo 'FAIL'",
+            returnStdout: true
+        ).trim()
+        
+        if (healthStatus == 'OK') {
+            echo "✅ Health check passed for ${containerName}"
+            healthCheckPassed = true
+            break
+        }
+        
+        echo "⏳ Health check attempt ${i+1}/${maxRetries} - Waiting..."
+    }
+    
+    if (!healthCheckPassed) {
+        echo "❌ Health check failed for ${containerName} after ${maxRetries} attempts"
+        return false
+    }
+    
+    return true
+}
+
+def switchTraffic(activeContainer, newContainer) {
+    if (activeContainer == 'none') {
+        echo "ℹ️  No active container to switch from - ${newContainer} is now active"
+        return
+    }
+    
+    echo "🔄 Switching traffic from ${activeContainer} to ${newContainer}"
+    
+    sh """
+        sleep 5
+        docker stop -t 30 ${activeContainer} || true
+        docker rm ${activeContainer} || true
+    """
+    
+    echo "✅ Traffic switched successfully"
+}
+
+def rollbackDeployment(blueContainer, greenContainer, bluePort, greenPort) {
+    echo "🔄 Starting rollback process..."
+    
+    def (activeColor, inactiveContainer) = getCurrentActiveContainer(blueContainer, greenContainer)
+    
+    if (activeColor == 'none') {
+        error("❌ No containers to rollback to")
+    }
+    
+    // 현재 활성 컨테이너를 중지하고 비활성 컨테이너를 시작
+    def activeContainer = (activeColor == 'blue') ? blueContainer : greenContainer
+    def rollbackPort = (activeColor == 'blue') ? greenPort : bluePort
+    
+    echo "📦 Current active: ${activeContainer}"
+    echo "📦 Rolling back to: ${inactiveContainer} on port ${rollbackPort}"
+    
+    // 비활성 컨테이너 시작 (이미 이미지가 있다고 가정)
+    sh """
+        docker start ${inactiveContainer} || true
+    """
+    
+    // 헬스체크
+    if (performHealthCheck(inactiveContainer, rollbackPort, 30, 2)) {
+        // 현재 활성 컨테이너 중지
+        sh """
+            docker stop -t 30 ${activeContainer} || true
+        """
+        echo "✅ Rollback completed successfully to ${inactiveContainer}"
+    } else {
+        // 롤백 실패 시 다시 활성 컨테이너 복구
+        sh """
+            docker start ${activeContainer} || true
+        """
+        error("❌ Rollback failed - restored ${activeContainer}")
+    }
+}
+
 pipeline {
     agent any
     
@@ -11,6 +159,11 @@ pipeline {
             name: 'BUILD_TARGET',
             choices: ['auto', 'client', 'server', 'both'],
             description: '빌드할 대상을 선택하세요.\n- auto: 변경사항 자동 감지\n- client: 프론트엔드만 빌드\n- server: 백엔드만 빌드\n- both: 프론트엔드와 백엔드 모두 빌드'
+        )
+        booleanParam(
+            name: 'ROLLBACK_SERVER',
+            defaultValue: false,
+            description: '서버를 이전 버전으로 롤백하려면 체크하세요.'
         )
     }
     
@@ -445,83 +598,35 @@ pipeline {
                                     
                                     echo "✅ Deploying to ${deployBranch} branch..."
                                     
+                                    // Blue/Green 컨테이너 정의
+                                    def BLUE_CONTAINER = 'wag-server-blue'
+                                    def GREEN_CONTAINER = 'wag-server-green'
                                     def BLUE_PORT = 18080
                                     def GREEN_PORT = 18081
                                     
-                                    def blueRunning = sh(
-                                        script: "docker ps -q -f name=wag-server-blue",
-                                        returnStdout: true
-                                    ).trim()
+                                    // 현재 활성 컨테이너 확인
+                                    def (activeColor, targetContainer) = getCurrentActiveContainer(BLUE_CONTAINER, GREEN_CONTAINER)
+                                    def activeContainer = (activeColor == 'blue') ? BLUE_CONTAINER : (activeColor == 'green') ? GREEN_CONTAINER : 'none'
+                                    def targetPort = (targetContainer == BLUE_CONTAINER) ? BLUE_PORT : GREEN_PORT
                                     
-                                    def greenRunning = sh(
-                                        script: "docker ps -q -f name=wag-server-green",
-                                        returnStdout: true
-                                    ).trim()
+                                    echo "📦 Active: ${activeContainer}, Target: ${targetContainer}, Port: ${targetPort}"
                                     
-                                    def targetColor = ""
-                                    def targetPort = 0
-                                    def oldColor = ""
-                                    
-                                    if (blueRunning) {
-                                        targetColor = "green"
-                                        targetPort = GREEN_PORT
-                                        oldColor = "blue"
-                                    } else {
-                                        targetColor = "blue"
-                                        targetPort = BLUE_PORT
-                                        oldColor = "green"
-                                    }
-                                    
-                                    echo "Deploying to ${targetColor} (Port: ${targetPort})"
-                                    
-                                    // 새 컨테이너 시작
-                                    sh """
-                                        docker run -d \\
-                                            --name wag-server-${targetColor} \\
-                                            -p ${targetPort}:8080 \\
-                                            -e SPRING_PROFILES_ACTIVE=prod \\
-                                            --restart unless-stopped \\
-                                            ${SERVER_IMAGE_NAME}:${IMAGE_TAG}
-                                    """
+                                    // 새 컨테이너 배포
+                                    deployNewContainer(targetContainer, targetPort, SERVER_IMAGE_NAME, IMAGE_TAG)
                                     
                                     // 헬스체크
-                                    def healthCheckPassed = false
-                                    for (int i = 0; i < 60; i++) {
-                                        sleep(3)
-                                        def healthStatus = sh(
-                                            script: "curl -sf http://localhost:${targetPort}/actuator/health > /dev/null && echo 'OK' || echo 'FAIL'",
-                                            returnStdout: true
-                                        ).trim()
-                                        
-                                        if (healthStatus == 'OK') {
-                                            healthCheckPassed = true
-                                            break
-                                        }
-                                        echo "⏳ Waiting... (${i+1}/60)"
+                                    if (!performHealthCheck(targetContainer, targetPort, 60, 3)) {
+                                        // 헬스체크 실패 시 롤백
+                                        sh "docker stop ${targetContainer} || true"
+                                        sh "docker rm ${targetContainer} || true"
+                                        error("❌ Health check failed! Deployment aborted.")
                                     }
                                     
-                                    if (!healthCheckPassed) {
-                                        sh "docker stop wag-server-${targetColor} || true"
-                                        sh "docker rm wag-server-${targetColor} || true"
-                                        error("❌ Health check failed!")
-                                    }
+                                    // 4. 트래픽 전환
+                                    switchTraffic(activeContainer, targetContainer)
                                     
-                                    // 이전 컨테이너 종료
-                                    if (oldColor == "blue" && blueRunning) {
-                                        sh """
-                                            sleep 5
-                                            docker stop -t 30 wag-server-blue || true
-                                            docker rm wag-server-blue || true
-                                        """
-                                    } else if (oldColor == "green" && greenRunning) {
-                                        sh """
-                                            sleep 5
-                                            docker stop -t 30 wag-server-green || true
-                                            docker rm wag-server-green || true
-                                        """
-                                    }
-                                    
-                                    echo "✅ Blue-Green deployment completed!"
+                                    echo "🎉 Blue-Green deployment completed successfully!"
+                                    echo "📊 New active container: ${targetContainer} on port ${targetPort}"
                                 }
                             }
                         }
@@ -531,6 +636,9 @@ pipeline {
         }
         
         stage('Clean Up') {
+            when {
+                expression { params.ROLLBACK_SERVER != true }
+            }
             steps {
                 echo "=========================================="
                 echo "🧹 Cleaning up old Docker images"
@@ -560,6 +668,33 @@ pipeline {
                 }
             }
         }
+        
+        stage('Rollback Server') {
+            when {
+                expression { params.ROLLBACK_SERVER == true }
+            }
+            steps {
+                echo "=========================================="
+                echo "🔄 Server Rollback"
+                echo "=========================================="
+                script {
+                    // Blue/Green 컨테이너 정의
+                    def BLUE_CONTAINER = 'wag-server-blue'
+                    def GREEN_CONTAINER = 'wag-server-green'
+                    def BLUE_PORT = 18080
+                    def GREEN_PORT = 18081
+                    
+                    echo "🔄 Initiating rollback for server..."
+                    
+                    try {
+                        rollbackDeployment(BLUE_CONTAINER, GREEN_CONTAINER, BLUE_PORT, GREEN_PORT)
+                        echo "✅ Rollback completed successfully!"
+                    } catch (Exception e) {
+                        error("❌ Rollback failed: ${e.message}")
+                    }
+                }
+            }
+        }
     }
     
     post {
@@ -575,6 +710,11 @@ pipeline {
             echo "❌ BUILD FAILED!"
             echo "=========================================="
             echo "Build Number: ${env.BUILD_NUMBER}"
+            echo ""
+            echo "💡 If deployment failed, you can rollback using:"
+            echo "   1. Click 'Build with Parameters'"
+            echo "   2. Check 'ROLLBACK_SERVER'"
+            echo "   3. Click 'Build'"
         }
         
         always {
