@@ -1,0 +1,226 @@
+pipeline {
+    agent any
+    
+    parameters {
+        string(
+            name: 'BUILD_BRANCH',
+            defaultValue: 'develop',
+            description: '빌드할 브랜치 이름을 입력하세요.'
+        )
+    }
+    
+    environment {
+        // Docker 이미지 이름 설정
+        IMAGE_NAME = 'wag-client'
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+        
+        // 프론트엔드 경로
+        CLIENT_DIR = 'client'
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo "=========================================="
+                echo "🔍 Checking out code from branch: ${params.BUILD_BRANCH}"
+                echo "=========================================="
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: "*/${params.BUILD_BRANCH}"]],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/pknu-wap/WAG.git',
+                        credentialsId: 'gd10080008@gmail.com/******'
+                    ]]
+                ])
+            }
+        }
+        
+        stage('Check Changes') {
+            steps {
+                script {
+                    echo "=========================================="
+                    echo "🔎 Checking for client directory changes"
+                    echo "=========================================="
+                    
+                    // 변경된 파일 목록 가져오기
+                    def changes = sh(
+                        script: 'git diff --name-only HEAD~1 HEAD || echo "FIRST_BUILD"',
+                        returnStdout: true
+                    ).trim()
+                    
+                    echo "Changed files:\n${changes}"
+                    
+                    // client/ 폴더에 변경사항이 있는지 확인
+                    env.CLIENT_CHANGED = changes.contains('client/') || changes == 'FIRST_BUILD' ? 'true' : 'false'
+                    
+                    echo "Client directory changed: ${env.CLIENT_CHANGED}"
+                    
+                    if (env.CLIENT_CHANGED == 'false') {
+                        echo "⏭️  No changes in client directory. Skipping build."
+                        currentBuild.result = 'SUCCESS'
+                        error('No client changes detected. Pipeline stopped.')
+                    }
+                }
+            }
+        }
+        
+        stage('Environment Info') {
+            steps {
+                echo "=========================================="
+                echo "📦 Build Information"
+                echo "=========================================="
+                sh '''
+                    echo "Build Number: ${BUILD_NUMBER}"
+                    echo "Branch: ${BUILD_BRANCH}"
+                    echo "Node Version: $(node --version || echo 'Node not installed')"
+                    echo "Docker Version: $(docker --version || echo 'Docker not installed')"
+                    echo "Working Directory: $(pwd)"
+                '''
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                echo "=========================================="
+                echo "🐳 Building Docker Image"
+                echo "=========================================="
+                dir("${CLIENT_DIR}") {
+                    script {
+                        sh """
+                            docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                            docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
+                            docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:${BUILD_BRANCH}
+                        """
+                    }
+                }
+            }
+        }
+        
+        stage('Test Image') {
+            steps {
+                echo "=========================================="
+                echo "✅ Testing Docker Image"
+                echo "=========================================="
+                script {
+                    // 특정 태그의 이미지가 실제로 존재하는지 확인
+                    def imageExists = sh(
+                        script: "docker images -q ${IMAGE_NAME}:${IMAGE_TAG}",
+                        returnStdout: true
+                    ).trim()
+                    
+                    if (imageExists) {
+                        echo "✅ Image ${IMAGE_NAME}:${IMAGE_TAG} exists!"
+                        sh "docker images ${IMAGE_NAME}:${IMAGE_TAG}"
+                    } else {
+                        error("❌ Image ${IMAGE_NAME}:${IMAGE_TAG} not found!")
+                    }
+                    
+                    // 이미지 크기 확인
+                    sh """
+                        echo "Image details:"
+                        docker inspect ${IMAGE_NAME}:${IMAGE_TAG} --format='Size: {{.Size}} bytes'
+                    """
+                }
+            }
+        }
+        
+        stage('Push to Registry (Optional)') {
+            when {
+                expression { 
+                    // 필요시 조건 추가 (예: main 브랜치일 때만)
+                    return false
+                }
+            }
+            steps {
+                echo "=========================================="
+                echo "📤 Pushing to Docker Registry"
+                echo "=========================================="
+                script {
+                    // Docker Hub or Private Registry에 push
+                    // sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                    echo "Skipping push to registry (disabled)"
+                }
+            }
+        }
+        
+        stage('Deploy') {
+            when {
+                expression { 
+                    // develop 또는 main 브랜치일 때만 배포
+                    params.BUILD_BRANCH == 'develop' || params.BUILD_BRANCH == 'main'
+                }
+            }
+            steps {
+                echo "=========================================="
+                echo "🚀 Deploying Application"
+                echo "=========================================="
+                script {
+                    // 기존 컨테이너 중지 및 제거
+                    sh """
+                        docker stop wag-client-container || true
+                        docker rm wag-client-container || true
+                    """
+                    
+                    // 새 컨테이너 실행
+                    sh """
+                        docker run -d \
+                            --name wag-client-container \
+                            -p 3001:80 \
+                            --restart unless-stopped \
+                            ${IMAGE_NAME}:${IMAGE_TAG}
+                    """
+                    
+                    echo "✅ Deployment completed!"
+                    echo "Access application at: http://localhost"
+                }
+            }
+        }
+        
+        stage('Clean Up Old Images') {
+            steps {
+                echo "=========================================="
+                echo "🧹 Cleaning up old Docker images"
+                echo "=========================================="
+                script {
+                    // 최근 3개 버전만 유지
+                    sh """
+                        docker images ${IMAGE_NAME} --format "{{.Tag}}" | \
+                        grep -E '^[0-9]+\$' | \
+                        sort -rn | \
+                        tail -n +4 | \
+                        xargs -I {} docker rmi ${IMAGE_NAME}:{} || true
+                    """
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo "=========================================="
+            echo "✅ BUILD SUCCESS!"
+            echo "=========================================="
+            echo "Image: ${IMAGE_NAME}:${IMAGE_TAG}"
+            echo "Branch: ${params.BUILD_BRANCH}"
+            echo "Build Number: ${env.BUILD_NUMBER}"
+        }
+        
+        failure {
+            echo "=========================================="
+            echo "❌ BUILD FAILED!"
+            echo "=========================================="
+            echo "Branch: ${params.BUILD_BRANCH}"
+            echo "Build Number: ${env.BUILD_NUMBER}"
+            // 실패 시 알림 (Slack, Email 등)
+        }
+        
+        always {
+            echo "=========================================="
+            echo "🏁 Pipeline Finished"
+            echo "=========================================="
+            // 워크스페이스 정리 (선택사항)
+            // cleanWs()
+        }
+    }
+}
+
