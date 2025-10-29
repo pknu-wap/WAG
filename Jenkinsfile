@@ -59,16 +59,28 @@ pipeline {
                         echo "Webhook triggered build - Using SCM branch"
                         checkout scm
                         
-                        // 현재 브랜치 확인
-                        def currentBranch = sh(
-                            script: 'git rev-parse --abbrev-ref HEAD',
-                            returnStdout: true
-                        ).trim()
+                        // 현재 브랜치 확인 (Jenkins 환경 변수 우선 사용)
+                        def currentBranch = ""
+                        if (env.GIT_BRANCH) {
+                            // Jenkins가 자동으로 설정한 GIT_BRANCH 환경 변수 사용
+                            currentBranch = env.GIT_BRANCH
+                        } else {
+                            // 대체 방법: git 명령어로 확인
+                            currentBranch = sh(
+                                script: 'git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --abbrev-ref HEAD',
+                                returnStdout: true
+                            ).trim()
+                        }
                         
-                        // 브랜치 이름 정규화 (origin/develop -> develop, remotes/origin/develop -> develop)
-                        def normalizedBranch = currentBranch.replaceAll('origin/', '').replaceAll('remotes/origin/', '')
+                        // 브랜치 이름 정규화
+                        // origin/develop -> develop, remotes/origin/develop -> develop, develop -> develop
+                        def normalizedBranch = currentBranch
+                            .replaceAll('origin/', '')
+                            .replaceAll('remotes/origin/', '')
+                            .replaceAll('refs/heads/', '')
                         
-                        echo "Current branch: ${normalizedBranch}"
+                        echo "Current branch (raw): ${currentBranch}"
+                        echo "Current branch (normalized): ${normalizedBranch}"
                         echo "Commit: ${env.GIT_COMMIT}"
                         
                         // develop 브랜치만 빌드 (webhook 트리거 시)
