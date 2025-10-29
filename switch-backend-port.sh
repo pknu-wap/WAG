@@ -59,47 +59,69 @@ if [ "$UPDATED_PORT" != "$PORT" ]; then
     exit 1
 fi
 
+# Docker 컨테이너 내부인지 확인
+IS_DOCKER=false
+if [ -f "/.dockerenv" ]; then
+    IS_DOCKER=true
+    echo -e "${YELLOW}🐳 Docker 컨테이너 내부에서 실행 중 - 호스트 명령 사용${NC}"
+fi
+
 # Nginx 설정 테스트
 echo -e "${YELLOW}🔍 Nginx 설정 테스트 중...${NC}"
-if nginx -t; then
-    echo -e "${GREEN}✅ Nginx 설정이 올바릅니다.${NC}"
-    
-    # Nginx reload
-    echo -e "${YELLOW}🔄 Nginx 재시작 중...${NC}"
-    # Jenkins 컨테이너에서 실행 중인 경우 호스트의 systemctl 사용
-    if [ -f "/.dockerenv" ]; then
-        # Docker 컨테이너 내부인 경우 - 호스트 systemd 접근
-        if nsenter --target 1 --mount --uts --ipc --net --pid -- systemctl reload nginx 2>/dev/null; then
-            echo "Reloaded via nsenter"
-        elif systemctl reload nginx 2>/dev/null; then
-            echo "Reloaded via systemctl"
-        elif nginx -s reload 2>/dev/null; then
-            echo "Reloaded via nginx -s reload"
-        else
-            false
-        fi
+if [ "$IS_DOCKER" = true ]; then
+    # Docker 컨테이너에서 실행 - 호스트의 nginx 사용
+    if nsenter --target 1 --mount --uts --ipc --net --pid -- nginx -t 2>&1; then
+        echo -e "${GREEN}✅ Nginx 설정이 올바릅니다.${NC}"
     else
-        # 호스트에서 직접 실행인 경우
-        systemctl reload nginx || nginx -s reload
-    fi
-    
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}✅ 성공적으로 포트를 $PORT로 변경했습니다!${NC}"
-        echo ""
-        echo -e "${GREEN}📋 변경 사항:${NC}"
-        echo "   Backend 포트: $CURRENT_PORT → $PORT"
-        echo "   백업 파일: $BACKUP_FILE"
-        echo ""
-        echo -e "${YELLOW}💡 참고:${NC}"
-        echo "   현재 실행 중인 컨테이너를 확인하세요:"
-        echo "   docker ps | grep wag-server"
-    else
-        echo -e "${RED}❌ Nginx reload 실패!${NC}"
+        echo -e "${RED}❌ Nginx 설정 오류!${NC}"
         echo -e "${YELLOW}백업에서 복원: cp $BACKUP_FILE $NGINX_CONFIG${NC}"
         exit 1
     fi
 else
-    echo -e "${RED}❌ Nginx 설정 오류!${NC}"
+    # 호스트에서 직접 실행
+    if nginx -t; then
+        echo -e "${GREEN}✅ Nginx 설정이 올바릅니다.${NC}"
+    else
+        echo -e "${RED}❌ Nginx 설정 오류!${NC}"
+        echo -e "${YELLOW}백업에서 복원: cp $BACKUP_FILE $NGINX_CONFIG${NC}"
+        exit 1
+    fi
+fi
+
+# Nginx reload
+echo -e "${YELLOW}🔄 Nginx 재시작 중...${NC}"
+if [ "$IS_DOCKER" = true ]; then
+    # Docker 컨테이너 내부인 경우 - 호스트 systemd 접근
+    if nsenter --target 1 --mount --uts --ipc --net --pid -- systemctl reload nginx 2>/dev/null; then
+        RELOAD_SUCCESS=true
+        echo -e "${GREEN}✅ Reloaded via nsenter + systemctl${NC}"
+    elif nsenter --target 1 --mount --uts --ipc --net --pid -- nginx -s reload 2>/dev/null; then
+        RELOAD_SUCCESS=true
+        echo -e "${GREEN}✅ Reloaded via nsenter + nginx -s reload${NC}"
+    else
+        RELOAD_SUCCESS=false
+    fi
+else
+    # 호스트에서 직접 실행인 경우
+    if systemctl reload nginx 2>/dev/null || nginx -s reload 2>/dev/null; then
+        RELOAD_SUCCESS=true
+    else
+        RELOAD_SUCCESS=false
+    fi
+fi
+
+if [ "$RELOAD_SUCCESS" = true ]; then
+    echo -e "${GREEN}✅ 성공적으로 포트를 $PORT로 변경했습니다!${NC}"
+    echo ""
+    echo -e "${GREEN}📋 변경 사항:${NC}"
+    echo "   Backend 포트: $CURRENT_PORT → $PORT"
+    echo "   백업 파일: $BACKUP_FILE"
+    echo ""
+    echo -e "${YELLOW}💡 참고:${NC}"
+    echo "   현재 실행 중인 컨테이너를 확인하세요:"
+    echo "   docker ps | grep wag-server"
+else
+    echo -e "${RED}❌ Nginx reload 실패!${NC}"
     echo -e "${YELLOW}백업에서 복원: cp $BACKUP_FILE $NGINX_CONFIG${NC}"
     exit 1
 fi
