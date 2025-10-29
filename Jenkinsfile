@@ -137,6 +137,13 @@ pipeline {
                     
                     // 파라미터에 따라 빌드 타겟 결정
                     def buildTarget = params.BUILD_TARGET ?: 'auto'
+                    echo "📋 buildTarget parameter: ${buildTarget}"
+                    echo "📋 autoClientChanged: ${autoClientChanged}"
+                    echo "📋 autoServerChanged: ${autoServerChanged}"
+                    
+                    // 환경변수 초기화
+                    env.CLIENT_CHANGED = 'false'
+                    env.SERVER_CHANGED = 'false'
                     
                     switch(buildTarget) {
                         case 'client':
