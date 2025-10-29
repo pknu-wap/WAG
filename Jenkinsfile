@@ -71,15 +71,19 @@ def deployNewContainer(containerName, port, imageName, imageTag) {
 }
 
 def performHealthCheck(containerName, port, maxRetries = 60, intervalSeconds = 3) {
-    echo "🏥 Starting health check for ${containerName} on port ${port}"
+    echo "🏥 Starting health check for ${containerName}"
     
     def healthCheckPassed = false
     
     for (int i = 0; i < maxRetries; i++) {
         sleep(intervalSeconds)
         
+        // Jenkins 컨테이너에서 직접 컨테이너 이름으로 접근
+        // Docker 네트워크를 통해 컨테이너 간 통신
         def healthStatus = sh(
-            script: "curl -sf http://localhost:${port}/actuator/health > /dev/null && echo 'OK' || echo 'FAIL'",
+            script: """
+                docker exec ${containerName} curl -sf http://localhost:8080/actuator/health > /dev/null && echo 'OK' || echo 'FAIL'
+            """,
             returnStdout: true
         ).trim()
         
