@@ -202,14 +202,37 @@ pipeline {
                                 echo "=========================================="
                                 dir("${CLIENT_DIR}") {
                                     script {
-                                        withCredentials([
-                                            file(credentialsId: '.env', variable: 'ENV_FILE')
-                                        ]) {
-                                            sh """
-                                                echo "Copying .env file from Jenkins credentials..."
-                                                cp \${ENV_FILE} .env
-                                                echo "✅ .env file copied successfully"
-                                            """
+                                        try {
+                                            withCredentials([
+                                                file(credentialsId: '.env', variable: 'ENV_FILE')
+                                            ]) {
+                                                sh """
+                                                    set +e
+                                                    echo "📍 Current directory: \$(pwd)"
+                                                    echo "📁 Listing current directory:"
+                                                    ls -la
+                                                    echo ""
+                                                    echo "Copying .env file from Jenkins credentials..."
+                                                    echo "ENV_FILE path: \${ENV_FILE}"
+                                                    if [ -z "\${ENV_FILE}" ]; then
+                                                        echo "⚠️  ENV_FILE is empty"
+                                                    elif [ ! -f "\${ENV_FILE}" ]; then
+                                                        echo "⚠️  ENV_FILE does not exist: \${ENV_FILE}"
+                                                    else
+                                                        cp "\${ENV_FILE}" .env
+                                                        if [ \$? -eq 0 ]; then
+                                                            echo "✅ .env file copied successfully"
+                                                            ls -la .env
+                                                        else
+                                                            echo "⚠️  Could not copy .env file"
+                                                        fi
+                                                    fi
+                                                    set -e
+                                                """
+                                            }
+                                        } catch (Exception e) {
+                                            echo "⚠️  Credential access warning: ${e.message}"
+                                            echo "💡 Continuing without .env file..."
                                         }
                                     }
                                 }
