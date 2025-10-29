@@ -22,4 +22,3 @@ public class ChatRoomModeMessage {
         this.isPrivateRoom = room.isPrivateRoom();
     }
 }
-
