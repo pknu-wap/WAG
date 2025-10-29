@@ -54,7 +54,7 @@ def deployNewContainer(containerName, port, imageName, imageTag) {
         docker run -d \\
             --name ${containerName} \\
             -p ${port}:8080 \\
-            -e SPRING_PROFILES_ACTIVE=prod \\
+            --add-host=host.docker.internal:host-gateway \\
             --restart unless-stopped \\
             ${imageName}:${imageTag}
     """
