@@ -278,16 +278,21 @@ pipeline {
                         }
                         
                         stage('Client: Deploy') {
-                            when {
-                                expression { 
-                                    return env.GIT_BRANCH == 'develop' || env.GIT_BRANCH == 'main'
-                                }
-                            }
                             steps {
                                 echo "=========================================="
                                 echo "🚀 Deploying Client"
                                 echo "=========================================="
                                 script {
+                                    echo "Checking deployment conditions..."
+                                    echo "Current GIT_BRANCH: ${env.GIT_BRANCH}"
+                                    
+                                    if (env.GIT_BRANCH != 'develop' && env.GIT_BRANCH != 'main') {
+                                        echo "⏭️  Skipping deployment: Branch '${env.GIT_BRANCH}' is not 'develop' or 'main'"
+                                        return
+                                    }
+                                    
+                                    echo "✅ Deploying to ${env.GIT_BRANCH} branch..."
+                                    
                                     sh """
                                         docker stop wag-client-container || true
                                         docker rm wag-client-container || true
@@ -409,16 +414,21 @@ pipeline {
                         }
                         
                         stage('Server: Deploy (Blue-Green)') {
-                            when {
-                                expression { 
-                                    return env.GIT_BRANCH == 'develop' || env.GIT_BRANCH == 'main'
-                                }
-                            }
                             steps {
                                 echo "=========================================="
                                 echo "🚀 Blue-Green Deployment"
                                 echo "=========================================="
                                 script {
+                                    echo "Checking deployment conditions..."
+                                    echo "Current GIT_BRANCH: ${env.GIT_BRANCH}"
+                                    
+                                    if (env.GIT_BRANCH != 'develop' && env.GIT_BRANCH != 'main') {
+                                        echo "⏭️  Skipping deployment: Branch '${env.GIT_BRANCH}' is not 'develop' or 'main'"
+                                        return
+                                    }
+                                    
+                                    echo "✅ Deploying to ${env.GIT_BRANCH} branch..."
+                                    
                                     def BLUE_PORT = 8080
                                     def GREEN_PORT = 8081
                                     
