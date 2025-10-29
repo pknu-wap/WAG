@@ -108,11 +108,8 @@ def updateNginxProxy(targetPort) {
     echo "🔄 Updating Nginx proxy to port ${targetPort}"
     
     sh """
-        # switch-backend-port.sh 스크립트 실행 권한 확인
         chmod +x switch-backend-port.sh
-        
-        # Nginx 백엔드 포트 전환
-        sudo ./switch-backend-port.sh ${targetPort}
+        ./switch-backend-port.sh ${targetPort}
     """
     
     echo "✅ Nginx proxy updated to port ${targetPort}"
@@ -128,10 +125,10 @@ def switchTraffic(activeContainer, newContainer, newPort) {
     
     echo "🔄 Switching traffic from ${activeContainer} to ${newContainer}"
     
-    // 1. Nginx 프록시를 새 포트로 전환
+    // Nginx 프록시를 새 포트로 전환
     updateNginxProxy(newPort)
     
-    // 2. 짧은 대기 후 기존 컨테이너 중지
+    // 짧은 대기 후 기존 컨테이너 중지
     sh """
         sleep 5
         docker stop -t 30 ${activeContainer} || true
