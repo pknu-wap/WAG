@@ -1,0 +1,329 @@
+pipeline {
+    agent any
+    
+    parameters {
+        string(
+            name: 'BUILD_BRANCH',
+            defaultValue: 'develop',
+            description: '빌드할 브랜치 이름을 입력하세요.'
+        )
+    }
+    
+    environment {
+        // Docker 이미지 이름 설정
+        IMAGE_NAME = 'wag-server'
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+        
+        // 백엔드 경로
+        SERVER_DIR = 'server'
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    echo "=========================================="
+                    echo "🔍 Checking out code"
+                    echo "=========================================="
+                    
+                    // BUILD_BRANCH 파라미터가 있으면 해당 브랜치 체크아웃 (수동 빌드)
+                    // 없으면 webhook으로 전달된 브랜치 사용 (자동 빌드)
+                    if (params.BUILD_BRANCH && env.JOB_NAME) {
+                        echo "Manual build - Branch: ${params.BUILD_BRANCH}"
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: [[name: "*/${params.BUILD_BRANCH}"]],
+                            userRemoteConfigs: [[
+                                url: 'https://github.com/pknu-wap/WAG.git',
+                                credentialsId: 'gd10080008@gmail.com/******'
+                            ]]
+                        ])
+                    } else {
+                        echo "Webhook triggered build - Using SCM branch"
+                        checkout scm
+                    }
+                    
+                    // 현재 브랜치 정보 출력
+                    def currentBranch = sh(
+                        script: 'git rev-parse --abbrev-ref HEAD',
+                        returnStdout: true
+                    ).trim()
+                    echo "Current branch: ${currentBranch}"
+                    echo "Commit: ${env.GIT_COMMIT}"
+                }
+            }
+        }
+        
+        stage('Check Changes') {
+            steps {
+                script {
+                    echo "=========================================="
+                    echo "🔎 Checking for server directory changes"
+                    echo "=========================================="
+                    
+                    // 변경된 파일 목록 가져오기
+                    def changes = sh(
+                        script: 'git diff --name-only HEAD~1 HEAD || echo "FIRST_BUILD"',
+                        returnStdout: true
+                    ).trim()
+                    
+                    echo "Changed files:\n${changes}"
+                    
+                    // server/ 폴더에 변경사항이 있는지 확인
+                    env.SERVER_CHANGED = changes.contains('server/') || changes == 'FIRST_BUILD' ? 'true' : 'false'
+                    
+                    echo "Server directory changed: ${env.SERVER_CHANGED}"
+                    
+                    if (env.SERVER_CHANGED == 'false') {
+                        echo "⏭️  No changes in server directory. Skipping build."
+                        currentBuild.result = 'SUCCESS'
+                        error('No server changes detected. Pipeline stopped.')
+                    }
+                }
+            }
+        }
+        
+        stage('Environment Info') {
+            steps {
+                echo "=========================================="
+                echo "📦 Build Information"
+                echo "=========================================="
+                sh '''
+                    echo "Build Number: ${BUILD_NUMBER}"
+                    echo "Branch: ${BUILD_BRANCH}"
+                    echo "Java Version: $(java -version 2>&1 | head -n 1)"
+                    echo "Gradle Version: $(./gradlew --version | grep Gradle || echo 'Will use Docker')"
+                    echo "Docker Version: $(docker --version || echo 'Docker not installed')"
+                    echo "Working Directory: $(pwd)"
+                '''
+            }
+        }
+        
+        stage('Prepare Application Properties') {
+            steps {
+                echo "=========================================="
+                echo "🔐 Setting up application.properties"
+                echo "=========================================="
+                dir("${SERVER_DIR}") {
+                    script {
+                        // Jenkins Credentials에서 application.properties 파일 가져오기
+                        withCredentials([
+                            file(credentialsId: 'application.properties', variable: 'APP_PROPS')
+                        ]) {
+                            sh """
+                                echo "Copying application.properties from Jenkins credentials..."
+                                cp \${APP_PROPS} src/main/resources/application.properties
+                                echo "✅ application.properties copied successfully"
+                                echo ""
+                                echo "Configuration loaded (values hidden for security)"
+                            """
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                echo "=========================================="
+                echo "🐳 Building Docker Image"
+                echo "=========================================="
+                dir("${SERVER_DIR}") {
+                    script {
+                        sh """
+                            docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                            docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
+                        """
+                    }
+                }
+            }
+        }
+        
+        stage('Test Image') {
+            steps {
+                echo "=========================================="
+                echo "✅ Testing Docker Image"
+                echo "=========================================="
+                script {
+                    // 특정 태그의 이미지가 실제로 존재하는지 확인
+                    def imageExists = sh(
+                        script: "docker images -q ${IMAGE_NAME}:${IMAGE_TAG}",
+                        returnStdout: true
+                    ).trim()
+                    
+                    if (imageExists) {
+                        echo "✅ Image ${IMAGE_NAME}:${IMAGE_TAG} exists!"
+                        sh "docker images ${IMAGE_NAME}:${IMAGE_TAG}"
+                    } else {
+                        error("❌ Image ${IMAGE_NAME}:${IMAGE_TAG} not found!")
+                    }
+                    
+                    // 이미지 크기 확인
+                    sh """
+                        echo "Image details:"
+                        docker inspect ${IMAGE_NAME}:${IMAGE_TAG} --format='Size: {{.Size}} bytes'
+                    """
+                }
+            }
+        }
+        
+        stage('Deploy (Blue-Green)') {
+            when {
+                expression { 
+                    // develop 또는 main 브랜치일 때만 배포
+                    def currentBranch = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                    return currentBranch == 'develop' || currentBranch == 'main'
+                }
+            }
+            steps {
+                echo "=========================================="
+                echo "🚀 Blue-Green Deployment"
+                echo "=========================================="
+                script {
+                    def BLUE_PORT = 8080
+                    def GREEN_PORT = 8081
+                    
+                    // 현재 실행 중인 컨테이너 확인
+                    def blueRunning = sh(
+                        script: "docker ps -q -f name=wag-server-blue",
+                        returnStdout: true
+                    ).trim()
+                    
+                    def greenRunning = sh(
+                        script: "docker ps -q -f name=wag-server-green",
+                        returnStdout: true
+                    ).trim()
+                    
+                    // 배포할 타겟 결정
+                    def targetColor = ""
+                    def targetPort = 0
+                    def oldColor = ""
+                    
+                    if (blueRunning) {
+                        targetColor = "green"
+                        targetPort = GREEN_PORT
+                        oldColor = "blue"
+                        echo "📘 Blue is running. Deploying to Green..."
+                    } else {
+                        targetColor = "blue"
+                        targetPort = BLUE_PORT
+                        oldColor = "green"
+                        echo "📗 Green is running (or first deploy). Deploying to Blue..."
+                    }
+                    
+                    echo "Target: ${targetColor} (Port: ${targetPort})"
+                    
+                    // 새 버전 컨테이너 시작
+                    echo "🚢 Starting new container: wag-server-${targetColor}"
+                    sh """
+                        docker run -d \
+                            --name wag-server-${targetColor} \
+                            -p ${targetPort}:8080 \
+                            -e SPRING_PROFILES_ACTIVE=prod \
+                            --restart unless-stopped \
+                            ${IMAGE_NAME}:${IMAGE_TAG}
+                    """
+                    
+                    // 헬스체크
+                    echo "🏥 Health checking new container..."
+                    def healthCheckPassed = false
+                    for (int i = 0; i < 60; i++) {
+                        sleep(3)
+                        def healthStatus = sh(
+                            script: """
+                                curl -sf http://localhost:${targetPort}/actuator/health > /dev/null && echo 'OK' || \
+                                curl -sf http://localhost:${targetPort}/ > /dev/null && echo 'OK' || \
+                                echo 'FAIL'
+                            """,
+                            returnStdout: true
+                        ).trim()
+                        
+                        if (healthStatus == 'OK') {
+                            echo "✅ Health check passed!"
+                            healthCheckPassed = true
+                            break
+                        }
+                        echo "⏳ Waiting for container to be ready... (${i+1}/60)"
+                    }
+                    
+                    if (!healthCheckPassed) {
+                        // 헬스체크 실패 시 새 컨테이너 제거하고 롤백
+                        echo "❌ Health check failed! Checking logs..."
+                        sh "docker logs wag-server-${targetColor} || true"
+                        sh "docker stop wag-server-${targetColor} || true"
+                        sh "docker rm wag-server-${targetColor} || true"
+                        error("❌ Health check failed! Rolling back deployment.")
+                    }
+                    
+                    // 트래픽 전환
+                    echo "🔄 Switching traffic to ${targetColor}..."
+                    // Nginx를 사용한다면 여기서 upstream 변경
+                    
+                    // 이전 컨테이너 종료 (graceful shutdown - 30초 대기)
+                    if (oldColor == "blue" && blueRunning) {
+                        echo "🛑 Stopping old container: wag-server-blue (graceful shutdown)"
+                        sh """
+                            sleep 5
+                            docker stop -t 30 wag-server-blue || true
+                            docker rm wag-server-blue || true
+                        """
+                    } else if (oldColor == "green" && greenRunning) {
+                        echo "🛑 Stopping old container: wag-server-green (graceful shutdown)"
+                        sh """
+                            sleep 5
+                            docker stop -t 30 wag-server-green || true
+                            docker rm wag-server-green || true
+                        """
+                    }
+                    
+                    echo "✅ Blue-Green deployment completed!"
+                    echo "🎯 Active container: wag-server-${targetColor} (Port: ${targetPort})"
+                    echo "🌐 Access application at: http://localhost:${targetPort}"
+                }
+            }
+        }
+        
+        stage('Clean Up Old Images') {
+            steps {
+                echo "=========================================="
+                echo "🧹 Cleaning up old Docker images"
+                echo "=========================================="
+                script {
+                    // 최근 3개 버전만 유지
+                    sh """
+                        docker images ${IMAGE_NAME} --format "{{.Tag}}" | \
+                        grep -E '^[0-9]+\$' | \
+                        sort -rn | \
+                        tail -n +4 | \
+                        xargs -I {} docker rmi ${IMAGE_NAME}:{} || true
+                    """
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo "=========================================="
+            echo "✅ BUILD SUCCESS!"
+            echo "=========================================="
+            echo "Image: ${IMAGE_NAME}:${IMAGE_TAG}"
+            echo "Build Number: ${env.BUILD_NUMBER}"
+        }
+        
+        failure {
+            echo "=========================================="
+            echo "❌ BUILD FAILED!"
+            echo "=========================================="
+            echo "Build Number: ${env.BUILD_NUMBER}"
+            // 실패 시 알림 (Slack, Email 등)
+        }
+        
+        always {
+            echo "=========================================="
+            echo "🏁 Pipeline Finished"
+            echo "=========================================="
+        }
+    }
+}
+
