@@ -33,9 +33,11 @@ pipeline {
                     echo "🔍 Checking out code"
                     echo "=========================================="
                     
-                    // BUILD_BRANCH 파라미터가 있으면 해당 브랜치 체크아웃 (수동 빌드)
-                    // 없으면 webhook으로 전달된 브랜치 사용 (자동 빌드)
-                    if (params.BUILD_BRANCH && env.JOB_NAME) {
+                    // BUILD_BRANCH가 'develop'이 아니면 수동 빌드로 간주
+                    def isManualBuild = params.BUILD_BRANCH && params.BUILD_BRANCH != 'develop'
+                    
+                    if (isManualBuild) {
+                        // 수동 빌드: BUILD_BRANCH 파라미터로 지정한 브랜치 사용
                         echo "Manual build - Branch: ${params.BUILD_BRANCH}"
                         checkout([
                             $class: 'GitSCM',
@@ -45,18 +47,40 @@ pipeline {
                                 credentialsId: 'gd10080008@gmail.com/******'
                             ]]
                         ])
+                        
+                        def currentBranch = sh(
+                            script: 'git rev-parse --abbrev-ref HEAD',
+                            returnStdout: true
+                        ).trim()
+                        echo "Current branch: ${currentBranch}"
+                        echo "✅ Manual build - any branch allowed"
                     } else {
+                        // Webhook 트리거 또는 develop 브랜치 빌드: SCM 브랜치 사용
                         echo "Webhook triggered build - Using SCM branch"
                         checkout scm
+                        
+                        // 현재 브랜치 확인
+                        def currentBranch = sh(
+                            script: 'git rev-parse --abbrev-ref HEAD',
+                            returnStdout: true
+                        ).trim()
+                        
+                        // 브랜치 이름 정규화 (origin/develop -> develop, remotes/origin/develop -> develop)
+                        def normalizedBranch = currentBranch.replaceAll('origin/', '').replaceAll('remotes/origin/', '')
+                        
+                        echo "Current branch: ${normalizedBranch}"
+                        echo "Commit: ${env.GIT_COMMIT}"
+                        
+                        // develop 브랜치만 빌드 (webhook 트리거 시)
+                        if (normalizedBranch != 'develop') {
+                            echo "⏭️  Branch '${normalizedBranch}' is not 'develop'. Skipping build."
+                            echo "💡 Only 'develop' branch triggers automatic builds from webhook."
+                            echo "💡 Use 'Build with Parameters' and set BUILD_BRANCH to build other branches manually."
+                            currentBuild.result = 'SUCCESS'
+                            error("Branch '${normalizedBranch}' is not 'develop'. Build skipped.")
+                        }
+                        echo "✅ Branch check passed: ${normalizedBranch}"
                     }
-                    
-                    // 현재 브랜치 정보 출력
-                    def currentBranch = sh(
-                        script: 'git rev-parse --abbrev-ref HEAD',
-                        returnStdout: true
-                    ).trim()
-                    echo "Current branch: ${currentBranch}"
-                    echo "Commit: ${env.GIT_COMMIT}"
                 }
             }
         }
