@@ -83,6 +83,9 @@ pipeline {
                         echo "Current branch (normalized): ${normalizedBranch}"
                         echo "Commit: ${env.GIT_COMMIT}"
                         
+                        // 이후 단계에서 사용하기 위해 환경 변수에 저장
+                        env.GIT_BRANCH = normalizedBranch
+                        
                         // develop 브랜치만 빌드 (webhook 트리거 시)
                         if (normalizedBranch != 'develop') {
                             echo "⏭️  Branch '${normalizedBranch}' is not 'develop'. Skipping build."
