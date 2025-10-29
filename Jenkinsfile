@@ -104,14 +104,34 @@ def performHealthCheck(containerName, port, maxRetries = 60, intervalSeconds = 3
     return true
 }
 
-def switchTraffic(activeContainer, newContainer) {
+def updateNginxProxy(targetPort) {
+    echo "🔄 Updating Nginx proxy to port ${targetPort}"
+    
+    sh """
+        # switch-backend-port.sh 스크립트 실행 권한 확인
+        chmod +x switch-backend-port.sh
+        
+        # Nginx 백엔드 포트 전환
+        sudo ./switch-backend-port.sh ${targetPort}
+    """
+    
+    echo "✅ Nginx proxy updated to port ${targetPort}"
+}
+
+def switchTraffic(activeContainer, newContainer, newPort) {
     if (activeContainer == 'none') {
         echo "ℹ️  No active container to switch from - ${newContainer} is now active"
+        // 첫 배포인 경우에도 Nginx 업데이트
+        updateNginxProxy(newPort)
         return
     }
     
     echo "🔄 Switching traffic from ${activeContainer} to ${newContainer}"
     
+    // 1. Nginx 프록시를 새 포트로 전환
+    updateNginxProxy(newPort)
+    
+    // 2. 짧은 대기 후 기존 컨테이너 중지
     sh """
         sleep 5
         docker stop -t 30 ${activeContainer} || true
@@ -144,6 +164,9 @@ def rollbackDeployment(blueContainer, greenContainer, bluePort, greenPort) {
     
     // 헬스체크
     if (performHealthCheck(inactiveContainer, rollbackPort, 30, 2)) {
+        // Nginx 프록시를 롤백 포트로 전환
+        updateNginxProxy(rollbackPort)
+        
         // 현재 활성 컨테이너 중지
         sh """
             docker stop -t 30 ${activeContainer} || true
@@ -638,8 +661,8 @@ pipeline {
                                         error("❌ Health check failed! Deployment aborted.")
                                     }
                                     
-                                    // 4. 트래픽 전환
-                                    switchTraffic(activeContainer, targetContainer)
+                                    // 4. 트래픽 전환 (Nginx 프록시 포트 업데이트 포함)
+                                    switchTraffic(activeContainer, targetContainer, targetPort)
                                     
                                     echo "🎉 Blue-Green deployment completed successfully!"
                                     echo "📊 New active container: ${targetContainer} on port ${targetPort}"
