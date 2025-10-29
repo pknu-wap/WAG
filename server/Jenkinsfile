@@ -180,8 +180,8 @@ pipeline {
                 echo "🚀 Blue-Green Deployment"
                 echo "=========================================="
                 script {
-                    def BLUE_PORT = 8080
-                    def GREEN_PORT = 8081
+                    def BLUE_PORT = 18080
+                    def GREEN_PORT = 18081
                     
                     // 현재 실행 중인 컨테이너 확인
                     def blueRunning = sh(
