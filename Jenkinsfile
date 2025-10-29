@@ -445,8 +445,8 @@ pipeline {
                                     
                                     echo "✅ Deploying to ${deployBranch} branch..."
                                     
-                                    def BLUE_PORT = 8080
-                                    def GREEN_PORT = 8081
+                                    def BLUE_PORT = 18080
+                                    def GREEN_PORT = 18081
                                     
                                     def blueRunning = sh(
                                         script: "docker ps -q -f name=wag-server-blue",
