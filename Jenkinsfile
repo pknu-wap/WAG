@@ -248,7 +248,6 @@ pipeline {
                                     script {
                                         sh """
                                             docker build -t ${CLIENT_IMAGE_NAME}:${IMAGE_TAG} .
-                                            docker tag ${CLIENT_IMAGE_NAME}:${IMAGE_TAG} ${CLIENT_IMAGE_NAME}:latest
                                         """
                                     }
                                 }
@@ -278,8 +277,7 @@ pipeline {
                         stage('Client: Deploy') {
                             when {
                                 expression { 
-                                    def currentBranch = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-                                    return currentBranch == 'develop' || currentBranch == 'main'
+                                    return env.GIT_BRANCH == 'develop' || env.GIT_BRANCH == 'main'
                                 }
                             }
                             steps {
@@ -381,7 +379,6 @@ pipeline {
                                     script {
                                         sh """
                                             docker build -t ${SERVER_IMAGE_NAME}:${IMAGE_TAG} .
-                                            docker tag ${SERVER_IMAGE_NAME}:${IMAGE_TAG} ${SERVER_IMAGE_NAME}:latest
                                         """
                                     }
                                 }
@@ -411,8 +408,7 @@ pipeline {
                         stage('Server: Deploy (Blue-Green)') {
                             when {
                                 expression { 
-                                    def currentBranch = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-                                    return currentBranch == 'develop' || currentBranch == 'main'
+                                    return env.GIT_BRANCH == 'develop' || env.GIT_BRANCH == 'main'
                                 }
                             }
                             steps {
