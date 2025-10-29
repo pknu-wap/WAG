@@ -141,34 +141,26 @@ pipeline {
                     echo "📋 autoClientChanged: ${autoClientChanged}"
                     echo "📋 autoServerChanged: ${autoServerChanged}"
                     
-                    // 환경변수 초기화
-                    env.CLIENT_CHANGED = 'false'
-                    env.SERVER_CHANGED = 'false'
-                    
-                    switch(buildTarget) {
-                        case 'client':
-                            env.CLIENT_CHANGED = 'true'
-                            env.SERVER_CHANGED = 'false'
-                            echo "📋 Build target: Client only (manual)"
-                            break
-                        case 'server':
-                            env.CLIENT_CHANGED = 'false'
-                            env.SERVER_CHANGED = 'true'
-                            echo "📋 Build target: Server only (manual)"
-                            break
-                        case 'both':
-                            env.CLIENT_CHANGED = 'true'
-                            env.SERVER_CHANGED = 'true'
-                            echo "📋 Build target: Both Client and Server (manual)"
-                            break
-                        case 'auto':
-                        default:
-                            env.CLIENT_CHANGED = autoClientChanged ? 'true' : 'false'
-                            env.SERVER_CHANGED = autoServerChanged ? 'true' : 'false'
-                            echo "📋 Build target: Auto (detected from changes)"
-                            echo "   - Client changes detected: ${autoClientChanged}"
-                            echo "   - Server changes detected: ${autoServerChanged}"
-                            break
+                    // 빌드 타겟에 따라 CLIENT_CHANGED와 SERVER_CHANGED 설정
+                    if (buildTarget == 'client') {
+                        env.CLIENT_CHANGED = 'true'
+                        env.SERVER_CHANGED = 'false'
+                        echo "📋 Build target: Client only (manual)"
+                    } else if (buildTarget == 'server') {
+                        env.CLIENT_CHANGED = 'false'
+                        env.SERVER_CHANGED = 'true'
+                        echo "📋 Build target: Server only (manual)"
+                    } else if (buildTarget == 'both') {
+                        env.CLIENT_CHANGED = 'true'
+                        env.SERVER_CHANGED = 'true'
+                        echo "📋 Build target: Both Client and Server (manual)"
+                    } else {
+                        // auto 또는 기본값
+                        env.CLIENT_CHANGED = autoClientChanged ? 'true' : 'false'
+                        env.SERVER_CHANGED = autoServerChanged ? 'true' : 'false'
+                        echo "📋 Build target: Auto (detected from changes)"
+                        echo "   - Client changes detected: ${autoClientChanged}"
+                        echo "   - Server changes detected: ${autoServerChanged}"
                     }
                     
                     echo "Client directory changed: ${env.CLIENT_CHANGED}"
