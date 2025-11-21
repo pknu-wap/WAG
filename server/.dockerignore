@@ -1,0 +1,47 @@
+# Gradle
+.gradle
+build/
+!build/libs/*.jar
+gradle-app.setting
+!gradle-wrapper.jar
+
+# IDE
+.idea
+*.iml
+*.ipr
+*.iws
+.vscode
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+*.md
+
+# Docker
+Dockerfile
+.dockerignore
+Dokerfile
+
+# Logs
+logs/
+*.log
+
+# Testing
+.gradle-test-output
+bin/
+out/
+
+# Jenkins
+Jenkinsfile
+

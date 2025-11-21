@@ -127,7 +127,8 @@ const ReadyToGame = () => {
   //boolean값으로 한번만 뜨게 새로고침 이후에 안뜨게
 
   const query = new URLSearchParams(location.search);
-
+  const loc = useLocation();
+  const fromRandom = loc.state?.fromRandom;
   //입장코드로 입력으로 roomid받기
   const getRoomIdCode = async (enterCode: number) => {
     try {
