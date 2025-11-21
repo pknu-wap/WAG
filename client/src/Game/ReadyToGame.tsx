@@ -48,7 +48,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import Slider from 'react-slick';
 import { trackEvent } from '../util/googleAnalytics/trackEvent';
 import { GA_EVENT } from '../constants/GA_EVENT';
-import { roomApi } from '../apis';
+import { answerApi, roomApi, userApi } from '../apis';
 
 var stompClient: any = null; //웹소켓 변수 선언
 
@@ -171,49 +171,55 @@ const ReadyToGame = () => {
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);
-    if ('isCaptin' in roomInfo) {
-      if (roomInfo.isCaptin === true) {
-        // console.log("Captain is in");
-        trackEvent({
-          action: GA_EVENT.ROOM.ROOM_INFO_ON_START,
-          category: 'room',
-          label: `roomId: ${localStorage.getItem('roomId')}`,
-        });
-        socketConnect();
-        setSelectedOption(category);
-        roomInfo.isCaptin = false;
-        //console.log("roomInfo : ", roomInfo)
-      }
-    } else {
-      const code = query.get('code');
 
-      if (code === null) {
+    const initializeRoom = async () => {
+      const code = query.get('code');
+      const storedRoomId = localStorage.getItem('roomId');
+
+      // 1. 코드로 입장
+      if (code) {
+        const roomId = await getRoomIdCode(parseInt(code, 10));
+
+        if (roomId === 'invalid enterCode') {
+          Toast({ message: '잘못된 접근입니다!', type: 'error' });
+          navigate('/');
+          return;
+        }
+
+        if (roomId === 'already started') {
+          Toast({ message: '이미 게임이 시작되었습니다!', type: 'error' });
+          navigate('/');
+          return;
+        }
+
+        localStorage.setItem('roomId', roomId);
+      }
+      // 2. roomId 없으면 잘못된 접근
+      else if (!storedRoomId) {
         Toast({ message: '잘못된 접근입니다!', type: 'error' });
         navigate('/');
         return;
       }
 
-      const checkRoomIdCode = async () => {
-        const roomId = await getRoomIdCode(parseInt(code, 10));
-        if (roomId === 'invalid enterCode') {
-          Toast({ message: '잘못된 접근입니다!', type: 'error' });
-          navigate('/');
-        } else if (roomId === 'already started') {
-          Toast({ message: '이미 게임이 시작되었습니다!', type: 'error' });
-          navigate('/');
-        } else {
-          localStorage.setItem('roomId', roomId);
-        }
-      };
-
-      checkRoomIdCode();
-
-      if (roomInfo.userCount === 1) {
-      } else {
-        openModal();
-        //console.log("roomInfo : ", roomInfo)
+      // 3. 방장이면 바로 연결
+      if (roomInfo.isCaptin) {
+        trackEvent({
+          action: GA_EVENT.ROOM.ROOM_INFO_ON_START,
+          category: 'room',
+          label: `roomId: ${storedRoomId}`,
+        });
+        socketConnect();
+        setSelectedOption(category);
+        return;
       }
-    }
+
+      // 4. 일반 참가자는 모달 표시
+      if (roomInfo.userCount !== 1) {
+        openModal();
+      }
+    };
+
+    initializeRoom();
 
     return () => {
       window.removeEventListener('resize', handleResize);
@@ -269,13 +275,8 @@ const ReadyToGame = () => {
   // 닉네임 유효한지 api get
   const getNicknamePossible = async () => {
     try {
-      const response = await axios.get<INicknamePossible>(`${process.env.REACT_APP_API_URL}/nickname/possible`, {
-        params: {
-          roomId: Number(params.roomId),
-          nickname: nickname,
-        },
-      });
-      return response.data;
+      const response = await userApi.checkNicknamePossible(Number(params.roomId), nickname);
+      return response;
     } catch (error) {
       console.error('랜덤 입장 요청 중 오류 발생:', error);
       throw error;
@@ -989,17 +990,12 @@ const ReadyToGame = () => {
   const getGameAnswer = async () => {
     const nickname = localStorage.getItem('nickName');
     try {
-      const response = await axios.get<UserAnswerDto>(`${process.env.REACT_APP_API_URL}/answer/list`, {
-        params: {
-          roomId: Number(params.roomId),
-          nickname,
-        },
-      });
-      const answerList = response.data;
+      const response = await answerApi.getAnswerList(Number(params.roomId), nickname!);
+      const answerList = response;
       answerListRef.current = answerList;
       //console.log("answerList : ", answerList)
       //console.log("answerListRef.current : ", answerListRef.current)
-      return response.data;
+      return response;
     } catch (error) {
       console.error('정답 리스트 get api 오류 발생 : ', error);
       throw error;
