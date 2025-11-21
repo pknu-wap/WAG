@@ -2,10 +2,6 @@
 // API type : type 이름 앞에 "I" 붙이기
 // 소켓 객체 type : 그냥 이름만
 
-import { UserInfo } from "os";
-
-export const URL = `${process.env.REACT_APP_API_URL}/ws`;
-
 // 닉네임 중복확인 get response
 export interface INicknamePossible {
   possible: boolean;
@@ -77,7 +73,7 @@ export interface ChatReadyMessage {
   messageType: string;
   roomId: number;
   sender: string;
-  userDtos: ReadyUserDto[]
+  userDtos: ReadyUserDto[];
 }
 
 //소켓으로 주고받는 채팅 객체
@@ -117,7 +113,6 @@ export interface GameMessage {
   cycle: number;
   gameUserDtos: GameUserDto[];
 }
-
 
 //김준서 : 이것도 정답어 get 게임중 화면에 띄워주는데 필요
 export interface UserAnswerDto {
