@@ -13,19 +13,7 @@ import {
 import { useEffect, useState, useRef } from 'react';
 import ReadyToGameModal from '../components/modal/ReadyModal';
 import Button from '../components/button/Button';
-import axios from 'axios';
-import {
-  ChatMessage,
-  GameUserDto,
-  INicknamePossible,
-  IRoomResponseInfo,
-  IUserDto,
-  URL,
-  UserAnswerDto,
-  AnswerUserDto,
-} from '../types/dto';
-import { Stomp } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
+import { ChatMessage, GameUserDto, IUserDto, AnswerUserDto } from '../types/dto';
 import ChatRoom from '../components/chatRoom/ChatRoom';
 import CaptainReatyToModal from '../components/modal/CaptainReadyModal';
 import LoadingModal from '../components/modal/LoadingModal';
@@ -49,8 +37,7 @@ import Slider from 'react-slick';
 import { trackEvent } from '../util/googleAnalytics/trackEvent';
 import { GA_EVENT } from '../constants/GA_EVENT';
 import { answerApi, roomApi, userApi } from '../apis';
-
-var stompClient: any = null; //웹소켓 변수 선언
+import { gameSocket } from '../socket';
 
 const ReadyToGame = () => {
   const params = useParams(); // params를 상수에 할당
@@ -441,19 +428,11 @@ const ReadyToGame = () => {
 
   //웹소켓 만들기
   const socketConnect = () => {
-    const socket = new SockJS(URL);
-    stompClient = Stomp.over(socket);
-    stompClient.connect({}, onConnected);
+    gameSocket.joinRoom(onMessageReceived, (error) => {
+      console.error('소켓 연결 실패:', error);
+      Toast({ message: '소켓 연결에 실패했습니다', type: 'error' });
+    });
   };
-
-  //STOMP 소켓 구독 및 JOIN으로 입장
-  async function onConnected() {
-    const roomId = localStorage.getItem('roomId');
-    const nickName = localStorage.getItem('nickName');
-    //console.log("roomId: ", roomId, "nickName: ", nickName);
-    stompClient.subscribe(`/topic/public/${roomId}`, onMessageReceived);
-    sendMessageToSocket('/app/chat.addUser', 'JOIN');
-  }
 
   //드가자 버튼 클릭시
   const handleGoIn = async () => {
@@ -464,8 +443,6 @@ const ReadyToGame = () => {
 
   //게임중 채팅메세지 MessageType에 따라 소켓에 객체를 전달하는 함수  -- 매개변수 : 소켓 URL, messageType
   function sendMessageToSocket(socketURL: string, messageType: string) {
-    const roomId = localStorage.getItem('roomId');
-    const nickName = localStorage.getItem('nickName');
     let contentToSend = myChatMessages; // 기본적으로 myChatMessages 값을 사용합니다.
     // messageType이 'JOIN', 'START', 'CHANGE' 중 하나라면, contentToSend를 빈 문자열로 보냄
     if (['JOIN', 'START', 'CHANGE', 'RESET', 'READY'].includes(messageType)) {
@@ -480,16 +457,7 @@ const ReadyToGame = () => {
     }
     //console.log(contentToSend, messageType)
 
-    stompClient.send(
-      socketURL,
-      {},
-      JSON.stringify({
-        sender: nickName,
-        content: contentToSend,
-        messageType: messageType,
-        roomId: roomId,
-      })
-    );
+    gameSocket.sendMessage(socketURL, messageType as any, contentToSend);
     setMyChatMessages(''); // 채팅입력필드 초기화를 위해 필요
   }
 
@@ -517,8 +485,8 @@ const ReadyToGame = () => {
     }
   }
   //구독된 방에서 받아오는 모든 메세지 처리 부분
-  function onMessageReceived(payload: any) {
-    var message = JSON.parse(payload.body);
+  function onMessageReceived(message: any) {
+    // gameSocket에서 이미 파싱된 message를 받음
     receiveChatMessage(message);
     if (message.messageType === 'JOIN') {
       //addJoinUser();
@@ -718,18 +686,7 @@ const ReadyToGame = () => {
 
   function socketPenaltyOnClick(recipient: string) {
     handleWarningSound();
-    const roomId = localStorage.getItem('roomId');
-    const nickName = localStorage.getItem('nickName');
-    stompClient.send(
-      '/app/chat.sendGameMessage',
-      {},
-      JSON.stringify({
-        sender: nickName,
-        content: recipient,
-        messageType: 'PENALTY',
-        roomId: roomId,
-      })
-    );
+    gameSocket.sendPenalty(recipient);
   }
 
   const ClickReady = () => {
@@ -820,19 +777,8 @@ const ReadyToGame = () => {
     if (time === 5 && isMyTurn) {
       //질문을 30초 안에 하지 않는다면 강제로 턴을 넘긴다
       if (!hasSentAsk) {
-        const roomId = localStorage.getItem('roomId');
-        const nickName = localStorage.getItem('nickName');
         handleQuestionSound();
-        stompClient.send(
-          '/app/chat.sendGameMessage',
-          {},
-          JSON.stringify({
-            sender: nickName,
-            content: '질문 시간이 종료되어 강제로 전송합니다.',
-            messageType: 'ASK',
-            roomId: roomId,
-          })
-        );
+        gameSocket.sendGameMessage('ASK', '질문 시간이 종료되어 강제로 전송합니다.');
       }
     }
     if (time < 0) {
@@ -885,16 +831,8 @@ const ReadyToGame = () => {
         Toast({ message: `${sender}가 정답을 맞추었습니다!`, type: 'success' });
         if (!hasSentAsk) {
           //console.log("질문하지 않았을 때")
-          stompClient.send(
-            '/app/chat.sendGameMessage',
-            {},
-            JSON.stringify({
-              sender: sender,
-              content: '정답이다!!',
-              messageType: 'ASK',
-              roomId: localStorage.getItem('roomId'),
-            })
-          );
+          const roomId = localStorage.getItem('roomId');
+          gameSocket.sendGameMessage('ASK', '정답이다!!');
         }
         stopTimer(); // 타이머 멈춤
         setTimeout(() => {
