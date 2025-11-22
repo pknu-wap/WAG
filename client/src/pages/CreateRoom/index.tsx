@@ -1,18 +1,18 @@
 import { useState } from 'react';
-import Button from '../components/button/Button';
-import RadioButton from '../components/radioButton/RadioButton';
-import FullLayout from '../components/layout/FullLayout';
+import Button from '../../components/button/Button';
+import RadioButton from '../../components/radioButton/RadioButton';
+import FullLayout from '../../components/layout/FullLayout';
 import { useNavigate } from 'react-router-dom';
-import Toast from '../components/toast/Toast';
-import DropdownSelect from '../components/dropDown/DropDown';
+import Toast from '../../components/toast/Toast';
+import DropdownSelect from '../../components/dropDown/DropDown';
 import { Option } from 'react-dropdown';
-import SliderComponent from '../components/slider/Slider';
+import SliderComponent from '../../components/slider/Slider';
 import { useRecoilState } from 'recoil';
-import { firstCategoryRecoil, timerCount, soundEffectStatus } from '../recoil/recoil';
-import Wrapper from '../components/Wrapper';
-import { trackEvent } from '../util/googleAnalytics/trackEvent';
-import { GA_EVENT } from '../constants/GA_EVENT';
-import { roomApi } from '../apis';
+import { firstCategoryRecoil, timerCount, soundEffectStatus } from '../../recoil/recoil';
+import Wrapper from '../../components/Wrapper';
+import { trackEvent } from '../../util/googleAnalytics/trackEvent';
+import { GA_EVENT } from '../../constants/GA_EVENT';
+import { roomApi } from '../../apis';
 
 function CreateRoom() {
   const [isPrivate, setIsPrivate] = useState<boolean | null>(false);
@@ -62,7 +62,7 @@ function CreateRoom() {
         roomId: roomId,
       };
 
-      navigate(`/ReadyToGame/${roomId}`, { state: newResponse });
+      navigate(`/GameRoom/${roomId}`, { state: newResponse });
     } catch (error) {
       console.error('방 생성 요청 중 오류 발생:', error);
       throw error;

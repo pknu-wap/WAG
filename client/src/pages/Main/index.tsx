@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
-import Button from '../components/button/Button';
-import FullLayout from '../components/layout/FullLayout';
+import Button from '../../components/button/Button';
+import FullLayout from '../../components/layout/FullLayout';
 import { ConnectedProps, connect } from 'react-redux';
-import { RootState } from '../modules';
+import { RootState } from '../../modules';
 import { useRecoilState } from 'recoil';
-import { modalState, soundEffectStatus } from '../recoil/recoil';
-import Modal from '../components/modal/Modal';
+import { modalState, soundEffectStatus } from '../../recoil/recoil';
+import Modal from '../../components/modal/Modal';
 import { useNavigate } from 'react-router-dom';
-import Toast from '../components/toast/Toast';
-import Wrapper from '../components/Wrapper';
-import { GA_EVENT } from '../constants/GA_EVENT';
-import { trackEvent } from '../util/googleAnalytics/trackEvent';
-import { roomApi } from '../apis';
+import Toast from '../../components/toast/Toast';
+import Wrapper from '../../components/Wrapper';
+import { GA_EVENT } from '../../constants/GA_EVENT';
+import { trackEvent } from '../../util/googleAnalytics/trackEvent';
+import { roomApi } from '../../apis';
 
 type Props = {
   children?: React.ReactNode;
@@ -77,7 +77,7 @@ function MainPage({ dark }: ComponentProps) {
         label: roomId,
       });
       localStorage.setItem('roomId', roomId);
-      navigate(`/ReadyToGame/${roomId}`);
+      navigate(`/GameRoom/${roomId}`);
     } else {
       Toast({ message: '입장 가능한 방이 없습니다.', type: 'error' });
       Toast({ message: '방을 생성하여 주시길 바랍니다.', type: 'error' });
@@ -98,7 +98,7 @@ function MainPage({ dark }: ComponentProps) {
         label: roomId,
       });
       localStorage.setItem('roomId', roomId);
-      navigate(`/ReadyToGame/${roomId}?code=${enterCode}`);
+      navigate(`/GameRoom/${roomId}?code=${enterCode}`);
     }
   };
 
