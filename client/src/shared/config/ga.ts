@@ -1,45 +1,44 @@
 export const GA_EVENT = {
-    HEADER: {
-        TOGGLE_SOUND: "toggle_sound",
-        TOGGLE_MUSIC: "toggle_music",
-        VIEW_TUTORIAL: "view_tutorial",
-    },
+  HEADER: {
+    TOGGLE_SOUND: 'toggle_sound',
+    TOGGLE_MUSIC: 'toggle_music',
+    VIEW_TUTORIAL: 'view_tutorial',
+  },
 
-    MAIN: {
-        QUICK_JOIN: "quick_join",
-        OPEN_CREATE_ROOM: "open_create_room",
-        INPUT_JOIN_ROOM: "input_join_room",
-        SOLO_MODE: "enter_solo_mode",
-    },
+  MAIN: {
+    QUICK_JOIN: 'quick_join',
+    OPEN_CREATE_ROOM: 'open_create_room',
+    INPUT_JOIN_ROOM: 'input_join_room',
+    SOLO_MODE: 'enter_solo_mode',
+  },
 
-    CREATE_ROOM: {
-        SUBMIT_CREATE: "submit_create_room",
-    },
+  CREATE_ROOM: {
+    SUBMIT_CREATE: 'submit_create_room',
+  },
 
-    ROOM: {
-        CLICK_READY: "click_ready",
-        CLICK_START: "click_start",
-        ROOM_INFO_ON_START: "room_info_on_start",
-    },
+  ROOM: {
+    CLICK_READY: 'click_ready',
+    CLICK_START: 'click_start',
+    ROOM_INFO_ON_START: 'room_info_on_start',
+  },
 
-    GAME: {
-        TIMEOUT: "timeout",
-        GAME_END: "game_end",
-    },
+  GAME: {
+    TIMEOUT: 'timeout',
+    GAME_END: 'game_end',
+  },
 
-    RESULT: {
-        CLICK_RESTART: "click_restart",
-        CLICK_GO_MAIN: "click_go_main",
-    },
+  RESULT: {
+    CLICK_RESTART: 'click_restart',
+    CLICK_GO_MAIN: 'click_go_main',
+  },
 
-    USER: {
-        FIRST_VISIT: "first_visit",
-    },
+  USER: {
+    FIRST_VISIT: 'first_visit',
+  },
 } as const;
 
-
 /**
-
+ *
  * | 카테고리          | 이벤트 이름                | 설명                                  |
  * ─────────────────────────────────────────────────────────────────────────────
  * | HEADER           | toggle_sound              | 효과음 ON/OFF 전환                      |
@@ -75,3 +74,4 @@ export const GA_EVENT = {
  * ─────────────────────────────────────────────────────────────────────────────
  * | USER             | first_visit               | 첫 방문 유저 (진입 시 1회 기록)         |
  */
+

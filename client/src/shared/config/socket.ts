@@ -1,7 +1,9 @@
+import { API_URL } from './api';
+
 /**
  * 소켓 서버 URL
  */
-export const SOCKET_SERVER_URL = `${process.env.REACT_APP_API_URL}/ws`;
+export const SOCKET_SERVER_URL = `${API_URL}/ws`;
 
 /**
  * 소켓 API 엔드포인트
@@ -29,3 +31,4 @@ export const SOCKET_ENDPOINTS = {
 export const SOCKET_TOPICS = {
   PUBLIC: (roomId: string) => `/topic/public/${roomId}`,
 } as const;
+
