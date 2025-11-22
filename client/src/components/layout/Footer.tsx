@@ -2,7 +2,7 @@ import * as React from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { RootState } from "../../modules/index";
 import { toggleDarkMode } from "../../modules/darkSlice";
-import IconButton from "../button/IconButton";
+import { IconButton } from '../../shared';
 import RulesModal from "../modal/RulesModal";
 import { useRecoilState } from "recoil";
 import { rulesModalState, soundEffectStatus } from "../../recoil/recoil";
