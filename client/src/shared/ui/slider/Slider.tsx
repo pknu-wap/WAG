@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactSlider from 'react-slider';
+
 interface SliderComponentProps {
   value: number;
   onChange: (value: number) => void;
 }
 
-const SliderComponent: React.FC<SliderComponentProps> = ({value, onChange}) => {
-
+const SliderComponent: React.FC<SliderComponentProps> = ({ value, onChange }) => {
   return (
     <div className="flex flex-col items-center">
       <ReactSlider
@@ -24,3 +24,4 @@ const SliderComponent: React.FC<SliderComponentProps> = ({value, onChange}) => {
 };
 
 export default SliderComponent;
+

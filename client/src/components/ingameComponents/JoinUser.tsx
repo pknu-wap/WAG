@@ -2,7 +2,7 @@ import { ReactNode, forwardRef, useEffect, useState } from 'react';
 import { faUser } from '@fortawesome/free-regular-svg-icons';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import IconButton from '../button/IconButton';
+import { IconButton } from '../../shared';
 import { GameUserDto, IGetAnswerList, ReadyUserDto } from '../../types/dto';
 import { faCrown } from '@fortawesome/free-solid-svg-icons';
 import PopoverComponent from '../popover/Popover';

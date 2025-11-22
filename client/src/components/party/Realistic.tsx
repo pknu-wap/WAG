@@ -1,7 +1,7 @@
 import { CreateTypes } from "canvas-confetti";
 import { Component } from "react";
 import ReactCanvasConfetti from "./Party";
-import IconButton from "../button/IconButton";
+import { IconButton } from '../../shared';
 
 export class Realistic extends Component {
   private isAnimationEnabled: boolean;

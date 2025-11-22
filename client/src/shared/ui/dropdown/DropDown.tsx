@@ -1,4 +1,3 @@
-// DropdownSelect.tsx
 import React from 'react';
 import Dropdown, { Option } from 'react-dropdown';
 import 'react-dropdown/style.css';
@@ -9,16 +8,16 @@ const options = {
     { value: 'lol', label: 'lol' },
     { value: '한국위인', label: '한국위인' },
     { value: '유명인', label: '유명인' },
-    { value: '애니메이션 캐릭터', label: '애니메이션 캐릭터' }
-  ]
+    { value: '애니메이션 캐릭터', label: '애니메이션 캐릭터' },
+  ],
 };
 
-interface DropdownSelectProps {
+interface DropDownProps {
   onOptionSelect: (option: Option) => void;
   defaultValue: string;
 }
 
-const DropdownSelect: React.FC<DropdownSelectProps> = ({ onOptionSelect, defaultValue }) => {
+const DropDown: React.FC<DropDownProps> = ({ onOptionSelect, defaultValue }) => {
   const handleChange = (option: Option) => {
     onOptionSelect(option);
   };
@@ -35,4 +34,5 @@ const DropdownSelect: React.FC<DropdownSelectProps> = ({ onOptionSelect, default
   );
 };
 
-export default DropdownSelect;
+export default DropDown;
+

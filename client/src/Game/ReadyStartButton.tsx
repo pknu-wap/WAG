@@ -1,6 +1,6 @@
 import React from 'react';
-import Button from '../components/button/Button';
-import { ReadyStartButtonProps } from "../types/common";
+import { Button } from '../shared';
+import { ReadyStartButtonProps } from '../types/common';
   
 
   function ReadyStartButton({ myState, handleStart, handleReady, allReady}: ReadyStartButtonProps) {

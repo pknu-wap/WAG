@@ -3,20 +3,19 @@ import { motion } from 'framer-motion';
 
 type WrapperProps = {
   children: ReactNode;
-  // 필요한 다른 props가 있다면 여기에 추가합니다.
 };
 
 const Wrapper: React.FC<WrapperProps> = ({ children, ...rest }) => {
   const pageEffect = {
     initial: {
-      opacity: 0
+      opacity: 0,
     },
     in: {
-      opacity: 1
+      opacity: 1,
     },
     out: {
-      opacity: 0
-    }
+      opacity: 0,
+    },
   };
 
   return (
@@ -34,3 +33,4 @@ const Wrapper: React.FC<WrapperProps> = ({ children, ...rest }) => {
 };
 
 export default Wrapper;
+

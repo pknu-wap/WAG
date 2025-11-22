@@ -1,4 +1,4 @@
-import Wrapper from "../Wrapper";
+import { Wrapper } from '../../shared';
 import FullLayout from "./FullLayout";
 
 function WrongUrl() {

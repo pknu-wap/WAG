@@ -1,5 +1,5 @@
-import { IconButton, Button, RadioButton, Toast, DropDown, Slider as SliderComponent, Wrapper, history } from '../../shared';
-import FullLayout from '../../components/layout/FullLayout';
+import { IconButton, Button, RadioButton, Toast, DropDown, Slider as SliderComponent, Wrapper, history } from '../shared';
+import FullLayout from '../components/layout/FullLayout';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 import {
@@ -9,30 +9,30 @@ import {
   readyToGameModalState,
   timerCount,
   soundEffectStatus,
-} from '../../recoil/recoil';
+} from '../recoil/recoil';
 import { useEffect, useState, useRef } from 'react';
-import ReadyToGameModal from '../../components/modal/ReadyModal';
-import { ChatMessage, GameUserDto, IUserDto, AnswerUserDto } from '../../types/dto';
-import ChatRoom from '../../components/chatRoom/ChatRoom';
-import CaptainReatyToModal from '../../components/modal/CaptainReadyModal';
-import LoadingModal from '../../components/modal/LoadingModal';
-import JoinUser from '../../components/ingameComponents/JoinUser';
-import Timer from '../../Game/timer/Timer';
-import useTimer, { TimerHookProps } from '../../Game/timer/useTimer';
-import { Realistic } from '../../components/party/Realistic';
-import RankingUser from '../../components/ingameComponents/RankingUser';
+import ReadyToGameModal from '../components/modal/ReadyModal';
+import { ChatMessage, GameUserDto, IUserDto, AnswerUserDto } from '../types/dto';
+import ChatRoom from '../components/chatRoom/ChatRoom';
+import CaptainReatyToModal from '../components/modal/CaptainReadyModal';
+import LoadingModal from '../components/modal/LoadingModal';
+import JoinUser from '../components/ingameComponents/JoinUser';
+import Timer from './timer/Timer';
+import useTimer, { TimerHookProps } from './timer/useTimer';
+import { Realistic } from '../components/party/Realistic';
+import RankingUser from '../components/ingameComponents/RankingUser';
 import { Option } from 'react-dropdown';
-import ReadyStartButton from '../../Game/ReadyStartButton';
+import ReadyStartButton from './ReadyStartButton';
 import { motion } from 'framer-motion';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import Slider from 'react-slick';
-import { trackEvent } from '../../util/googleAnalytics/trackEvent';
-import { GA_EVENT } from '../../constants/GA_EVENT';
-import { answerApi, roomApi, userApi } from '../../apis';
-import { gameSocket } from '../../socket';
+import { trackEvent } from '../util/googleAnalytics/trackEvent';
+import { GA_EVENT } from '../constants/GA_EVENT';
+import { answerApi, roomApi, userApi } from '../apis';
+import { gameSocket } from '../socket';
 
-const GameRoom = () => {
+const ReadyToGame = () => {
   const params = useParams(); // params를 상수에 할당
   const [, setIsOpen] = useRecoilState(readyToGameModalState);
   const [, setCaptainIsOpen] = useRecoilState(captainReadyToGameModalState);
@@ -1500,4 +1500,4 @@ const GameRoom = () => {
   );
 };
 
-export default GameRoom;
+export default ReadyToGame;

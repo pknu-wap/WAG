@@ -1,14 +1,11 @@
 import { useEffect, useState } from 'react';
-import Button from '../../components/button/Button';
+import { Button, Modal, Toast, Wrapper } from '../../shared';
 import FullLayout from '../../components/layout/FullLayout';
 import { ConnectedProps, connect } from 'react-redux';
 import { RootState } from '../../modules';
 import { useRecoilState } from 'recoil';
 import { modalState, soundEffectStatus } from '../../recoil/recoil';
-import Modal from '../../components/modal/Modal';
 import { useNavigate } from 'react-router-dom';
-import Toast from '../../components/toast/Toast';
-import Wrapper from '../../components/Wrapper';
 import { GA_EVENT } from '../../constants/GA_EVENT';
 import { trackEvent } from '../../util/googleAnalytics/trackEvent';
 import { roomApi } from '../../apis';

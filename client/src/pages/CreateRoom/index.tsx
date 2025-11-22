@@ -1,15 +1,10 @@
 import { useState } from 'react';
-import Button from '../../components/button/Button';
-import RadioButton from '../../components/radioButton/RadioButton';
+import { Button, RadioButton, Toast, DropDown, Slider, Wrapper } from '../../shared';
+import { Option } from 'react-dropdown';
 import FullLayout from '../../components/layout/FullLayout';
 import { useNavigate } from 'react-router-dom';
-import Toast from '../../components/toast/Toast';
-import DropdownSelect from '../../components/dropDown/DropDown';
-import { Option } from 'react-dropdown';
-import SliderComponent from '../../components/slider/Slider';
 import { useRecoilState } from 'recoil';
 import { firstCategoryRecoil, timerCount, soundEffectStatus } from '../../recoil/recoil';
-import Wrapper from '../../components/Wrapper';
 import { trackEvent } from '../../util/googleAnalytics/trackEvent';
 import { GA_EVENT } from '../../constants/GA_EVENT';
 import { roomApi } from '../../apis';
@@ -134,12 +129,12 @@ function CreateRoom() {
 
           <div className='mb-8'>
             <div className='rounded-xl font-extrabold min-w-44 mb-3'>게임 카테고리 설정</div>
-            <DropdownSelect onOptionSelect={handleOptionSelect} defaultValue='전체' />
+            <DropDown onOptionSelect={handleOptionSelect} defaultValue='전체' />
           </div>
 
           <div>
             <div className='rounded-xl font-extrabold min-w-44 mb-3'>턴 당 진행시간</div>
-            <SliderComponent value={sliderValue} onChange={handleSliderChange} />
+            <Slider value={sliderValue} onChange={handleSliderChange} />
           </div>
 
           <input
