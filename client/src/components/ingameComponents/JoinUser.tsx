@@ -6,7 +6,7 @@ import { IconButton } from '../../shared';
 import { GameUserDto, IGetAnswerList, ReadyUserDto } from '../../types/dto';
 import { faCrown } from '@fortawesome/free-solid-svg-icons';
 import PopoverComponent from '../popover/Popover';
-import { answerApi } from '../../apis';
+import { answerApi } from '../../shared';
 
 interface JoinUserProps {
   Nickname: string;

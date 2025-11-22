@@ -5,9 +5,7 @@ import FullLayout from '../../components/layout/FullLayout';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 import { firstCategoryRecoil, timerCount, soundEffectStatus } from '../../recoil/recoil';
-import { trackEvent } from '../../util/googleAnalytics/trackEvent';
-import { GA_EVENT } from '../../constants/GA_EVENT';
-import { roomApi } from '../../apis';
+import { trackEvent, GA_EVENT, roomApi } from '../../shared';
 
 function CreateRoom() {
   const [isPrivate, setIsPrivate] = useState<boolean | null>(false);

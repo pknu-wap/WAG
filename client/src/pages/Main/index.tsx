@@ -6,9 +6,7 @@ import { RootState } from '../../modules';
 import { useRecoilState } from 'recoil';
 import { modalState, soundEffectStatus } from '../../recoil/recoil';
 import { useNavigate } from 'react-router-dom';
-import { GA_EVENT } from '../../constants/GA_EVENT';
-import { trackEvent } from '../../util/googleAnalytics/trackEvent';
-import { roomApi } from '../../apis';
+import { GA_EVENT, trackEvent, roomApi } from '../../shared';
 
 type Props = {
   children?: React.ReactNode;

@@ -1,7 +1,7 @@
 import { Stomp, CompatClient, IMessage, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { MessageType, MessageCallback } from './types';
-import { SOCKET_SERVER_URL, SOCKET_ENDPOINTS, SOCKET_TOPICS } from './constants';
+import { SOCKET_SERVER_URL, SOCKET_ENDPOINTS, SOCKET_TOPICS } from '../shared/config';
 
 /**
  * 게임 소켓 관리 클래스

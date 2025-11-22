@@ -27,9 +27,7 @@ import { motion } from 'framer-motion';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import Slider from 'react-slick';
-import { trackEvent } from '../util/googleAnalytics/trackEvent';
-import { GA_EVENT } from '../constants/GA_EVENT';
-import { answerApi, roomApi, userApi } from '../apis';
+import { trackEvent, GA_EVENT, answerApi, roomApi, userApi } from '../shared';
 import { gameSocket } from '../socket';
 
 const ReadyToGame = () => {

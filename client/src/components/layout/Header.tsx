@@ -8,8 +8,7 @@ import { useRecoilState } from "recoil";
 import { rulesModalState, soundEffectStatus } from "../../recoil/recoil";
 import { faTruckField } from "@fortawesome/free-solid-svg-icons";
 import Footer from "./Footer";
-import { trackEvent } from "../../util/googleAnalytics/trackEvent";
-import { GA_EVENT } from "../../constants/GA_EVENT";
+import { trackEvent, GA_EVENT } from '../../shared';
 
 
 const { useEffect, useState, useRef } = React;

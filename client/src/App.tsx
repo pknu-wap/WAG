@@ -4,7 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import MainPage from './pages/Main';
 import CreateRoom from './pages/CreateRoom';
 import GameRoom from './pages/GameRoom';
-import { initializeGA } from './util/googleAnalytics/initializeGA';
+import { initializeGA } from './shared/lib/google-analytics';
 
 function App() {
   useEffect(() => {
