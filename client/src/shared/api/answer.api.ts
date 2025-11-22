@@ -1,7 +1,5 @@
-import axios from 'axios';
-import { UserAnswerDto, IGetAnswerList } from '../types/dto';
-
-const API_URL = process.env.REACT_APP_API_URL;
+import { apiInstance } from './instance';
+import { UserAnswerDto, IGetAnswerList } from '../../types/dto';
 
 /**
  * 게임 답변 목록 조회 (자기 자신 제외)
@@ -11,7 +9,7 @@ const API_URL = process.env.REACT_APP_API_URL;
  */
 export async function getAnswerList(roomId: number, nickname: string): Promise<UserAnswerDto> {
   try {
-    const response = await axios.get<UserAnswerDto>(`${API_URL}/answer/list`, {
+    const response = await apiInstance.get<UserAnswerDto>('/answer/list', {
       params: {
         roomId,
         nickname,
@@ -32,7 +30,7 @@ export async function getAnswerList(roomId: number, nickname: string): Promise<U
  */
 export async function getGameAnswerList(roomId: string | number, nickname: string): Promise<IGetAnswerList> {
   try {
-    const response = await axios.get<IGetAnswerList>(`${API_URL}/answer/list`, {
+    const response = await apiInstance.get<IGetAnswerList>('/answer/list', {
       params: {
         roomId,
         nickname,
@@ -54,3 +52,4 @@ export const answerApi = {
 };
 
 export default answerApi;
+

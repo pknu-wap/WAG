@@ -1,7 +1,5 @@
-import axios from 'axios';
-import { IRoomResponseInfo } from '../types/dto';
-
-const API_URL = process.env.REACT_APP_API_URL;
+import { apiInstance } from './instance';
+import { IRoomResponseInfo } from '../../types/dto';
 
 /**
  * 방 생성
@@ -15,7 +13,7 @@ export async function createRoom(data: {
   timer: number;
 }): Promise<IRoomResponseInfo> {
   try {
-    const response = await axios.post<IRoomResponseInfo>(`${API_URL}/room/create`, data);
+    const response = await apiInstance.post<IRoomResponseInfo>('/room/create', data);
     return response.data;
   } catch (error) {
     console.error('방 생성 요청 중 오류 발생:', error);
@@ -30,7 +28,7 @@ export async function createRoom(data: {
  */
 export async function getRoomIdByCode(enterCode: number): Promise<string> {
   try {
-    const response = await axios.get<string>(`${API_URL}/roomId/code`, {
+    const response = await apiInstance.get<string>('/roomId/code', {
       params: { enterCode },
     });
     // 서버가 단순 문자열을 반환하므로 response.data를 그대로 반환
@@ -48,7 +46,7 @@ export async function getRoomIdByCode(enterCode: number): Promise<string> {
  */
 export async function getRoomInfo(roomId: number): Promise<IRoomResponseInfo> {
   try {
-    const response = await axios.get<IRoomResponseInfo>(`${API_URL}/room/info`, {
+    const response = await apiInstance.get<IRoomResponseInfo>('/room/info', {
       params: { roomId },
     });
     return response.data;
@@ -64,7 +62,7 @@ export async function getRoomInfo(roomId: number): Promise<IRoomResponseInfo> {
  */
 export async function getRandomRoomId(): Promise<string> {
   try {
-    const response = await axios.get<string>(`${API_URL}/roomId`);
+    const response = await apiInstance.get<string>('/roomId');
     return response.data;
   } catch (error) {
     console.error('랜덤 방 조회 중 오류 발생:', error);
@@ -83,3 +81,4 @@ export const roomApi = {
 };
 
 export default roomApi;
+

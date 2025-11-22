@@ -1,7 +1,5 @@
-import axios from 'axios';
-import { INicknamePossible } from '../types/dto';
-
-const API_URL = process.env.REACT_APP_API_URL;
+import { apiInstance } from './instance';
+import { INicknamePossible } from '../../types/dto';
 
 /**
  * 닉네임 중복 확인
@@ -11,7 +9,7 @@ const API_URL = process.env.REACT_APP_API_URL;
  */
 export async function checkNicknamePossible(roomId: number, nickname: string): Promise<INicknamePossible> {
   try {
-    const response = await axios.get<INicknamePossible>(`${API_URL}/nickname/possible`, {
+    const response = await apiInstance.get<INicknamePossible>('/nickname/possible', {
       params: {
         roomId,
         nickname,
@@ -32,3 +30,4 @@ export const userApi = {
 };
 
 export default userApi;
+
