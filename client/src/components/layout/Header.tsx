@@ -2,14 +2,13 @@ import * as React from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { RootState } from "../../modules/index";
 import { toggleDarkMode } from "../../modules/darkSlice";
-import IconButton from "../button/IconButton";
+import { IconButton } from '../../shared';
 import RulesModal from "../modal/RulesModal";
 import { useRecoilState } from "recoil";
 import { rulesModalState, soundEffectStatus } from "../../recoil/recoil";
 import { faTruckField } from "@fortawesome/free-solid-svg-icons";
 import Footer from "./Footer";
-import { trackEvent } from "../../util/googleAnalytics/trackEvent";
-import { GA_EVENT } from "../../constants/GA_EVENT";
+import { trackEvent, GA_EVENT } from '../../shared';
 
 
 const { useEffect, useState, useRef } = React;

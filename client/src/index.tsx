@@ -1,41 +1,23 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import "./index.css";
-import App from "./App";
-import reportWebVitals from "./reportWebVitals";
-import { Provider } from "react-redux";
-import store from "./modules";
-import Header from "./components/layout/Header";
-import { BrowserRouter } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "react-query";
-import { RecoilRoot } from "recoil";
-import ReactModal from "react-modal";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import SquareBubble from "./components/layout/SquareBubble";
-import FullLayout from "./components/layout/FullLayout";
+import ReactDOM from 'react-dom/client';
+import ReactModal from 'react-modal';
+import './index.css';
+import { AppProviders } from './app/providers';
+import { AppRouter } from './app/router';
+import { initializeGA } from './shared/lib/google-analytics';
+import reportWebVitals from './reportWebVitals';
 
-const queryClient = new QueryClient();
-const rootElement = document.getElementById("root") as HTMLElement; // id가 'root'인 엘리먼트를 찾는 코드를 변수에 할당
+// GA 초기화
+initializeGA();
+
+const rootElement = document.getElementById('root') as HTMLElement;
 const root = ReactDOM.createRoot(rootElement);
-ReactModal.setAppElement(rootElement); //rootElement를 ReactModal의 app 엘리먼트로 설정
+
+ReactModal.setAppElement(rootElement);
 
 root.render(
-    <QueryClientProvider client={queryClient}>
-      <Provider store={store}>
-        <RecoilRoot>
-          <BrowserRouter>
-            <SquareBubble>
-            <FullLayout>
-            <Header />
-            <App />
-            </FullLayout>
-            <ToastContainer />
-            </SquareBubble>
-          </BrowserRouter>
-        </RecoilRoot>
-      </Provider>
-    </QueryClientProvider>
+  <AppProviders>
+    <AppRouter />
+  </AppProviders>
 );
 
 // If you want to start measuring performance in your app, pass a function

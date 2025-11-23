@@ -93,6 +93,8 @@ public class SecurityConfig {
                         .permitAll()
                     .requestMatchers("/auth/**", "/oauth2/**")
                         .permitAll()
+                    .requestMatchers("/actuator/**")  // 헬스체크 엔드포인트 허용
+                        .permitAll()
                     .anyRequest()
                         .authenticated()
                     .and();
