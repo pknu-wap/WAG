@@ -1,4 +1,5 @@
 import { FullLayoutProps } from "../../types/common";
+import './SquareBubble.css';
 
 function SquareBubble({className,children }: FullLayoutProps) {
   return <div className={`area`}>
