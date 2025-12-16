@@ -131,7 +131,7 @@ function MainPage({ dark }: ComponentProps) {
       <FullLayout>
         <div className=''>
           <div className='flex justify-center items-center '>
-            <img className={`relative w-2/4`} src='images/yangSaeChanGame.png' alt='logo light mode' />
+            <img className={`relative w-5/6`} src='images/yangSaeChanGame.png' alt='logo light mode' />
           </div>
 
           <div className='flex flex-col items-center justify-center space-y-5 mt-6'>
