@@ -25,6 +25,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
   const [play, setPlay] = useState(false);
   const [isClicked, setIsClicked] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [audioSrc, setAudioSrc] = useState("/audio/main_theme.mp3");
 
   useEffect(() => {
     if (dark) {
@@ -52,9 +53,21 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
       if (play) {
         audio.pause();
       } else {
-        audio.play().catch((error) => {
-          console.error("오디오 재생 오류:", error);
-        });
+        // 랜덤하게 크리스마스 mp3 선택
+        const files = [
+          "/audio/main_theme_chirstmas_1_cut.mp3",
+          "/audio/main_theme_chirstmas_2_cut.mp3"
+        ];
+        const randomFile = files[Math.floor(Math.random() * files.length)];
+        setAudioSrc(randomFile);
+        setTimeout(() => {
+          if (audioRef.current) {
+            audioRef.current.load();
+            audioRef.current.play().catch((error) => {
+              console.error("오디오 재생 오류:", error);
+            });
+          }
+        }, 0);
       }
 
       setPlay(!play);
@@ -143,7 +156,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
           )}
         </div>
         <div className="flex justify-between z-50">
-          <audio ref={audioRef} src='/audio/main_theme.mp3' loop />
+          <audio ref={audioRef} src={audioSrc} loop />
           {isChrome() ? (
             <>
               <IconButton
