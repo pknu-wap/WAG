@@ -1,0 +1,59 @@
+.button-snow-top {
+  position: absolute;
+  top: -8px;
+  left: 0;
+  width: 100%;
+  height: 24px;
+  pointer-events: none;
+  z-index: 2;
+  display: block;
+}
+.button-snow-line {
+  width: 100%;
+  height: 16px;
+  background: #fff;
+  border-radius: 10px 10px 8px 8px / 16px 16px 8px 8px;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.07);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.button-snow-drip {
+  position: absolute;
+  background: #fff;
+  opacity: 0.85;
+  bottom: 0;
+}
+.button-snow-drip.d1 {
+  left: 10%;
+  width: 18px;
+  height: 20px;
+  border-radius: 0 0 14px 14px / 0 0 20px 20px;
+  margin-left: 2px;
+  opacity: 0.85;
+}
+.button-snow-drip.d2 {
+  left: 32%;
+  width: 8px;
+  height: 10px;
+  border-radius: 0 0 7px 7px / 0 0 10px 10px;
+  margin-left: -3px;
+  opacity: 0.7;
+}
+.button-snow-drip.d4 {
+  left: 85%;
+  width: 7px;
+  height: 8px;
+  border-radius: 0 0 6px 6px / 0 0 8px 8px;
+  margin-left: 0;
+  opacity: 0.7;
+}
+.button-snow-drip.d5 {
+  left: 95%;
+  width: 5px;
+  height: 7px;
+  border-radius: 0 0 4px 4px / 0 0 7px 7px;
+  margin-left: -2px;
+  opacity: 0.6;
+  bottom: 4px;
+}

@@ -25,6 +25,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
   const [play, setPlay] = useState(false);
   const [isClicked, setIsClicked] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [audioSrc, setAudioSrc] = useState("/audio/main_theme.mp3");
 
   useEffect(() => {
     if (dark) {
@@ -52,13 +53,23 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
       if (play) {
         audio.pause();
       } else {
-        audio.play().catch((error) => {
-          console.error("오디오 재생 오류:", error);
-        });
+        // 랜덤하게 크리스마스 mp3 선택
+        const files = [
+          "/audio/main_theme_chirstmas_1_cut.mp3",
+          "/audio/main_theme_chirstmas_2_cut.mp3"
+        ];
+        const randomFile = files[Math.floor(Math.random() * files.length)];
+        setAudioSrc(randomFile);
+        setTimeout(() => {
+          if (audioRef.current) {
+            audioRef.current.load();
+            audioRef.current.play().catch((error) => {
+              console.error("오디오 재생 오류:", error);
+            });
+          }
+        }, 0);
       }
-
       setPlay(!play);
-
       trackEvent({
         action: GA_EVENT.HEADER.TOGGLE_MUSIC,
         category: "header",
@@ -120,7 +131,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
         <div className="relative top-2">
           {dark ? (
 
-            <img className={`w-20 h-16 ${isClicked ? 'clicked' : ''}`} src="/images/WAG_dark.2.png"
+            <img className={`w-24 h-20 -mt-5 ${isClicked ? 'clicked' : ''}`} src="/images/WAG_dark.2.png"
               alt="logo dark mode"
               onClick={() => {
                 handleDarkLogoClick();
@@ -131,7 +142,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
             </img>
 
           ) : (
-            <img className={`w-20 h-16 ${isClicked ? 'clicked' : ''}`} src="/images/WAG_white.2.png"
+            <img className={`w-24 h-20 -mt-5 ${isClicked ? 'clicked' : ''}`} src="/images/WAG_white.2.png"
               alt="logo light mode"
               onClick={() => {
                 handleLightLogoClick();
@@ -143,71 +154,85 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
           )}
         </div>
         <div className="flex justify-between z-50">
-          <audio ref={audioRef} src='/audio/main_theme.mp3' loop />
+          <audio ref={audioRef} src={audioSrc} loop />
           {isChrome() ? (
             <>
               <IconButton
-                className="z-50 mr-3"
+                className={`z-50 mr-3 transition-colors duration-200
+                bg-[#2ecc40] dark:bg-[#b71c1c] 
+                hover:bg-[#27ae60] dark:hover:bg-[#c62828]
+                active:bg-[#229d3a] dark:active:bg-[#8e0000]
+                shadow-lg`}
                 size="md"
                 onClick={() => {
                   handlePlaySoundEffect();
                 }}
               >
+                {/* 눈꽃 or 기존 아이콘 - 크리스마스 느낌 색상 */}
                 {playSoundEffect ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 text-white dark:text-yellow-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />
                   </svg>
-
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 9.75 19.5 12m0 0 2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6 4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 text-white dark:text-yellow-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 9.75 19.5 12m0 0 2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6 4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />
                   </svg>
                 )}
               </IconButton>
 
               <IconButton
-                className="z-50 mr-3"
+                className={`z-50 mr-3 transition-colors duration-200
+                bg-[#2ecc40] dark:bg-[#b71c1c] 
+                hover:bg-[#27ae60] dark:hover:bg-[#c62828]
+                active:bg-[#229d3a] dark:active:bg-[#8e0000]
+                shadow-lg`}
                 size="md"
                 onClick={() => {
                   handlePlayMusic();
                 }}
               >
-                {play ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m9 9 10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553Z" />
-                  </svg>
-                )}
+                {/* 눈꽃 아이콘 SVG - 크리스마스 느낌 색상 */}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="size-6 text-white dark:text-yellow-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 2v20m10-10H2m16.95-6.95-13.9 13.9m0-13.9 13.9 13.9" />
+                </svg>
               </IconButton>
 
               <IconButton
-                className="z-50 mr-3"
+                className={`z-50 mr-3 transition-colors duration-200
+                bg-[#2ecc40] dark:bg-[#b71c1c] 
+                hover:bg-[#27ae60] dark:hover:bg-[#c62828]
+                active:bg-[#229d3a] dark:active:bg-[#8e0000]
+                shadow-lg`}
                 size="md"
                 onClick={() => {
                   openModal();
                 }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 text-white dark:text-yellow-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
                 </svg>
               </IconButton>
 
               <IconButton
-                className="z-50"
+                className={`z-50 transition-colors duration-200
+                bg-[#2ecc40] dark:bg-[#b71c1c] 
+                hover:bg-[#27ae60] dark:hover:bg-[#c62828]
+                active:bg-[#229d3a] dark:active:bg-[#8e0000]
+                shadow-lg`}
                 size="md"
                 onClick={() => {
                   toggleDarkMode("");
                 }}
               >
                 {dark ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 text-white dark:text-yellow-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
                   </svg>
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 text-white dark:text-yellow-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
                   </svg>
                 )}
