@@ -162,7 +162,6 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
                 bg-[#2ecc40] dark:bg-[#b71c1c] 
                 hover:bg-[#27ae60] dark:hover:bg-[#c62828]
                 active:bg-[#229d3a] dark:active:bg-[#8e0000]
-                border-2 border-white dark:border-yellow-300
                 shadow-lg`}
                 size="md"
                 onClick={() => {
@@ -186,7 +185,6 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
                 bg-[#2ecc40] dark:bg-[#b71c1c] 
                 hover:bg-[#27ae60] dark:hover:bg-[#c62828]
                 active:bg-[#229d3a] dark:active:bg-[#8e0000]
-                border-2 border-white dark:border-yellow-300
                 shadow-lg`}
                 size="md"
                 onClick={() => {
@@ -207,7 +205,6 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
                 bg-[#2ecc40] dark:bg-[#b71c1c] 
                 hover:bg-[#27ae60] dark:hover:bg-[#c62828]
                 active:bg-[#229d3a] dark:active:bg-[#8e0000]
-                border-2 border-white dark:border-yellow-300
                 shadow-lg`}
                 size="md"
                 onClick={() => {
@@ -224,7 +221,6 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
                 bg-[#2ecc40] dark:bg-[#b71c1c] 
                 hover:bg-[#27ae60] dark:hover:bg-[#c62828]
                 active:bg-[#229d3a] dark:active:bg-[#8e0000]
-                border-2 border-white dark:border-yellow-300
                 shadow-lg`}
                 size="md"
                 onClick={() => {
