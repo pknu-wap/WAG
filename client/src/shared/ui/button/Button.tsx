@@ -1,5 +1,6 @@
 import { ButtonProps } from '../../../types/common';
 import classNames from 'classnames';
+import './ButtonSnow.css';
 
 const Button = ({
   type,
@@ -29,11 +30,20 @@ const Button = ({
         baseClassName,
         disabled ? disabledClassName : enabledClassName,
         sizeClassName[size || 'md'],
-        className
+        className,
+        'relative overflow-visible' // 눈 표시를 위해
       )}
       onClick={onClick}
       disabled={disabled}
     >
+      {/* 위에 한 줄로 쌓인 눈 + 불규칙적으로 흘러내린 눈방울 (왼쪽 크게, 중앙 없음, 끝 작게) */}
+      <div className="button-snow-top">
+        <div className="button-snow-line" />
+        <div className="button-snow-drip d1" />
+        <div className="button-snow-drip d2" />
+        <div className="button-snow-drip d4" />
+        <div className="button-snow-drip d5" />
+      </div>
       {children}
     </button>
   );
