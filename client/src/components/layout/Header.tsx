@@ -23,6 +23,7 @@ type ComponentProps = Props & PropsFromRedux;
 const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
 
   const [play, setPlay] = useState(false);
+  const [musicIndex, setMusicIndex] = useState(0); // 0: 1번, 1: 2번
   const [isClicked, setIsClicked] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null);
   const [audioSrc, setAudioSrc] = useState("/audio/main_theme.mp3");
@@ -49,17 +50,16 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
 
   const handlePlayMusic = () => {
     const audio = audioRef.current;
+    const files = [
+      "/audio/main_theme_chirstmas_1_cut.mp3",
+      "/audio/main_theme_chirstmas_2_cut.mp3"
+    ];
     if (audio) {
       if (play) {
         audio.pause();
       } else {
-        // 랜덤하게 크리스마스 mp3 선택
-        const files = [
-          "/audio/main_theme_chirstmas_1_cut.mp3",
-          "/audio/main_theme_chirstmas_2_cut.mp3"
-        ];
-        const randomFile = files[Math.floor(Math.random() * files.length)];
-        setAudioSrc(randomFile);
+        // 순서대로 재생
+        setAudioSrc(files[musicIndex]);
         setTimeout(() => {
           if (audioRef.current) {
             audioRef.current.load();
@@ -68,6 +68,7 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
             });
           }
         }, 0);
+        setMusicIndex((prev) => (prev + 1) % files.length);
       }
       setPlay(!play);
       trackEvent({
