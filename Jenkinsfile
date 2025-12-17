@@ -184,7 +184,7 @@ pipeline {
     parameters {
         string(
             name: 'BUILD_BRANCH',
-            defaultValue: 'develop',
+            defaultValue: 'release',
             description: '빌드할 브랜치 이름을 입력하세요.'
         )
         choice(
@@ -218,8 +218,8 @@ pipeline {
                     echo "🔍 Checking out code"
                     echo "=========================================="
                     
-                    // BUILD_BRANCH가 'develop'이 아니면 수동 빌드로 간주
-                    def isManualBuild = params.BUILD_BRANCH && params.BUILD_BRANCH != 'develop'
+                    // BUILD_BRANCH가 'release'이 아니면 수동 빌드로 간주
+                    def isManualBuild = params.BUILD_BRANCH && params.BUILD_BRANCH != 'release'
                     
                     if (isManualBuild) {
                         // 수동 빌드: BUILD_BRANCH 파라미터로 지정한 브랜치 사용
@@ -240,7 +240,7 @@ pipeline {
                         echo "Current branch: ${currentBranch}"
                         echo "✅ Manual build - any branch allowed"
                     } else {
-                        // Webhook 트리거 또는 develop 브랜치 빌드: SCM 브랜치 사용
+                        // Webhook 트리거 또는 release 브랜치 빌드: SCM 브랜치 사용
                         echo "Webhook triggered build - Using SCM branch"
                         checkout scm
                         
@@ -258,7 +258,7 @@ pipeline {
                         }
                         
                         // 브랜치 이름 정규화
-                        // origin/develop -> develop, remotes/origin/develop -> develop, develop -> develop
+                        // origin/release -> release, remotes/origin/release -> release, release -> release
                         def normalizedBranch = currentBranch
                             .replaceAll('origin/', '')
                             .replaceAll('remotes/origin/', '')
@@ -271,13 +271,13 @@ pipeline {
                         // 이후 단계에서 사용하기 위해 환경 변수에 저장
                         env.GIT_BRANCH = normalizedBranch
                         
-                        // develop 브랜치만 빌드 (webhook 트리거 시)
-                        if (normalizedBranch != 'develop') {
-                            echo "⏭️  Branch '${normalizedBranch}' is not 'develop'. Skipping build."
-                            echo "💡 Only 'develop' branch triggers automatic builds from webhook."
+                        // release 브랜치만 빌드 (webhook 트리거 시)
+                        if (normalizedBranch != 'release') {
+                            echo "⏭️  Branch '${normalizedBranch}' is not 'release'. Skipping build."
+                            echo "💡 Only 'release' branch triggers automatic builds from webhook."
                             echo "💡 Use 'Build with Parameters' and set BUILD_BRANCH to build other branches manually."
                             currentBuild.result = 'SUCCESS'
-                            error("Branch '${normalizedBranch}' is not 'develop'. Build skipped.")
+                            error("Branch '${normalizedBranch}' is not 'release'. Build skipped.")
                         }
                         echo "✅ Branch check passed: ${normalizedBranch}"
                     }
@@ -479,8 +479,8 @@ pipeline {
                                     
                                     echo "Current GIT_BRANCH (normalized): ${deployBranch}"
                                     
-                                    if (deployBranch != 'develop' && deployBranch != 'main') {
-                                        echo "⏭️  Skipping deployment: Branch '${deployBranch}' is not 'develop' or 'main'"
+                                    if (deployBranch != 'release' && deployBranch != 'main') {
+                                        echo "⏭️  Skipping deployment: Branch '${deployBranch}' is not 'release' or 'main'"
                                         return
                                     }
                                     
@@ -627,8 +627,8 @@ pipeline {
                                     
                                     echo "Current GIT_BRANCH (normalized): ${deployBranch}"
                                     
-                                    if (deployBranch != 'develop' && deployBranch != 'main') {
-                                        echo "⏭️  Skipping deployment: Branch '${deployBranch}' is not 'develop' or 'main'"
+                                    if (deployBranch != 'release' && deployBranch != 'main') {
+                                        echo "⏭️  Skipping deployment: Branch '${deployBranch}' is not 'release' or 'main'"
                                         return
                                     }
                                     
