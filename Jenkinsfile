@@ -435,7 +435,7 @@ pipeline {
                                 dir("${CLIENT_DIR}") {
                                     script {
                                         sh """
-                                            docker build -t ${CLIENT_IMAGE_NAME}:${IMAGE_TAG} .
+                                            docker build --no-cache -t ${CLIENT_IMAGE_NAME}:${IMAGE_TAG} .
                                         """
                                     }
                                 }
@@ -583,7 +583,7 @@ pipeline {
                                 dir("${SERVER_DIR}") {
                                     script {
                                         sh """
-                                            docker build -t ${SERVER_IMAGE_NAME}:${IMAGE_TAG} .
+                                            docker build --no-cache -t ${SERVER_IMAGE_NAME}:${IMAGE_TAG} .
                                         """
                                     }
                                 }
