@@ -592,7 +592,7 @@ const GameRoom = () => {
       // 공개방일 때
       return (
         // 바꾸고자 하는 값(changeIsPrivate) = true(공개로 변경하고 싶음) 일 때 활성화
-        <Button size='sm' onClick={privateModeOnclick} disabled={changeIsPrivate === false}>
+        <Button size='sm' className='mt-4' onClick={privateModeOnclick} disabled={changeIsPrivate === false}>
           비공개방으로 변경
         </Button>
       );
@@ -600,7 +600,7 @@ const GameRoom = () => {
       // 비공개방일 때
       return (
         // 바꾸고자 하는 값(changeIsPrivate) = false(공개로 변경하고 싶음) 일 때 활성화
-        <Button size='sm' onClick={privateModeOnclick} disabled={changeIsPrivate === true}>
+        <Button size='sm' className='mt-4' onClick={privateModeOnclick} disabled={changeIsPrivate === true}>
           공개방으로 변경
         </Button>
       );
@@ -722,13 +722,13 @@ const GameRoom = () => {
   const categoryChangeRenderButton = () => {
     if (category === selectedOption || selectedOption === beforeCategory) {
       return (
-        <Button size='sm' disabled={true} onClick={sendCategoryOnClick}>
+        <Button size='sm' className='mt-4' disabled={true} onClick={sendCategoryOnClick}>
           카테고리 바꿀래?
         </Button>
       );
     } else {
       return (
-        <Button size='sm' disabled={false} onClick={sendCategoryOnClick}>
+        <Button size='sm' className='mt-4' disabled={false} onClick={sendCategoryOnClick}>
           변경
         </Button>
       );
@@ -737,13 +737,13 @@ const GameRoom = () => {
   const timerChangeRenderButton = () => {
     if (ingameTimerRecoil === sliderValue) {
       return (
-        <Button size='sm' disabled={true} onClick={sendSliderChange}>
+        <Button size='sm' className='mt-4' disabled={true} onClick={sendSliderChange}>
           시간 바꿀래?
         </Button>
       );
     } else {
       return (
-        <Button size='sm' disabled={false} onClick={sendSliderChange}>
+        <Button size='sm' className='mt-4' disabled={false} onClick={sendSliderChange}>
           변경
         </Button>
       );
@@ -1470,7 +1470,7 @@ const GameRoom = () => {
                 <div className='flex flex-col justify-center items-center'>
                   <div className='mt-5'>{renderButton()}</div>
                   <div>
-                    <div className='rounded-xl font-extrabold min-w-44 mb-3'>게임 카테고리 설정</div>
+                    <div className='rounded-xl font-extrabold min-w-44 mb-3 mt-4'>게임 카테고리 설정</div>
                     <div>
                       <DropDown
                         onOptionSelect={handleOptionSelect}
@@ -1479,7 +1479,7 @@ const GameRoom = () => {
                       {categoryChangeRenderButton()}
                     </div>
                     <div>
-                      <div className='rounded-xl font-extrabold min-w-44 mb-3'>턴 당 진행시간</div>
+                      <div className='rounded-xl font-extrabold min-w-44 mb-3 mt-4'>턴 당 진행시간</div>
                       <SliderComponent value={sliderValue} onChange={handleSliderChange} />
                       {timerChangeRenderButton()}
                     </div>
