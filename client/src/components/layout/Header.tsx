@@ -8,6 +8,7 @@ import { useRecoilState } from "recoil";
 import { rulesModalState, soundEffectStatus } from "../../recoil/recoil";
 import { faTruckField } from "@fortawesome/free-solid-svg-icons";
 import Footer from "./Footer";
+import "./MusicButtonAnim.css";
 import { trackEvent, GA_EVENT } from '../../shared';
 
 
@@ -21,6 +22,19 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 type ComponentProps = Props & PropsFromRedux;
 
 const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
+  // Click Me 텍스트 노출 여부 (localStorage로 영구 저장)
+  const [showClickMe, setShowClickMe] = useState(() => {
+    return localStorage.getItem('hideMusicClickMe') !== 'true';
+  });
+
+  // 버튼 클릭 시 Click Me 텍스트 숨김
+  const handleMusicButtonClick = () => {
+    handlePlayMusic();
+    if (showClickMe) {
+      setShowClickMe(false);
+      localStorage.setItem('hideMusicClickMe', 'true');
+    }
+  };
 
   const [play, setPlay] = useState(false);
   const [musicIndex, setMusicIndex] = useState(0); // 0: 1번, 1: 2번
@@ -181,25 +195,38 @@ const Header = ({ dark, toggleDarkMode }: ComponentProps) => {
                 )}
               </IconButton>
 
-              <IconButton
-                className={`z-50 mr-3 transition-colors duration-200
-                bg-[#2ecc40] dark:bg-[#b71c1c] 
-                hover:bg-[#27ae60] dark:hover:bg-[#c62828]
-                active:bg-[#229d3a] dark:active:bg-[#8e0000]
-                shadow-lg`}
-                size="md"
-                onClick={() => {
-                  handlePlayMusic();
-                }}
-              >
-                {/* 눈꽃 아이콘 SVG - 크리스마스 느낌 색상 */}
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="size-6 text-white dark:text-yellow-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 2v20m10-10H2m16.95-6.95-13.9 13.9m0-13.9 13.9 13.9" />
-                </svg>
-              </IconButton>
+                  <div className="mr-3 flex flex-col items-center">
+                    <IconButton
+                      className={`z-50 music-anim-btn transition-colors duration-200
+                      bg-[#2ecc40] dark:bg-[#b71c1c] 
+                      hover:bg-[#27ae60] dark:hover:bg-[#c62828]
+                      active:bg-[#229d3a] dark:active:bg-[#8e0000]
+                      shadow-lg`}
+                      size="md"
+                      onClick={handleMusicButtonClick}
+                    >
+                      {/* 눈꽃 아이콘 SVG - 크리스마스 느낌 색상 */}
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
+                        stroke="currentColor"
+                        className="size-6 text-white dark:text-yellow-300 drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 2v20m10-10H2m16.95-6.95-13.9 13.9m0-13.9 13.9 13.9" />
+                      </svg>
+                    </IconButton>
+                    {/* Click Me! 통통 튀는 텍스트 */}
+                    {showClickMe && (
+                      <span
+                        className="mt-2 text-xs font-bold text-[#2ecc40] dark:text-[#ff5252] animate-bounce"
+                        style={{
+                          animationDuration: '0.8s',
+                          animationTimingFunction: 'cubic-bezier(.68,-0.55,.27,1.55)',
+                          userSelect: 'none',
+                        }}
+                      >
+                        Click Me!
+                      </span>
+                    )}
+                  </div>
 
               <IconButton
                 className={`z-50 mr-3 transition-colors duration-200

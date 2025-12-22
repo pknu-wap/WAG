@@ -1,0 +1,41 @@
+/* 크리스마스 버튼 애니메이션 */
+
+
+
+/* 심플 반짝임만 남긴 음악 버튼 애니메이션 */
+.music-anim-btn {
+  position: relative;
+  overflow: hidden;
+  z-index: 0;
+}
+.music-anim-btn::before {
+  display: none;
+}
+.music-anim-btn::after {
+  content: '';
+  position: absolute;
+  top: -30%;
+  left: -30%;
+  width: 160%;
+  height: 160%;
+  pointer-events: none;
+  z-index: 2;
+  background: radial-gradient(circle, rgba(255,255,255,0.7) 0 8%, transparent 40%) 0 0/30% 30% repeat;
+  opacity: 0.7;
+  animation: music-bling-dot 2.2s linear infinite;
+}
+
+@keyframes music-bling-dot {
+  0% {
+    background-position: 0% 0%;
+    opacity: 0.7;
+  }
+  50% {
+    background-position: 100% 100%;
+    opacity: 1;
+  }
+  100% {
+    background-position: 0% 0%;
+    opacity: 0.7;
+  }
+}
