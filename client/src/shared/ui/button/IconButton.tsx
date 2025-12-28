@@ -13,9 +13,6 @@ const IconButton = ({
     ? 'p-2 px-3 rounded-full flex justify-center items-center text-light-text dark:text-dark-text bg-transparent shadow-none hover:shadow-none dark:shadow-none dark:bg-transparent'
     : 'p-2 px-3 rounded-full flex justify-center items-center text-light-text dark:text-dark-text bg-transparent shadow-xl hover:shadow-sm dark:shadow-xl dark:bg-transparent';
 
-  // 실제 버튼처럼 눌리는 효과 추가
-  combinedClassName += ' transition active:translate-y-[2px]';
-
   switch (size) {
     case 'sm': {
       combinedClassName += ' sm:w-12 sm:h-12 sm:text-base w-10 h-10 text-[13px] rounded-full';
