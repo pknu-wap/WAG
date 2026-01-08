@@ -9,6 +9,7 @@ import store from '../../modules';
 import Header from '../../components/layout/Header';
 import SquareBubble from '../../components/layout/SquareBubble';
 import FullLayout from '../../components/layout/FullLayout';
+import MaintenanceBanner from '../../components/layout/MaintenanceBanner';
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
               </FullLayout>
               <ToastContainer />
             </SquareBubble>
+            <MaintenanceBanner />
           </BrowserRouter>
         </RecoilRoot>
       </Provider>
