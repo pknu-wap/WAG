@@ -35,7 +35,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   @apply transition-colors duration-200 bg-light-bg dark:bg-dark-bg;
   max-width: 1024px;
-  /* padding-bottom: 7vh; */
+  padding-bottom: 7vh;
 }
 
 footer {
@@ -54,6 +54,49 @@ code {
   position: fixed;
   top: 0px;
   width: 100vw;
+}
+
+.maintenance-banner {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100vw;
+  background: rgba(0, 0, 0, 0.9);
+  color: #ffffff;
+  overflow: hidden;
+  z-index: 60;
+  font-size: 0.875rem;
+}
+
+.maintenance-banner__track {
+  display: flex;
+  width: max-content;
+  animation: maintenance-scroll 40s linear infinite;
+}
+
+.maintenance-banner__inner {
+  display: flex;
+  white-space: nowrap;
+}
+
+.maintenance-banner__item {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0;
+}
+
+.maintenance-banner__spacer {
+  display: inline-block;
+  width: 3rem;
+}
+
+@keyframes maintenance-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 
