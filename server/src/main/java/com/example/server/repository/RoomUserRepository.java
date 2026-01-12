@@ -45,4 +45,7 @@ public interface RoomUserRepository extends JpaRepository<RoomUser, Long> {
     @Query(value="SELECT ru.id FROM RoomUser ru WHERE ru.room.id = :roomId AND ru.gameOrder.userOrder=:gameOrder")
     Optional<Long> findByGameOrder(@Param("gameOrder") int gameOrder, @Param("roomId") Long roomId);
 
+    List<RoomUser> findAllByRoom(Room room);
+
+    Optional<Object> findAllByRoomId(Long roomId);
 }

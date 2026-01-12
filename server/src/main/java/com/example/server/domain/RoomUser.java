@@ -20,8 +20,6 @@ public class RoomUser {
     @NotNull
     private String roomNickname;
 
-    private String profileImage;
-
     @NotNull
     private boolean isReady;
 

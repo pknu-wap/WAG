@@ -157,7 +157,7 @@ public class RoomService {
         if(room.getCategory().equals(chatMessage.getContent())){  // 기존의 카테고리와 같은 카테고리로 변경할 경우
             throw new CategoryException("기존의 카테고리와 같은 카테고리입니다. ");
         }
-        if(!chatMessage.getContent().equals("전체")){    // 카테고리가 전체인 경우를 제외하고 검사
+        if(!chatMessage.getContent().equals("전체") && !chatMessage.getContent().equals("CUSTOM")){    // 카테고리가 전체인 경우를 제외하고 검사
             answerListRepository.haveCategory(chatMessage.getContent())   // 존재하는 카테고리인지 확인 여부
                     .orElseThrow(()->new NoSuchCategoryException(chatMessage.getContent()));
         }

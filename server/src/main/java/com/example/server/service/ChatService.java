@@ -5,6 +5,7 @@ import com.example.server.domain.Room;
 import com.example.server.domain.RoomUser;
 import com.example.server.dto.ChatGameMessage;
 import com.example.server.dto.ChatMessage;
+import com.example.server.dto.ChatMessage.MessageType;
 import com.example.server.exception.MaxPenaltyExceededException;
 import com.example.server.exception.NoSuchGameOrderException;
 import com.example.server.exception.NoSuchRoomException;
@@ -38,6 +39,9 @@ public class ChatService {
             }
             return startGame(chatMessage, room);
         }
+        else if(chatMessage.getMessageType()== MessageType.SET_NAME){
+            return finishSetCustomNickname(chatMessage, chatMessage.getRoomId());
+        }
         else if (chatMessage.getMessageType()==ChatMessage.MessageType.PENALTY) {
             return penaltyUser(chatMessage);
         }
@@ -55,15 +59,29 @@ public class ChatService {
         }
     }
 
-    private ChatGameMessage startCustomGame(ChatMessage chatMessage, Room room) {
-        gameService.makeGameOrder(chatMessage);
-        roomInit(room);
+    private ChatGameMessage finishSetCustomNickname(ChatMessage chatMessage, Long roomId) {
+
+        Room room = roomRepository.findById(chatMessage.getRoomId())
+                .orElseThrow(() -> new NoSuchRoomException(chatMessage.getRoomId()));
+
+        gameService.fillEmptyAnswers(roomId);
 
         ChatGameMessage chatGameMessage = messageService.makeChatGameMessage(chatMessage, room);
         chatGameMessage.setMessageType(ChatMessage.MessageType.START);
 
         return chatGameMessage;
+    }
 
+    private ChatGameMessage startCustomGame(ChatMessage chatMessage, Room room) {
+        gameService.makeGameOrder(chatMessage);
+        roomInit(room);
+
+        String content = gameService.getAnswerTarget(room);
+        ChatGameMessage chatGameMessage = messageService.makeChatGameMessage(chatMessage, room);
+        chatGameMessage.setContent(content);
+        chatGameMessage.setMessageType(MessageType.SET_NAME);
+
+        return chatGameMessage;
     }
 
     public ChatGameMessage startGame(ChatMessage chatMessage, Room room) {
