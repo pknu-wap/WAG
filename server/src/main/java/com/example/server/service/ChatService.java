@@ -31,7 +31,12 @@ public class ChatService {
 
     public ChatGameMessage setGame(ChatMessage chatMessage) {
         if(chatMessage.getMessageType()==ChatMessage.MessageType.START){
-            return startGame(chatMessage);
+            Room room = roomRepository.findById(chatMessage.getRoomId())
+                    .orElseThrow(() -> new NoSuchRoomException(chatMessage.getRoomId()));
+            if (room.getCategory().equals("CUSTOM")) {
+                return startCustomGame(chatMessage, room);
+            }
+            return startGame(chatMessage, room);
         }
         else if (chatMessage.getMessageType()==ChatMessage.MessageType.PENALTY) {
             return penaltyUser(chatMessage);
@@ -50,14 +55,22 @@ public class ChatService {
         }
     }
 
-    public ChatGameMessage startGame(ChatMessage chatMessage) {
+    private ChatGameMessage startCustomGame(ChatMessage chatMessage, Room room) {
         gameService.makeGameOrder(chatMessage);
-
-        Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
-                .orElseThrow(() -> new NoSuchRoomException(chatMessage.getRoomId()));
         roomInit(room);
 
-        roomRepository.save(room);
+        ChatGameMessage chatGameMessage = messageService.makeChatGameMessage(chatMessage, room);
+        chatGameMessage.setMessageType(ChatMessage.MessageType.START);
+
+        return chatGameMessage;
+
+    }
+
+    public ChatGameMessage startGame(ChatMessage chatMessage, Room room) {
+
+        gameService.makeGameOrder(chatMessage);
+
+        roomInit(room);
 
         ChatGameMessage chatGameMessage = messageService.makeChatGameMessage(chatMessage, room);
         chatGameMessage.setMessageType(ChatMessage.MessageType.START);
@@ -72,6 +85,8 @@ public class ChatService {
         room.setCorrectMemberCnt(0);
         room.setLeftCorrectMember(0);
         room.setLastStartedTime(LocalDateTime.now());
+
+        roomRepository.save(room);
     }
 
     public ChatGameMessage penaltyUser(ChatMessage chatMessage){

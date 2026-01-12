@@ -21,11 +21,6 @@ public interface RoomUserRepository extends JpaRepository<RoomUser, Long> {
     @Query("SELECT ru FROM RoomUser ru JOIN ru.room r WHERE r.id = :roomId ")
     List<RoomUser> findByRoomId(@Param("roomId") Long roomId);
 
-//    @Query("SELECT ru FROM RoomUser ru JOIN ru.room r WHERE r.id = :roomId AND ru.gameOrder.ranking > 0 ORDER BY ru.gameOrder.ranking ASC")
-//    List<RoomUser> findByRoomIdOrderByRanking(@Param("roomId") Long roomId);
-//    @Query("SELECT ru FROM RoomUser ru JOIN ru.room r WHERE ru.room.id = :roomId AND ru.gameOrder.ranking = 0 ")
-//    List<RoomUser> findByZeroOrderByRanking(@Param("roomId") Long roomId);
-
     @Query("SELECT ru FROM RoomUser ru JOIN ru.room r WHERE r.id = :roomId order by RAND()")
     List<RoomUser> findRandomByRoomId(@Param("roomId") Long roomId);
 
@@ -36,7 +31,7 @@ public interface RoomUserRepository extends JpaRepository<RoomUser, Long> {
     Optional<RoomUser> hasRoomNickName(@Param("nickName") String nickName , @Param("roomId") Long roomId);
 
     @Query("SELECT ru FROM RoomUser ru WHERE ru.room.id = :roomId AND ru.isCaptain = false order by RAND() limit 1")
-    Optional<RoomUser> findNextCaptinByRandom(@Param("roomId") Long roomId);
+    Optional<RoomUser> findNextCaptainByRandom(@Param("roomId") Long roomId);
 
     @Query("SELECT ru FROM RoomUser ru WHERE ru.room.id = :roomId order by RAND() limit 1")
     Optional<RoomUser> findLastOne(@Param("roomId") Long roomId);
@@ -49,9 +44,5 @@ public interface RoomUserRepository extends JpaRepository<RoomUser, Long> {
 
     @Query(value="SELECT ru.id FROM RoomUser ru WHERE ru.room.id = :roomId AND ru.gameOrder.userOrder=:gameOrder")
     Optional<Long> findByGameOrder(@Param("gameOrder") int gameOrder, @Param("roomId") Long roomId);
-
-//    @Query(value="SELECT ru.id FROM RoomUser ru WHERE ru.room.id = :roomId AND ru.gameOrder.nextTurn = true")
-//    Optional<Long> findNextOrderByRoomId(@Param("roomId") Long roomId);
-
 
 }

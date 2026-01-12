@@ -8,6 +8,7 @@ import com.example.server.dto.ChatMessage;
 import com.example.server.exception.CantStartGameException;
 import com.example.server.exception.NoSuchGameOrderException;
 import com.example.server.exception.NoSuchRoomException;
+import com.example.server.payload.request.SetAnswerRequest;
 import com.example.server.payload.response.AnswerListResponse;
 import com.example.server.repository.AnswerListRepository;
 import com.example.server.repository.GameOrderRepository;
@@ -31,24 +32,28 @@ public class GameService {
     public void makeGameOrder(ChatMessage chatMessage){  // 게임 순서 & 정답어 설정
         Long roomId = chatMessage.getRoomId();
         List<RoomUser> roomUsers = roomUserRepository.findRandomByRoomId(roomId);
-        List<AnswerList> answerLists;
         Room room = roomRepository.findById(roomId).orElseThrow(()->new NoSuchRoomException(roomId));
 
+        List<AnswerList> answerLists;
         if(room.getCategory().equals("전체")) {  // 전체 분야로 설정
             answerLists = answerListRepository.findAnswerListBy();
-        }
-        else{   // 원하는 분야의 정답어만 설정
+        }else if(room.getCategory().equals("CUSTOM")){
+            answerLists = null;
+        }else{   // 원하는 분야의 정답어만 설정
             answerLists = answerListRepository.findAnswerListByGroup(room.getCategory());
         }
 
         int order = 1;
-
         for(RoomUser roomUser : roomUsers){ // 레디하지 않은 유저가 있다면 예외처리.
             if(!roomUser.isReady()){
                 throw new CantStartGameException();
             }
         }
 
+        setRoomUserInfo(roomUsers, room, order, answerLists);
+    }
+
+    private void setRoomUserInfo(List<RoomUser> roomUsers, Room room, int order, List<AnswerList> answerLists) {
         for(RoomUser roomUser : roomUsers){
             if(!roomUser.isCaptain()){
                 roomUser.setReady(false);
@@ -61,7 +66,8 @@ public class GameService {
                 room.setNowTurnUserId(roomUser.getId());
                 roomRepository.save(room);
             }
-            gameOrder.setAnswerName(answerLists.get(order-1).getName());
+            if(answerLists != null) gameOrder.setAnswerName(answerLists.get(order -1).getName());
+
             gameOrder.setUserOrder(order);
             order += 1;
             roomUser.setGameOrder(gameOrder);
@@ -173,5 +179,7 @@ public class GameService {
         }
     }
 
-
+    public void setCustomNickname(SetAnswerRequest setAnswerRequest) {
+        // TODO: 구현
+    }
 }

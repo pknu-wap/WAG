@@ -17,11 +17,4 @@ public class ChatGameMessage {
     private boolean gameEnd;
     private int cycle;
     private List<GameUserDto> gameUserDtos;
-//    public enum MessageType{
-//        ASK,
-//        ANSWER,
-//        CORRECT,
-//        START,
-//        END
-//    }
 }
