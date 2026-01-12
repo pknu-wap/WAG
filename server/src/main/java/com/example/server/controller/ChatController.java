@@ -125,7 +125,7 @@ public class ChatController {
     }
 
     @PostMapping("/custom")
-    public ResponseEntity<?> setNickname(@RequestBody SetAnswerRequest setAnswerRequest){// 닉네임으로 게임 방 정보주기
+    public ResponseEntity<?> setNickname(@RequestBody SetAnswerRequest setAnswerRequest){
         gameService.setCustomNickname(setAnswerRequest);
         return ResponseEntity.ok().build();
     }
