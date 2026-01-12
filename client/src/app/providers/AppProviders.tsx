@@ -30,7 +30,6 @@ const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
               </FullLayout>
               <ToastContainer />
             </SquareBubble>
-            <MaintenanceBanner />
           </BrowserRouter>
         </RecoilRoot>
       </Provider>
