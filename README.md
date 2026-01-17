@@ -68,14 +68,14 @@
 
 <br>
 
-## 💪 Contributor
+## 💪 Contributers
 
 <div align="center">
 
-|  <img src="https://avatars.githubusercontent.com/u/112786665?v=4" alt="3_pano" width="120" height="120">  | <img src="https://avatars.githubusercontent.com/u/35947667?v=4" alt="3_pano" width="120" height="120">  | <img src="https://avatars.githubusercontent.com/u/111286262?v=4" alt="3_simba" width="120" height="120"> | <img src="https://avatars.githubusercontent.com/u/130421104?v=4" alt="3_miki" width="120" height="120"> | <img src="https://avatars.githubusercontent.com/u/120546936?v=4" alt="3_popo" width="120" height="120">
-| :------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | 
-|  [김준서](https://github.com/oesnuj)   |    [장홍준](https://github.com/wkdghdwns199)   |     [김종경](https://github.com/JONG-KYEONG)   |      [함규빈](https://github.com/PororoAndFriends)      | [최민석](https://github.com/m0304s) 
-| Front-End |  Front-End |  Back-End |  Back-End | DevOps
+|  <img src="https://avatars.githubusercontent.com/u/112786665?v=4" alt="3_pano" width="120" height="120">  | <img src="https://avatars.githubusercontent.com/u/35947667?v=4" alt="3_pano" width="120" height="120">  | <img src="https://avatars.githubusercontent.com/u/111286262?v=4" alt="3_simba" width="120" height="120"> | <img src="https://avatars.githubusercontent.com/u/130421104?v=4" alt="3_miki" width="120" height="120"> | <img src="https://avatars.githubusercontent.com/u/120546936?v=4" alt="3_popo" width="120" height="120"> | <img src="https://avatars.githubusercontent.com/u/163711629?v=4" alt="3_popo" width="120" height="120"> | <img src="https://avatars.githubusercontent.com/u/202640579?v=4" alt="3_popo" width="120" height="120">
+| :------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: |
+|  [김준서](https://github.com/oesnuj)   |    [장홍준](https://github.com/wkdghdwns199)   |     [김종경](https://github.com/JONG-KYEONG)   |      [함규빈](https://github.com/PororoAndFriends)      | [최민석](https://github.com/m0304s) | [김수현](https://github.com/suhyun113) | [김예람](https://github.com/rlaexram) 
+| Front-End |  Front-End |  Back-End |  Back-End | DevOps | Design | Design
 
 </div>
 <br>
@@ -84,10 +84,10 @@
 
 <div align="center">
 
-| <img src="https://avatars.githubusercontent.com/u/80705329?v=4" alt="3_jumo" width="120" height="120"> | 
-| :------------------------------------------------------------------------------------------------------: |
-|    [하준서](https://github.com/dev-junseo)     |
-| Front-End
+| <img src="https://avatars.githubusercontent.com/u/80705329?v=4" alt="3_jumo" width="120" height="120"> | <img src="https://avatars.githubusercontent.com/u/49135677?v=4" alt="3_jumo" width="120" height="120"> | 
+| :------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: |
+|    [하준서](https://github.com/dev-junseo)     |    [윤성원](https://github.com/Zepelown)     |
+| Front-End | Manager |
 
 </div>
 <br>
