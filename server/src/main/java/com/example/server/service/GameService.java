@@ -231,7 +231,7 @@ public class GameService {
         List<AnswerList> answerLists = answerListRepository.findAnswerListBy();
 
         for(int i=0;i<gameOrders.size();i++){
-            if (gameOrders.get(i).getAnswerName() == null) {
+            if (gameOrders.get(i).getAnswerName() == null || gameOrders.get(i).getAnswerName().equals("")) {
                 gameOrders.get(i).setAnswerName(answerLists.get(i).getName());
                 gameOrderRepository.save(gameOrders.get(i));
             }
