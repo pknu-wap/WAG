@@ -1,7 +1,7 @@
 <!-- <img src="https://capsule-render.vercel.app/api?type=waving&color=B931FC&height=150&section=header&text=&fontSize=0" /> -->
 
 
-# WAG - Web Appends Game
+# WAG - Web Appends Game 
 ![image](https://github.com/user-attachments/assets/808bc148-ddb7-490c-b87a-9ed151981847)
 <br>
 <br>
