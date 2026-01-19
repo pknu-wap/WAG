@@ -4,15 +4,23 @@ import com.example.server.domain.AnswerList;
 import com.example.server.domain.GameOrder;
 import com.example.server.domain.Room;
 import com.example.server.domain.RoomUser;
+import com.example.server.dto.ChatGameMessage;
 import com.example.server.dto.ChatMessage;
 import com.example.server.exception.CantStartGameException;
 import com.example.server.exception.NoSuchGameOrderException;
 import com.example.server.exception.NoSuchRoomException;
+import com.example.server.payload.request.SetAnswerRequest;
 import com.example.server.payload.response.AnswerListResponse;
 import com.example.server.repository.AnswerListRepository;
 import com.example.server.repository.GameOrderRepository;
 import com.example.server.repository.RoomRepository;
 import com.example.server.repository.RoomUserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,24 +39,28 @@ public class GameService {
     public void makeGameOrder(ChatMessage chatMessage){  // 게임 순서 & 정답어 설정
         Long roomId = chatMessage.getRoomId();
         List<RoomUser> roomUsers = roomUserRepository.findRandomByRoomId(roomId);
-        List<AnswerList> answerLists;
         Room room = roomRepository.findById(roomId).orElseThrow(()->new NoSuchRoomException(roomId));
 
+        List<AnswerList> answerLists;
         if(room.getCategory().equals("전체")) {  // 전체 분야로 설정
             answerLists = answerListRepository.findAnswerListBy();
-        }
-        else{   // 원하는 분야의 정답어만 설정
+        }else if(room.getCategory().equals("CUSTOM")){
+            answerLists = null;
+        }else{   // 원하는 분야의 정답어만 설정
             answerLists = answerListRepository.findAnswerListByGroup(room.getCategory());
         }
 
         int order = 1;
-
         for(RoomUser roomUser : roomUsers){ // 레디하지 않은 유저가 있다면 예외처리.
             if(!roomUser.isReady()){
                 throw new CantStartGameException();
             }
         }
 
+        setRoomUserInfo(roomUsers, room, order, answerLists);
+    }
+
+    private void setRoomUserInfo(List<RoomUser> roomUsers, Room room, int order, List<AnswerList> answerLists) {
         for(RoomUser roomUser : roomUsers){
             if(!roomUser.isCaptain()){
                 roomUser.setReady(false);
@@ -61,7 +73,8 @@ public class GameService {
                 room.setNowTurnUserId(roomUser.getId());
                 roomRepository.save(room);
             }
-            gameOrder.setAnswerName(answerLists.get(order-1).getName());
+            if(answerLists != null) gameOrder.setAnswerName(answerLists.get(order -1).getName());
+
             gameOrder.setUserOrder(order);
             order += 1;
             roomUser.setGameOrder(gameOrder);
@@ -173,5 +186,55 @@ public class GameService {
         }
     }
 
+    public void setCustomNickname(SetAnswerRequest setAnswerRequest) {
+        Room room = roomRepository.findByRoomId(setAnswerRequest.getRoomId())
+                .orElseThrow(() -> new NoSuchRoomException(setAnswerRequest.getRoomId()));
+        GameOrder gameOrder = gameOrderRepository.findByNickName(setAnswerRequest.getTargetNickname(), room.getId())
+                .orElseThrow(NoSuchGameOrderException::new);
+        gameOrder.setAnswerName(setAnswerRequest.getAnswer());
+        gameOrderRepository.save(gameOrder);
+    }
 
+    public String getAnswerTarget(Room room) {
+
+        List<String> nicknames = roomUserRepository.findAllByRoom(room).stream().map(RoomUser::getRoomNickname).toList();
+        List<String> shuffled = new ArrayList<>(nicknames);
+        Collections.shuffle(shuffled);
+
+        Map<String, String> target = new HashMap<>();
+        for (int i = 0; i < nicknames.size(); i++) {
+            String from = nicknames.get(i);
+            String to = shuffled.get(i);
+
+            if (from.equals(to)) {
+                Collections.shuffle(shuffled);
+                i = -1; // 처음부터 다시 검사
+                target.clear();
+                continue;
+            }
+
+            target.put(from, to);
+        }
+
+        String json;
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            json = objectMapper.writeValueAsString(target);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return json;
+    }
+
+    public void fillEmptyAnswers(Long roomId) {
+        List<GameOrder> gameOrders = gameOrderRepository.findAllByRoom_Id(roomId);
+        List<AnswerList> answerLists = answerListRepository.findAnswerListBy();
+
+        for(int i=0;i<gameOrders.size();i++){
+            if (gameOrders.get(i).getAnswerName() == null || gameOrders.get(i).getAnswerName().equals("")) {
+                gameOrders.get(i).setAnswerName(answerLists.get(i).getName());
+                gameOrderRepository.save(gameOrders.get(i));
+            }
+        }
+    }
 }

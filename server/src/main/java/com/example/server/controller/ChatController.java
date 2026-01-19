@@ -1,10 +1,9 @@
 package com.example.server.controller;
 
 import com.example.server.dto.*;
+import com.example.server.payload.request.SetAnswerRequest;
 import com.example.server.payload.response.AnswerListResponse;
 import com.example.server.payload.response.RoomResponse;
-import com.example.server.security.CurrentUser;
-import com.example.server.security.UserPrincipal;
 import com.example.server.service.ChatService;
 import com.example.server.service.GameService;
 import com.example.server.kafka.KafkaProducerService;
@@ -16,6 +15,8 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -92,7 +93,7 @@ public class ChatController {
         headerAccessor.getSessionAttributes().put("username", sender);
         headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
 
-        RoomResponse roomResponse = roomService.enterRoomByRoomId(chatMessage.getSender(),chatMessage.getRoomId(), null);  // 해당 방에 입장하는 로직
+        RoomResponse roomResponse = roomService.enterRoomByRoomId(chatMessage.getSender(),chatMessage.getRoomId());  // 해당 방에 입장하는 로직
         ChatRoomInfoMessage chatRoomInfoMessage = new ChatRoomInfoMessage();
         chatRoomInfoMessage.setMessageType(ChatMessage.MessageType.JOIN);
         chatRoomInfoMessage.setSender(sender);
@@ -121,6 +122,12 @@ public class ChatController {
     public ResponseEntity<AnswerListResponse> getAnswerList(@RequestParam Long roomId, @RequestParam String nickname){// 닉네임으로 게임 방 정보주기
         AnswerListResponse answerListResponse = gameService.getAnswerList(roomId, nickname);
         return new ResponseEntity<>(answerListResponse, HttpStatus.OK);
+    }
+
+    @PostMapping("/custom")
+    public ResponseEntity<?> setNickname(@RequestBody SetAnswerRequest setAnswerRequest){
+        gameService.setCustomNickname(setAnswerRequest);
+        return ResponseEntity.ok().build();
     }
 
 

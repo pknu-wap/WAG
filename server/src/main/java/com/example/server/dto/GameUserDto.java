@@ -13,7 +13,6 @@ import lombok.Setter;
 public class GameUserDto {
     private boolean isCaptain;
     private String roomNickname;
-    private String profileImage;
     @Max(3)
     private int penalty;
     private boolean isMyTurn;
@@ -26,7 +25,6 @@ public class GameUserDto {
         return new GameUserDto(
                 roomUser.isCaptain(),
                 roomUser.getRoomNickname(),
-                roomUser.getProfileImage(),
                 gameOrder.getPenalty(),
                 gameOrder.isNowTurn(),
                 gameOrder.isNextTurn(),

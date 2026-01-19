@@ -9,7 +9,6 @@ import lombok.Setter;
 @Setter
 public class ResultUserDto {
     private String roomNickname;
-    private String profileImage;
     private String answerName;
     private int ranking;
 }
