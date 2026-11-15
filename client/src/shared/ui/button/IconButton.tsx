@@ -1,48 +1,27 @@
-import { ButtonProps } from '../../../types/common';
+import { ButtonHTMLAttributes, ReactNode } from 'react';
+import classNames from 'classnames';
 
-const IconButton = ({
-  type,
-  size,
-  className,
-  disabled,
-  onClick,
-  children,
-  isInput,
-}: ButtonProps) => {
-  let combinedClassName = isInput
-    ? 'p-2 px-3 rounded-full flex justify-center items-center text-light-text dark:text-dark-text bg-transparent shadow-none hover:shadow-none dark:shadow-none dark:bg-transparent'
-    : 'p-2 px-3 rounded-full flex justify-center items-center text-light-text dark:text-dark-text bg-transparent shadow-xl hover:shadow-sm dark:shadow-xl dark:bg-transparent';
+export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  /** 헤더 아이콘(45px 원) / 작은 원(18px, 캐러셀 화살표) / 배경 없는 아이콘 */
+  look?: 'header' | 'arrow' | 'plain';
+  label: string;
+  children: ReactNode;
+}
 
-  switch (size) {
-    case 'sm': {
-      combinedClassName += ' sm:w-12 sm:h-12 sm:text-base w-10 h-10 text-[13px] rounded-full';
-      break;
-    }
-    case 'md': {
-      combinedClassName += ' sm:w-14 sm:h-14 sm:text-base w-12 h-12 text-sm rounded-full';
-      break;
-    }
-    case 'lg': {
-      combinedClassName += ' lg:w-16 lg:h-16 lg:text-xl sm:w-14 sm:h-14 sm:text-lg w-12 h-12 text-base rounded-full font-black';
-      break;
-    }
-    default: {
-      combinedClassName += ' w-14 h-14 rounded-full text-lg';
-      break;
-    }
-  }
+/** 원형 아이콘 버튼. `label` 은 스크린리더용 이름입니다. */
+const IconButton = ({ look = 'header', label, className, children, type = 'button', ...rest }: IconButtonProps) => {
+  const base = 'inline-flex items-center justify-center shrink-0 text-light-text dark:text-dark-text transition-transform active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wag-askerText';
+  const looks = {
+    header: 'w-[45px] h-[45px] rounded-full bg-light-icon dark:bg-dark-icon shadow-wag',
+    arrow: 'w-[18px] h-[18px] rounded-full bg-wag-arrow !text-black shadow-soft',
+    plain: 'w-9 h-9 rounded-full bg-transparent',
+  };
 
   return (
-    <button
-      type={type ? type : 'button'}
-      className={`${className} ${combinedClassName}`}
-      onClick={onClick}
-      disabled={disabled}
-    >
+    <button type={type} aria-label={label} title={label} className={classNames(base, looks[look], className)} {...rest}>
       {children}
     </button>
   );
 };
 
 export default IconButton;
-

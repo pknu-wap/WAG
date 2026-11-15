@@ -51,8 +51,9 @@ public class RoomService {
         room.setPrivateRoom(roomCreateRequest.isPrivateRoom());
         room.setGameStatus(false);
         room.setUserCount(0);
-        room.setCategory(roomCreateRequest.getCategory());
+        room.setCategory(normalizeCategory(roomCreateRequest.getCategory()));
         room.setTimer(roomCreateRequest.getTimer());
+        room.setCustomMode(roomCreateRequest.isCustomMode());
         room.setLastStartedTime(LocalDateTime.now());
         room = roomRepository.save(room);  // 방 생성
         return room;
@@ -154,6 +155,7 @@ public class RoomService {
         return chatMessage;
     }
 
+    /** 카테고리 변경 (방장). content 는 "전체" 또는 "lol,한국위인" 처럼 쉼표로 이어진 목록 */
     public ChatMessage setCategory(ChatMessage chatMessage){
         Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
                 .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
@@ -162,15 +164,45 @@ public class RoomService {
         if(!roomUser.isCaptain()){  // 방장이 아닌 사람이 변경 시도할 경우
             throw new CategoryException("카테고리 변경 권한이 없습니다. ");
         }
-        if(room.getCategory().equals(chatMessage.getContent())){  // 기존의 카테고리와 같은 카테고리로 변경할 경우
+        String category = normalizeCategory(chatMessage.getContent());
+        if(room.getCategory().equals(category)){  // 기존의 카테고리와 같은 카테고리로 변경할 경우
             throw new CategoryException("기존의 카테고리와 같은 카테고리입니다. ");
         }
-        if(!chatMessage.getContent().equals("전체")){    // 카테고리가 전체인 경우를 제외하고 검사
-            answerListRepository.haveCategory(chatMessage.getContent())   // 존재하는 카테고리인지 확인 여부
-                    .orElseThrow(()->new NoSuchCategoryException(chatMessage.getContent()));
-        }
-        room.setCategory(chatMessage.getContent());
+        room.setCategory(category);
         roomRepository.save(room);
+        chatMessage.setContent(category);
+        return chatMessage;
+    }
+
+    /** 카테고리 목록을 검증하고 "전체" 또는 "a,b" 형태로 정규화 */
+    private String normalizeCategory(String raw) {
+        List<String> groups = GameService.parseCategories(raw);
+        for (String group : groups) {
+            answerListRepository.haveCategory(group)   // 존재하는 카테고리인지 확인
+                    .orElseThrow(() -> new NoSuchCategoryException(group));
+        }
+        return groups.isEmpty() ? GameService.ALL_CATEGORY : String.join(",", groups);
+    }
+
+    /** 선택 가능한 카테고리 목록 ("전체" 제외) */
+    public List<String> getCategories() {
+        return answerListRepository.findDistinctGroups();
+    }
+
+    /** 서로 이름 지어주기 on/off (방장). content 는 "true"/"false" */
+    public ChatMessage setCustomMode(ChatMessage chatMessage){
+        Room room = roomRepository.findByRoomId(chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomException(chatMessage.getRoomId()));
+        RoomUser roomUser = roomUserRepository.hasNickName(chatMessage.getSender(), chatMessage.getRoomId())
+                .orElseThrow(()->new NoSuchRoomUserException(chatMessage.getRoomId()));
+        if(!roomUser.isCaptain()){
+            throw new CategoryException("설정 변경 권한이 없습니다. ");
+        }
+        boolean customMode = Boolean.parseBoolean(chatMessage.getContent());
+        room.setCustomMode(customMode);
+        roomRepository.save(room);
+        chatMessage.setContent(String.valueOf(customMode));
+        chatMessage.setMessageType(ChatMessage.MessageType.CUSTOM);
         return chatMessage;
     }
 

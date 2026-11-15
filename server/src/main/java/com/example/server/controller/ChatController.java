@@ -41,6 +41,10 @@ public class ChatController {
     public ChatGameMessage sendGameMessage(@Payload ChatMessage chatMessage) {
 //        String destination = "/topic/public/"+chatMessage.getRoomId();
         ChatGameMessage chatGameMessage = chatService.setGame(chatMessage);
+        // 질문 차례가 아닌 사용자의 ASK 는 null 이 돌아온다. null 을 Kafka 로 보내면 컨슈머에서 NPE 가 나므로 보내지 않는다.
+        if (chatGameMessage == null) {
+            return null;
+        }
 //        messagingTemplate.convertAndSend(destination, chatGameMessage);
         kafkaProducerService.send("game-topic", chatGameMessage);
         return chatGameMessage;
@@ -82,6 +86,13 @@ public class ChatController {
         rechatMessage.setMessageType(ChatMessage.MessageType.TIMER);
 //        messagingTemplate.convertAndSend(destination, rechatMessage);
         kafkaProducerService.send("timer-topic", rechatMessage);
+        return rechatMessage;
+    }
+
+    @MessageMapping("/chat.setCustomMode")   // 서로 이름 지어주기 on/off (방장)
+    public ChatMessage setCustomMode(@Payload ChatMessage chatMessage) {
+        ChatMessage rechatMessage = roomService.setCustomMode(chatMessage);
+        kafkaProducerService.send("custom-topic", rechatMessage);
         return rechatMessage;
     }
 

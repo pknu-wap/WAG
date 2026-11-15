@@ -1,0 +1,12 @@
+{
+  "name": "wag-e2e",
+  "private": true,
+  "type": "module",
+  "description": "브라우저 2개로 게임 한 판을 끝까지 돌리는 스모크 테스트 (로컬 서버 필요)",
+  "scripts": {
+    "smoke": "node smoke.mjs"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^22.15.0"
+  }
+}

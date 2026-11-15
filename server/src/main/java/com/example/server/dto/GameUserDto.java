@@ -20,7 +20,10 @@ public class GameUserDto {
     private boolean isNextTurn;
     private boolean haveAnswerChance;
     private int ranking;
+    /** END 메시지에서만 채워짐 (결과 화면용) */
     private String answername;
+    /** 서로 이름 지어주기 단계에서 이 사람이 제시어를 정해 줄 상대 닉네임 */
+    private String namingTarget;
 
     public static GameUserDto of(GameOrder gameOrder, RoomUser roomUser){
         return new GameUserDto(
@@ -32,7 +35,8 @@ public class GameUserDto {
                 gameOrder.isNextTurn(),
                 gameOrder.isHaveAnswerChance(),
                 gameOrder.getRanking(),
-                null
+                null,
+                gameOrder.getNamingTarget()
         );
     }
 

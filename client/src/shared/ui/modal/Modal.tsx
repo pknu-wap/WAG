@@ -1,74 +1,65 @@
-import React from 'react';
-import { useRecoilState } from 'recoil';
-import { modalState } from '../../../recoil/recoil';
-import { motion, AnimatePresence } from 'framer-motion';
-import { CSSProperties } from 'react';
+import { ReactNode, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import classNames from 'classnames';
 
-const customModalStyles = {
-  overlay: {
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    width: '100%',
-    height: '100%',
-    zIndex: 10,
-    position: 'fixed' as CSSProperties['position'],
-    top: 0,
-    left: 0,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  } as CSSProperties,
-  content: {
-    width: '70%',
-    maxWidth: '550px',
-    minWidth: '450px',
-    height: 'auto',
-    minHeight: '310px',
-    maxHeight: '400px',
-    zIndex: 150,
-    borderRadius: '10px',
-    boxShadow: '2px 2px 2px rgba(0, 0, 0, 0.25)',
-    backgroundColor: '#FFE5E5',
-    overflow: 'auto',
-  } as CSSProperties,
-};
-
-interface ModalProps {
-  children: React.ReactNode;
-  onRequestClose: () => void;
+export interface ModalProps {
+  open: boolean;
+  /** 바깥(오버레이) 클릭이나 ESC 로 닫을 때. 없으면 닫히지 않음 */
+  onClose?: () => void;
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+  label: string;
+  children: ReactNode;
 }
 
-const Modal: React.FC<ModalProps> = ({ children, onRequestClose }) => {
-  const baseClassName =
-    'w-5/6 max-w-lg min-w-xs h-auto min-h-[310px] max-h-[400px] z-150 rounded-lg shadow-md overflow-auto bg-light-bg dark:bg-dark-bg';
-  const [isOpen, setIsOpen] = useRecoilState(modalState);
+const SIZE = {
+  sm: 'max-w-[434px] sm:max-w-[428px]',
+  md: 'max-w-[434px] sm:max-w-[530px]',
+  lg: 'max-w-[434px] sm:max-w-[646px]',
+};
 
-  const closeModal = (e: React.MouseEvent) => {
-    if ((e.target as Element).id === 'overlay') {
-      setIsOpen(false);
-    }
-  };
+/** 공통 모달: 어두운 오버레이 + 연분홍(다크: 회색) 카드 */
+const Modal = ({ open, onClose, size = 'md', className, label, children }: ModalProps) => {
+  useEffect(() => {
+    if (!open || !onClose) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
 
   return (
     <AnimatePresence>
-      {isOpen && (
-        <div style={customModalStyles.overlay} id="overlay" onClick={closeModal}>
+      {open && (
+        <motion.div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { duration: 0.15 } }}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) onClose?.();
+          }}
+        >
           <motion.div
-            className={baseClassName}
+            role="dialog"
+            aria-modal="true"
+            aria-label={label}
+            className={classNames(
+              'w-full max-h-[90vh] overflow-y-auto scrollbar-thin rounded-[13px] sm:rounded-[8px] bg-light-modal dark:bg-dark-modal text-light-text dark:text-dark-text shadow-wag p-5 sm:p-6',
+              SIZE[size],
+              className
+            )}
             initial={{ opacity: 0, y: 20 }}
-            animate={{
-              opacity: 1,
-              y: 0,
-              transition: { delay: 0.1 },
-            }}
-            exit={{ opacity: 0, y: 20, transition: { duration: 0.1 } }}
+            animate={{ opacity: 1, y: 0, transition: { delay: 0.05 } }}
+            exit={{ opacity: 0, y: 20, transition: { duration: 0.15 } }}
           >
-            <div className="p-3">{children}</div>
+            {children}
           </motion.div>
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
 };
 
 export default Modal;
-

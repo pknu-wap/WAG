@@ -33,4 +33,7 @@ public class GameOrder {
     @NotNull
     private int ranking;
 
+    /** 서로 이름 지어주기 모드에서 이 사람이 제시어를 정해 줘야 하는 상대 닉네임 */
+    private String namingTarget;
+
 }

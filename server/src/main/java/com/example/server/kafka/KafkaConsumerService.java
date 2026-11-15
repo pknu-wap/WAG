@@ -74,6 +74,16 @@ public class KafkaConsumerService {
         }
     }
 
+    @KafkaListener(topics = "custom-topic", groupId = "websocket-group")
+    public void consumeCustomMode(String rawMessage) {
+        try {
+            ChatMessage message = objectMapper.readValue(rawMessage, ChatMessage.class);
+            messagingTemplate.convertAndSend("/topic/public/" + message.getRoomId(), message);
+        } catch (JsonProcessingException e) {
+            handleException("custom-topic", rawMessage, e);
+        }
+    }
+
     @KafkaListener(topics = "add-topic", groupId = "websocket-group")
     public void consumeAddUser(String rawMessage) {
         try {

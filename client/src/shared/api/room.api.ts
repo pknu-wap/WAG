@@ -1,84 +1,53 @@
 import { apiInstance } from './instance';
 import { IRoomResponseInfo } from '../../types/dto';
 
-/**
- * 방 생성
- * @param data - 방 생성 정보
- * @returns 생성된 방 정보
- */
-export async function createRoom(data: {
+export interface CreateRoomRequest {
   privateRoom: boolean;
   userNickName: string;
+  /** "전체" 또는 "lol,한국위인" 처럼 쉼표로 이어진 카테고리 */
   category: string;
   timer: number;
-}): Promise<IRoomResponseInfo> {
-  try {
-    const response = await apiInstance.post<IRoomResponseInfo>('/room/create', data);
-    return response.data;
-  } catch (error) {
-    console.error('방 생성 요청 중 오류 발생:', error);
-    throw error;
-  }
+  /** 서로 이름 지어주기 모드 */
+  customMode: boolean;
 }
 
 /**
- * 입장코드로 방 ID 조회
- * @param enterCode - 입장 코드
- * @returns 방 ID 문자열 (또는 "invalid enterCode", "already started")
+ * 서버가 roomId 대신 상태 문자열("invalid enterCode" 등)을 돌려주는 엔드포인트의 결과.
+ * 호출부는 문자열 비교 대신 `ok` 와 `reason` 으로 분기합니다.
  */
-export async function getRoomIdByCode(enterCode: number): Promise<string> {
-  try {
-    const response = await apiInstance.get<string>('/roomId/code', {
-      params: { enterCode },
-    });
-    // 서버가 단순 문자열을 반환하므로 response.data를 그대로 반환
-    return response.data;
-  } catch (error) {
-    console.error('입장코드로 방 조회 중 오류 발생:', error);
-    throw error;
-  }
+export type RoomLookupResult =
+  | { ok: true; roomId: string }
+  | { ok: false; reason: 'INVALID_CODE' | 'ALREADY_STARTED' | 'NO_AVAILABLE_ROOM' };
+
+const LOOKUP_FAILURES: Record<string, Extract<RoomLookupResult, { ok: false }>['reason']> = {
+  'invalid enterCode': 'INVALID_CODE',
+  'already started': 'ALREADY_STARTED',
+  'no available room': 'NO_AVAILABLE_ROOM',
+};
+
+function toLookupResult(raw: string | number): RoomLookupResult {
+  const reason = LOOKUP_FAILURES[String(raw)];
+  return reason ? { ok: false, reason } : { ok: true, roomId: String(raw) };
 }
 
-/**
- * 방 정보 조회
- * @param roomId - 방 ID
- * @returns 방 정보
- */
-export async function getRoomInfo(roomId: number): Promise<IRoomResponseInfo> {
-  try {
-    const response = await apiInstance.get<IRoomResponseInfo>('/room/info', {
-      params: { roomId },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('방 정보 조회 중 오류 발생:', error);
-    throw error;
-  }
-}
-
-/**
- * 랜덤 방 ID 조회 (빠른 입장)
- * @returns 방 ID 문자열 (또는 "no available room")
- */
-export async function getRandomRoomId(): Promise<string> {
-  try {
-    const response = await apiInstance.get<string>('/roomId');
-    return response.data;
-  } catch (error) {
-    console.error('랜덤 방 조회 중 오류 발생:', error);
-    throw error;
-  }
-}
-
-/**
- * Room API 객체
- */
 export const roomApi = {
-  createRoom,
-  getRoomIdByCode,
-  getRoomInfo,
-  getRandomRoomId,
+  /** 방 생성 (방장). POST /room/create */
+  create: (body: CreateRoomRequest) =>
+    apiInstance.post<IRoomResponseInfo>('/room/create', body).then((r) => r.data),
+
+  /** 방 정보 + 참가자 목록. GET /room/info */
+  getInfo: (roomId: number) =>
+    apiInstance.get<IRoomResponseInfo>('/room/info', { params: { roomId } }).then((r) => r.data),
+
+  /** 입장코드로 roomId 찾기. GET /roomId/code */
+  findByEnterCode: (enterCode: number) =>
+    apiInstance.get<string>('/roomId/code', { params: { enterCode } }).then((r) => toLookupResult(r.data)),
+
+  /** 랜덤 입장 가능한 방의 roomId. GET /roomId */
+  findRandom: () => apiInstance.get<string>('/roomId').then((r) => toLookupResult(r.data)),
+
+  /** 선택 가능한 제시어 카테고리 목록 ("전체" 제외). GET /categories */
+  getCategories: () => apiInstance.get<string[]>('/categories').then((r) => r.data),
 };
 
 export default roomApi;
-

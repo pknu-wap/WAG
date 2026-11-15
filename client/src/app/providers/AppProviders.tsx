@@ -7,9 +7,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import store from '../../modules';
 import Header from '../../components/layout/Header';
-import SquareBubble from '../../components/layout/SquareBubble';
-import FullLayout from '../../components/layout/FullLayout';
-import MaintenanceBanner from '../../components/layout/MaintenanceBanner';
+import Background from '../../components/layout/Background';
 
 const queryClient = new QueryClient();
 
@@ -23,13 +21,10 @@ const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
       <Provider store={store}>
         <RecoilRoot>
           <BrowserRouter>
-            <SquareBubble>
-              <FullLayout>
-                <Header />
-                {children}
-              </FullLayout>
-              <ToastContainer />
-            </SquareBubble>
+            <Background />
+            <Header />
+            <main>{children}</main>
+            <ToastContainer />
           </BrowserRouter>
         </RecoilRoot>
       </Provider>
@@ -38,4 +33,3 @@ const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
 };
 
 export default AppProviders;
-

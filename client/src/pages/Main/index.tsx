@@ -1,184 +1,120 @@
 import { useEffect, useState } from 'react';
-import { Button, Modal, Toast, Wrapper } from '../../shared';
-import FullLayout from '../../components/layout/FullLayout';
-import { ConnectedProps, connect } from 'react-redux';
-import { RootState } from '../../modules';
-import { useRecoilState } from 'recoil';
-import { modalState, soundEffectStatus } from '../../recoil/recoil';
 import { useNavigate } from 'react-router-dom';
-import { GA_EVENT, trackEvent, roomApi } from '../../shared';
+import { useRecoilState } from 'recoil';
+import { Button, Modal, TextField, Toast, Wrapper, GA_EVENT, trackEvent, roomApi, session, useSound } from '../../shared';
+import FullLayout from '../../components/layout/FullLayout';
+import { modalState } from '../../recoil/recoil';
 
-type Props = {
-  children?: React.ReactNode;
-};
+const SOLO_GAME_URL = 'https://splendorous-conkies-8e58b1.netlify.app/';
 
-type PropsFromRedux = ConnectedProps<typeof connector>;
-type ComponentProps = Props & PropsFromRedux;
-const connector = connect((state: RootState) => ({ dark: state.dark.isDark }), {});
-
-function MainPage({ dark }: ComponentProps) {
+function MainPage() {
   const navigate = useNavigate();
-  const [theme, setTheme] = useState(localStorage.theme);
-  const [enterCode, setEnterCode] = useState<number>();
-  const [, setIsOpen] = useRecoilState(modalState);
-  const [soundEffectStatusValue] = useRecoilState(soundEffectStatus);
-  const [disabled, setDisabled] = useState<boolean>(true);
+  const play = useSound();
+  const [codeModalOpen, setCodeModalOpen] = useRecoilState(modalState);
+  const [enterCode, setEnterCode] = useState('');
+  const canSubmitCode = /^\d{4}$/.test(enterCode);
 
-  const openModal = () => {
-    handlePlaySound();
-    setIsOpen(true);
+  // 메인으로 돌아오면 이전 방 정보는 버린다
+  useEffect(() => {
+    session.clearGame();
+  }, []);
+
+  const enterRoom = (roomId: string, code?: string) => {
+    session.setRoomId(roomId);
+    navigate(code ? `/GameRoom/${roomId}?code=${code}` : `/GameRoom/${roomId}`);
   };
 
-  const closeModal = () => {
-    setIsOpen(false);
-  };
-
-  const getRoomIdCode = async () => {
+  const handleRandomEnter = async () => {
+    play('click');
     try {
-      if (!enterCode) throw new Error('enterCode is missing');
-      const response = await roomApi.getRoomIdByCode(enterCode);
-      return response;
-    } catch (error) {
-      console.error(error);
-      throw error;
+      const result = await roomApi.findRandom();
+      if (!result.ok) {
+        Toast({ message: '입장 가능한 방이 없습니다. 방을 만들어 주세요!', type: 'error' });
+        return;
+      }
+      trackEvent({ action: GA_EVENT.MAIN.QUICK_JOIN, category: 'main', label: result.roomId });
+      enterRoom(result.roomId);
+    } catch {
+      Toast({ message: '서버와 연결하지 못했습니다. 잠시 후 다시 시도해주세요.', type: 'error' });
     }
   };
 
-  const getRandomRoomId = async () => {
+  const handleCodeEnter = async () => {
+    play('click');
+    if (!canSubmitCode) return;
     try {
-      const response = await roomApi.getRandomRoomId();
-      return response;
-    } catch (error) {
-      console.error('랜덤 입장 요청 중 오류 발생:', error);
-      throw error;
+      const result = await roomApi.findByEnterCode(Number(enterCode));
+      if (!result.ok) {
+        Toast({
+          message: result.reason === 'ALREADY_STARTED' ? '이미 게임이 시작되었습니다!' : '존재하지 않는 입장코드 입니다!',
+          type: 'error',
+        });
+        return;
+      }
+      trackEvent({ action: GA_EVENT.MAIN.INPUT_JOIN_ROOM, category: 'main', label: result.roomId });
+      enterRoom(result.roomId, enterCode);
+    } catch {
+      Toast({ message: '서버와 연결하지 못했습니다. 잠시 후 다시 시도해주세요.', type: 'error' });
     }
   };
 
-  const handlePlaySound = () => {
-    const playSound = () => {
-      const audio = new Audio('audio/button_click.mp3');
-      audio.play();
-    };
-    if (soundEffectStatusValue) playSound();
-  };
-
-  const handleRandomEnterClick = async () => {
-    handlePlaySound();
-    const roomId = await getRandomRoomId();
-    if (roomId !== 'no available room') {
-      trackEvent({
-        action: GA_EVENT.MAIN.QUICK_JOIN,
-        category: 'main',
-        label: roomId,
-      });
-      localStorage.setItem('roomId', roomId);
-      navigate(`/GameRoom/${roomId}`);
-    } else {
-      Toast({ message: '입장 가능한 방이 없습니다.', type: 'error' });
-      Toast({ message: '방을 생성하여 주시길 바랍니다.', type: 'error' });
-    }
-  };
-
-  const buttonCheckHandler = async () => {
-    handlePlaySound();
-    const roomId = await getRoomIdCode();
-    if (roomId === 'invalid enterCode') {
-      Toast({ message: '존재하지 않는 입장코드 입니다!', type: 'error' });
-    } else if (roomId === 'already started') {
-      Toast({ message: '이미 게임이 시작되었습니다!', type: 'error' });
-    } else {
-      trackEvent({
-        action: GA_EVENT.MAIN.INPUT_JOIN_ROOM,
-        category: 'main',
-        label: roomId,
-      });
-      localStorage.setItem('roomId', roomId);
-      navigate(`/GameRoom/${roomId}?code=${enterCode}`);
-    }
-  };
-
-  const handleCreateRoomClick = () => {
-    handlePlaySound();
-    trackEvent({
-      action: GA_EVENT.MAIN.OPEN_CREATE_ROOM,
-      category: 'main',
-    });
+  const handleCreateRoom = () => {
+    play('click');
+    trackEvent({ action: GA_EVENT.MAIN.OPEN_CREATE_ROOM, category: 'main' });
     navigate('/CreateRoom');
   };
 
-  const handleGoToSinglePlayground = () => {
-    trackEvent({
-      action: GA_EVENT.MAIN.SOLO_MODE,
-      category: 'main',
-    });
-    window.open('https://splendorous-conkies-8e58b1.netlify.app/', '_self');
+  const handleOpenCodeModal = () => {
+    play('click');
+    setEnterCode('');
+    setCodeModalOpen(true);
   };
 
-  useEffect(() => {
-    localStorage.clear();
-  }, []);
-
-  useEffect(() => {
-    setDisabled(enterCode === undefined || Number.isNaN(enterCode));
-  }, [enterCode]);
-
-  useEffect(() => {
-    setTheme(dark ? 'dark' : 'light');
-  }, [dark]);
+  const handleSoloGame = () => {
+    trackEvent({ action: GA_EVENT.MAIN.SOLO_MODE, category: 'main' });
+    window.open(SOLO_GAME_URL, '_self');
+  };
 
   return (
     <Wrapper>
       <FullLayout>
-        <div className=''>
-          <div className='flex justify-center items-center '>
-            <img className={`relative w-2/4`} src='images/yangSaeChanGame.png' alt='logo light mode' />
-          </div>
+        <img className="mx-auto mt-3 w-[260px] sm:mt-1 sm:w-[423px]" src="/images/yangSaeChanGame.png" alt="양세찬 게임" />
 
-          <div className='flex flex-col items-center justify-center space-y-5 mt-6'>
-            <Button size='lg' onClick={handleRandomEnterClick}>
-              랜덤 입장
-            </Button>
-            <Button size='lg' onClick={handleCreateRoomClick}>
-              방 생성
-            </Button>
-            <Button size='lg' onClick={openModal}>
-              입장코드 입력
-            </Button>
-            <Button size='lg' onClick={handleGoToSinglePlayground}>
-              1인 미니게임
-            </Button>
-          </div>
+        <div className="mt-5 flex flex-col items-center gap-5 sm:mt-4 sm:gap-[17px]">
+          <Button size="menu" onClick={handleRandomEnter}>
+            랜덤 입장
+          </Button>
+          <Button size="menu" onClick={handleCreateRoom}>
+            방 생성
+          </Button>
+          <Button size="menu" onClick={handleOpenCodeModal}>
+            입장코드 입력
+          </Button>
+          <Button size="menu" onClick={handleSoloGame}>
+            1인 미니게임
+          </Button>
         </div>
 
-        <Modal onRequestClose={closeModal}>
-          <div className='relative z-10 flex flex-col justify-between'>
-            <div className='my-5 flex flex-row justify-between items-center'>
-              <div className='text-4xl'>JOIN</div>
-            </div>
-            <div className='text-lg'>입장코드 형식 : 랜덤 숫자 4자리</div>
-            <br />
-            <input
-              className='w-full h-12 mb-5 rounded shadow-md pl-5 text-[#000000]'
-              type='error'
-              required
-              placeholder={'입장코드를 숫자로 입력해주세요'}
+        <Modal open={codeModalOpen} onClose={() => setCodeModalOpen(false)} size="sm" label="입장코드 입력">
+          <div className="flex flex-col items-center">
+            <h2 className="self-start text-5xl font-normal sm:text-4xl">JOIN</h2>
+            <p className="mt-3 text-xl sm:mt-2 sm:text-base">입장코드 형식 : 랜덤 숫자 4자리</p>
+            <TextField
+              className="mt-4 h-[63px] sm:h-[39px]"
+              inputMode="numeric"
+              autoFocus
+              value={enterCode}
+              placeholder="입장코드를 숫자로 입력해주세요"
               onKeyDown={(e) => {
-                if (e.key === 'Enter') buttonCheckHandler();
+                if (e.key === 'Enter') handleCodeEnter();
               }}
               onChange={(e) => {
-                const value = e.target.value;
-                const regex = /^[0-9]*$/;
-                if (regex.test(value) || value === '') {
-                  setEnterCode(parseInt(value, 10));
-                }
+                if (/^\d{0,4}$/.test(e.target.value)) setEnterCode(e.target.value);
               }}
-            ></input>
-
-            <div className='m-auto flex justify-end items-end'>
-              <Button disabled={disabled} size='lg' onClick={buttonCheckHandler}>
-                {disabled ? '아직 멀었다' : '드가자'}
-              </Button>
-            </div>
+            />
+            <Button size="modal" className="mt-6 sm:mt-4" disabled={!canSubmitCode} onClick={handleCodeEnter}>
+              {canSubmitCode ? '드가자' : '아직 멀었다'}
+            </Button>
           </div>
         </Modal>
       </FullLayout>
@@ -186,4 +122,4 @@ function MainPage({ dark }: ComponentProps) {
   );
 }
 
-export default connector(MainPage);
+export default MainPage;

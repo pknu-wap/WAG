@@ -9,4 +9,6 @@ public class RoomCreateRequest {
     private String userNickName;
     private String category;
     private int timer;
+    /** 서로 이름 지어주기 모드 */
+    private boolean customMode;
 }

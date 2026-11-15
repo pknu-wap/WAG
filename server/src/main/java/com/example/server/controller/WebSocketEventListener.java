@@ -42,6 +42,7 @@ public class WebSocketEventListener {
     private final GameOrderRepository gameOrderRepository;
     private final GameService gameService;
     private final MessageService messageService;
+    private final ChatService chatService;
 
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
@@ -72,7 +73,12 @@ public class WebSocketEventListener {
                 return;
             }
 
-            if(room.isGameStatus()){  // 만약 게임 중이라면 해당 유저 게임 진행 정보 삭제
+            if(room.isGameStatus() && gameOrderRepository.countPendingAnswers(roomId) > 0){
+                // 서로 이름 지어주기(제시어 입력) 단계에서 나가면 짝이 깨지므로 단계를 취소하고 대기방으로 돌린다
+                ChatGameMessage cancel = chatService.cancelNamingInternal(room, username, username + " 님이 나가 이름 짓기가 취소되었습니다.");
+                messagingTemplate.convertAndSend(destination, cancel);
+            }
+            else if(room.isGameStatus()){  // 만약 게임 중이라면 해당 유저 게임 진행 정보 삭제
                 GameOrder gameOrder = gameOrderRepository.findByRoomUser(roomUser)
                         .orElseThrow(NoSuchGameOrderException::new);
                 if(gameOrder.getRanking() != 0){

@@ -1,129 +1,53 @@
-// 규칙!!!!!!
-// API type : type 이름 앞에 "I" 붙이기
-// 소켓 객체 type : 그냥 이름만
+// 서버 REST 응답 / 소켓 페이로드에 공통으로 쓰이는 DTO.
+// 소켓 메시지 타입(JOIN, START ...)은 src/socket/types.ts 에 있습니다.
 
-// 닉네임 중복확인 get response
+/** GET /nickname/possible */
 export interface INicknamePossible {
   possible: boolean;
   nickName: string;
 }
 
-// 닉네임 get
-export interface IGetNickname {
-  nickname: string;
-}
-
-// 코드로 방 입장
-export interface IGetRoomIdCode {
-  roomId?: string;
-}
-
-// 방 생성
-export interface IRoomCreate {
-  isPrivateRoom: boolean;
-  userNickName: string;
-}
-
+/** 방 참가자 (대기방) */
 export interface IUserDto {
   captain: boolean;
   roomNickname: string;
-  profileImage: string;
+  profileImage: string | null;
   ready: boolean;
 }
 
-// 방 정보 get response
+/** GET /room/info, POST /room/create 응답 */
 export interface IRoomResponseInfo {
   roomId: number;
   privateRoom: boolean;
   roomEnterCode: number;
   gameStatus: boolean;
   userCount: number;
+  /** "전체" 또는 "lol,한국위인" 처럼 쉼표로 이어진 카테고리 */
   category: string;
   timer: number;
+  /** 서로 이름 지어주기 모드 */
+  customMode: boolean;
   userDtos: IUserDto[];
 }
 
-// 방장 외 유저 JOIN 시 받는 값
-export interface ChatMessageJoin {
-  messageType: string;
-  content: string;
-  sender: string;
-  roomId: number;
-  roomResponse: IRoomResponseInfo;
-}
-
-// 방장 JOIN 시 받는 값
-export interface ChatMessageCaptainJoin {
-  content: string | null;
-  messageType: string;
-  roomId: number;
-  sender: string;
-}
-
-export interface ReadyUserDto {
-  roomNickname: string;
-  profileImage: null;
-  captain: boolean;
-  ready: boolean;
-}
-
-// READY 시 받는 값
-export interface ChatReadyMessage {
-  content: string;
-  messageType: string;
-  roomId: number;
-  sender: string;
-  userDtos: ReadyUserDto[];
-}
-
-//소켓으로 주고받는 채팅 객체
-export interface ChatMessage {
-  messageType: string;
-  sender: string; // 사용자 이름
-  content: string; // 메시지 텍스트
-  roomId: number;
-  isPrivateRoom: boolean;
-  gameUserDtos?: GameUserDto[];
-}
-
-export interface JoinUser {
-  userNickName: string;
-  userProfile: string;
-}
-
+/** 게임 중 참가자 상태 (ChatGameMessage.gameUserDtos) */
 export interface GameUserDto {
   captain: boolean;
   roomNickname: string;
-  profileImage: string;
+  profileImage: string | null;
   penalty: number;
   myTurn: boolean;
-  answername?: string;
   nextTurn: boolean;
   haveAnswerChance: boolean;
   ranking: number;
-  ready: boolean;
-}
-// 게임 중 채팅 객체
-export interface GameMessage {
-  messageType: string;
-  content: string;
-  sender: string;
-  roomId: number;
-  gameEnd: boolean;
-  cycle: number;
-  gameUserDtos: GameUserDto[];
+  /** END 메시지에서만 채워짐 */
+  answername?: string;
+  /** 서로 이름 지어주기 단계에서 내가 제시어를 정해 줄 상대 */
+  namingTarget?: string | null;
 }
 
-//김준서 : 이것도 정답어 get 게임중 화면에 띄워주는데 필요
-export interface UserAnswerDto {
-  answerUserDtos: AnswerUserDto[];
-}
-
+/** GET /answer/list 의 항목 */
 export interface AnswerUserDto {
   nickname: string;
   answer: string;
-}
-// 정답어 get
-export interface IGetAnswerList {
-  answerUserDtos: AnswerUserDto[];
 }

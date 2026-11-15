@@ -6,6 +6,7 @@ import com.example.server.domain.Room;
 import com.example.server.domain.RoomUser;
 import com.example.server.dto.ChatMessage;
 import com.example.server.exception.CantStartGameException;
+import com.example.server.exception.CategoryException;
 import com.example.server.exception.NoSuchGameOrderException;
 import com.example.server.exception.NoSuchRoomException;
 import com.example.server.payload.response.AnswerListResponse;
@@ -16,11 +17,15 @@ import com.example.server.repository.RoomUserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class GameService {
+
+    /** 카테고리 값이 이것이면 모든 카테고리에서 제시어를 뽑는다 */
+    public static final String ALL_CATEGORY = "전체";
 
     private final RoomRepository roomRepository;
     private final RoomUserRepository roomUserRepository;
@@ -28,20 +33,15 @@ public class GameService {
     private final GameOrderRepository gameOrderRepository;
 
 
-    public void makeGameOrder(ChatMessage chatMessage){  // 게임 순서 & 정답어 설정
+    /**
+     * 게임 순서 & 정답어 설정.
+     * - 일반 모드: 방 카테고리(복수 가능)에서 랜덤 제시어를 뽑아 배정
+     * - 서로 이름 지어주기 모드: 제시어는 비워 두고, 각자 다음 순서 사람의 제시어를 정하도록 namingTarget 만 배정
+     */
+    public void makeGameOrder(ChatMessage chatMessage){
         Long roomId = chatMessage.getRoomId();
-        List<RoomUser> roomUsers = roomUserRepository.findRandomByRoomId(roomId);
-        List<AnswerList> answerLists;
         Room room = roomRepository.findById(roomId).orElseThrow(()->new NoSuchRoomException(roomId));
-
-        if(room.getCategory().equals("전체")) {  // 전체 분야로 설정
-            answerLists = answerListRepository.findAnswerListBy();
-        }
-        else{   // 원하는 분야의 정답어만 설정
-            answerLists = answerListRepository.findAnswerListByGroup(room.getCategory());
-        }
-
-        int order = 1;
+        List<RoomUser> roomUsers = roomUserRepository.findRandomByRoomId(roomId);
 
         for(RoomUser roomUser : roomUsers){ // 레디하지 않은 유저가 있다면 예외처리.
             if(!roomUser.isReady()){
@@ -49,6 +49,9 @@ public class GameService {
             }
         }
 
+        List<AnswerList> answerLists = room.isCustomMode() ? List.of() : pickAnswers(room.getCategory(), roomUsers.size());
+
+        int order = 1;
         for(RoomUser roomUser : roomUsers){
             if(!roomUser.isCaptain()){
                 roomUser.setReady(false);
@@ -61,12 +64,47 @@ public class GameService {
                 room.setNowTurnUserId(roomUser.getId());
                 roomRepository.save(room);
             }
-            gameOrder.setAnswerName(answerLists.get(order-1).getName());
+            if (room.isCustomMode()) {
+                gameOrder.setAnswerName("");
+                // 내 다음 순서 사람의 제시어를 내가 정한다 (마지막 사람은 첫 사람)
+                gameOrder.setNamingTarget(roomUsers.get(order % roomUsers.size()).getRoomNickname());
+            } else {
+                gameOrder.setAnswerName(answerLists.get(order-1).getName());
+            }
             gameOrder.setUserOrder(order);
             order += 1;
             roomUser.setGameOrder(gameOrder);
             gameOrderRepository.save(gameOrder);
         }
+    }
+
+    /** 카테고리 문자열("전체" 또는 "lol,한국위인")에 맞는 제시어를 인원수만큼 뽑는다 */
+    public List<AnswerList> pickAnswers(String category, int count) {
+        List<String> groups = parseCategories(category);
+        List<AnswerList> answers = groups.isEmpty()
+                ? answerListRepository.findAnswerListBy()
+                : answerListRepository.findAnswerListByGroups(groups);
+        if (answers.size() < count) {
+            throw new CategoryException("선택한 카테고리의 제시어가 부족합니다. (" + answers.size() + "개)");
+        }
+        return answers;
+    }
+
+    /** 서로 이름 지어주기에서 시간 안에 입력하지 않았을 때 대신 쓸 제시어 */
+    public String randomAnswer() {
+        return answerListRepository.findAnswerListBy().get(0).getName();
+    }
+
+    /** "전체" 이거나 비어 있으면 빈 목록, 아니면 쉼표로 나눈 카테고리 목록 */
+    public static List<String> parseCategories(String category) {
+        if (category == null || category.isBlank() || category.trim().equals(ALL_CATEGORY)) {
+            return List.of();
+        }
+        return Arrays.stream(category.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty() && !s.equals(ALL_CATEGORY))
+                .distinct()
+                .toList();
     }
 
     private GameOrder gameOrderInit(RoomUser roomUser, Room room) {

@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class RoomController {
@@ -37,6 +39,11 @@ public class RoomController {
     @GetMapping("/roomId")
     public String returnRandomRoomCode(){
         return roomService.getRandomRoomId();
+    }
+
+    @GetMapping("/categories")   // 선택 가능한 제시어 카테고리 목록 ("전체" 제외)
+    public List<String> returnCategories(){
+        return roomService.getCategories();
     }
 
 //    @PostMapping("/room/enter/random")

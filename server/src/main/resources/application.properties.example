@@ -1,0 +1,43 @@
+# 로컬 개발용 설정 예시. 복사해서 application.properties 로 쓰세요 (application.properties 는 git 제외).
+#   cp src/main/resources/application.properties.example src/main/resources/application.properties
+# 운영 값은 Jenkins credential 'application.properties' 에서 주입됩니다.
+
+spring.application.name=server
+
+# ---------- DB (docker-compose.local.yml 기준) ----------
+spring.datasource.url=jdbc:mysql://localhost:3306/wag?createDatabaseIfNotExist=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+spring.datasource.username=root
+spring.datasource.password=
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+# data.sql(정답어 시드)을 Hibernate 가 테이블을 만든 뒤에 실행
+spring.sql.init.mode=always
+spring.jpa.defer-datasource-initialization=true
+spring.sql.init.continue-on-error=true
+
+# ---------- Kafka (docker-compose.local.yml 기준) ----------
+spring.kafka.bootstrap-servers=localhost:9092
+spring.kafka.consumer.auto-offset-reset=latest
+
+# ---------- 앱 설정: 코드에서 @Value 로 읽는 키. 빠지면 기동 실패 ----------
+# 프론트 개발 서버 오리진. 휴대폰 실기기 테스트면 http://<PC LAN IP>:3000 도 추가
+app.cors.allowedOrigins=http://localhost:3000,https://localhost:3000
+app.swagger.url=http://localhost:8080
+# 유령방 정리: lastStartedTime 이 lifetime 분보다 오래된 방을 cron 주기로 삭제
+scheduler.room.lifetime.minutes=60
+scheduler.room.check-ghost.cron=0 */10 * * * *
+# ChatGptService 가 @Value 로 요구. 로컬에서는 쓰지 않으므로 아무 값
+gpt.api.key=unused-in-local
+
+# ---------- 인증 (현재 SecurityConfig 가 전부 permitAll 이라 실질 미사용) ----------
+app.auth.tokenSecret=local-only-secret-local-only-secret-local-only-secret-local-only-secret
+app.auth.tokenExpirationMsec=864000000
+app.oauth2.authorizedRedirectUris=http://localhost:3000/oauth2/redirect
+
+# OAuth2 클라이언트 등록은 로컬에서 생략해도 됩니다. 필요하면 운영 값과 같은 키로 추가:
+# spring.security.oauth2.client.registration.google.client-id=
+# spring.security.oauth2.client.registration.google.client-secret=
+# spring.security.oauth2.client.registration.google.redirect-uri=http://localhost:8080/oauth2/callback/google
+# spring.security.oauth2.client.registration.google.scope=email,profile

@@ -1,5 +1,4 @@
 import ReactDOM from 'react-dom/client';
-import ReactModal from 'react-modal';
 import './index.css';
 import { AppProviders } from './app/providers';
 import { AppRouter } from './app/router';
@@ -11,8 +10,6 @@ initializeGA();
 
 const rootElement = document.getElementById('root') as HTMLElement;
 const root = ReactDOM.createRoot(rootElement);
-
-ReactModal.setAppElement(rootElement);
 
 root.render(
   <AppProviders>

@@ -41,3 +41,12 @@
        url('./Galmuri7.woff2') format('woff2'),
        url('./Galmuri7.ttf') format('truetype');
 }
+@font-face {
+  font-family: Galmuri14;
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Galmuri14 Regular'),
+       url('./Galmuri14.woff2') format('woff2'),
+       url('./Galmuri14.ttf') format('truetype');
+}

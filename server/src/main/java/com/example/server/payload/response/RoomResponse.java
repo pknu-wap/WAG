@@ -19,12 +19,15 @@ public class RoomResponse {
     private int roomEnterCode; // 랜덤 4자리 생성
     private boolean gameStatus;
     private int userCount;
+    /** "전체" 또는 쉼표로 이어진 카테고리 목록 (예: "lol,한국위인") */
     private String category;
     private int timer;
+    /** 서로 이름 지어주기 모드 */
+    private boolean customMode;
     private List<UserDto> UserDtos;
 
 
-    public RoomResponse(Long roomId, boolean isPrivateRoom, int roomEnterCode, boolean gameStatus, int userCount, String category, int timer) {
+    public RoomResponse(Long roomId, boolean isPrivateRoom, int roomEnterCode, boolean gameStatus, int userCount, String category, int timer, boolean customMode) {
         this.roomId = roomId;
         this.isPrivateRoom = isPrivateRoom;
         this.roomEnterCode = roomEnterCode;
@@ -32,6 +35,7 @@ public class RoomResponse {
         this.userCount = userCount;
         this.category = category;
         this.timer = timer;
+        this.customMode = customMode;
     }
 
     public static RoomResponse create(Room room, List<UserDto> userDtos){
@@ -43,6 +47,7 @@ public class RoomResponse {
                 room.getUserCount(),
                 room.getCategory(),
                 room.getTimer(),
+                room.isCustomMode(),
                 userDtos
         );
     }
@@ -55,7 +60,8 @@ public class RoomResponse {
                 room.isGameStatus(),
                 room.getUserCount(),
                 room.getCategory(),
-                room.getTimer()
+                room.getTimer(),
+                room.isCustomMode()
         );
     }
 }

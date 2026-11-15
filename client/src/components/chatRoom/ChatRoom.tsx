@@ -1,128 +1,79 @@
-import React, { useState, useEffect } from "react";
-import { ChatMessage } from "../../types/dto";
-import UserMessage from "./UserMessage";
-import NotificationMessage from "./NotificationMessage";
+import React, { useEffect, useRef } from 'react';
+import { SocketMessage } from '../../socket';
+import { session } from '../../shared/lib/session';
+import { formatCategories } from '../../shared/lib/category';
+import UserMessage from './UserMessage';
+import NotificationMessage from './NotificationMessage';
 
-const ChatRoom: React.FC<{ message: ChatMessage; whoseTurn?: string }> = ({ message, whoseTurn }) => {
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const myName = localStorage.getItem("nickName");
+interface ChatRoomProps {
+  messages: SocketMessage[];
+  /** 현재 질문자 닉네임. 질문자의 말풍선은 주황색으로 표시 */
+  whoseTurn?: string;
+}
 
-  // 새 메시지가 도착할 때마다 채팅창 스크롤을 아래로 이동합니다.
+/** 채팅 메시지 목록. 새 메시지가 오면 맨 아래로 스크롤합니다. */
+const ChatRoom: React.FC<ChatRoomProps> = ({ messages, whoseTurn }) => {
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const myName = session.getNickname();
+
   useEffect(() => {
-    const chatContainer = document.getElementById("chat-container");
-    if (chatContainer) {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
+    bottomRef.current?.scrollIntoView({ block: 'end' });
+  }, [messages]);
+
+  const notice = (key: number, ...lines: string[]) => (
+    <div key={key} className="flex flex-col items-center gap-[3px]">
+      {lines.map((line, i) => (
+        <NotificationMessage key={i} content={line} />
+      ))}
+    </div>
+  );
+
+  const renderMessage = (msg: SocketMessage, index: number) => {
+    switch (msg.messageType) {
+      case 'CHAT':
+      case 'ASK':
+      case 'ANSWER': {
+        if (msg.content === '') return null;
+        const isMine = msg.sender === myName;
+        return (
+          <div key={index} className={isMine ? 'flex flex-col items-end' : 'flex flex-col items-start'}>
+            <UserMessage sender={msg.sender} content={msg.content} isMyMessage={isMine} askerMessage={msg.sender === whoseTurn} />
+          </div>
+        );
+      }
+      case 'CORRECT': {
+        const senderDto = msg.gameUserDtos?.find((u) => u.roomNickname === msg.sender);
+        if (!senderDto) return null;
+        return senderDto.ranking !== 0
+          ? notice(index, `${msg.sender}(이)가 "${msg.content}"(으)로 정답을 외쳤습니다.`, '========== 5초 뒤 다음 턴으로 넘어갑니다 ==========')
+          : notice(index, `${msg.sender}(이)가 "${msg.content}"(으)로 오답을 외쳤습니다.`);
+      }
+      case 'CATEGORY':
+        return notice(index, `카테고리가 ${formatCategories(msg.content)}(으)로 변경되었습니다.`);
+      case 'TIMER':
+        return notice(index, `턴 당 진행시간이 ${msg.content}초로 변경되었습니다.`);
+      case 'CUSTOM':
+        return notice(index, msg.content === 'true' ? '서로 이름 지어주기가 켜졌습니다.' : '서로 이름 지어주기가 꺼졌습니다.');
+      case 'NAMING':
+        return notice(index, '--------------------------', '서로 이름 지어주기!', '맡은 사람의 제시어를 10초 안에 정해주세요.');
+      case 'NAME':
+        return notice(index, `${msg.sender} 님이 제시어를 정했습니다. (남은 인원 ${msg.content}명)`);
+      case 'START':
+        return notice(index, '--------------------------', '5초 뒤에 게임이 시작됩니다.', '준비하세요!');
+      case 'END':
+        return notice(index, `${msg.sender}(이)가 "${msg.content}"(으)로 정답을 외쳤습니다.`, '정답자가 모두 나왔습니다', '5초 뒤 결과페이지로 이동합니다!');
+      default:
+        // JOIN / LEAVE / PENALTY / CANCEL / 서버 안내 등은 content 를 그대로 공지로 표시
+        return msg.content ? notice(index, msg.content) : null;
     }
-  }, [chatMessages]);
+  };
 
-  useEffect(() => {
-    // 이전 메시지 배열에 새 메시지를 추가합니다.
-    setChatMessages((prevMessages) => [...prevMessages, message]);
-  }, [message]);
-
-    // 메시지 렌더링 로직을 별도의 함수로 분리
-    const renderMessage = (msg: any, index: number) => {
-      const userMessageTypes = ['CHAT', 'ASK', 'ANSWER']; // UserMessage로 처리될 메시지 타입들
-      const isUserMessage = userMessageTypes.includes(msg.messageType); //UserMessage 인지 아닌지
-      const isMyMessage = msg.sender === myName;   //내가 보낸 메세지인지 아닌지
-      if (isUserMessage) //CHAT, ASK, ANSWER, CORRECT 중에 하나라면
-        {
-          if(msg.content === "")
-            return;
-        // 사용자 메시지 처리
-        let containerClass = isMyMessage ? "flex flex-col items-end" : "flex flex-col items-start";
-        return (
-          <div key={index} className={containerClass}>
-            <UserMessage message={msg} isMyMessage={isMyMessage} askerMessage={msg.sender === whoseTurn}/> 
-          </div>
-        );
-      } 
-      else if (msg.messageType === "CORRECT")
-        {
-          const gameUserDtos = msg.gameUserDtos;
-          const senderIndex = msg.gameUserDtos?.findIndex((user: any) => user.roomNickname === msg.sender)
-          if (senderIndex !== -1) {
-            if (gameUserDtos[senderIndex].ranking !== 0) {
-              return (
-                <div key={index} className="flex flex-col items-center mx-[2.5px]">
-                  <NotificationMessage message={{...msg, content: `${msg.sender}(이)가 "${msg.content}"(으)로 정답을 외쳤습니다.`}} />
-                  <NotificationMessage message={{...msg, content: "========== 5초 뒤 다음 턴으로 넘어갑니다 =========="}} />
-                </div>
-              )
-            } else {
-              return (
-                <div key={index} className="flex flex-col items-center mx-[2.5px]">
-                  <NotificationMessage message={{...msg, content: `${msg.sender}(이)가 "${msg.content}"(으)로 오답을 외쳤습니다.`}} />
-                </div>
-              )
-            }
-          }
-        }
-      else if (msg.messageType === "CATEGORY")
-        {
-          return (
-            <div key={index} className="flex flex-col items-center mx-[2.5px]">
-              <NotificationMessage message={{...msg, content: `${msg.content}로 카테고리가 변경되었습니다.`}} />
-            </div>
-          )
-        }
-      else if (msg.messageType === "TIMER") 
-        {
-          return (
-            <div key={index} className="flex flex-col items-center mx-[2.5px]">
-              <NotificationMessage message={{...msg, content: `${msg.content}로 타이머가 변경되었습니다.`}} />
-            </div>
-          )
-        }
-      else if (msg.messageType === 'START') //UserMessage가 아니고
-        {
-        return (
-          <div key={index} className="flex flex-col items-center mx-[2.5px]">
-            <NotificationMessage message={{...msg, content: "--------------------------"}} />
-            <NotificationMessage message={{...msg, content: "5초 뒤에 게임이 시작됩니다."}} />
-            <NotificationMessage message={{...msg, content: "준비하세요!"}} />
-          </div>
-        );
-      }
-      else if (msg.messageType === 'PENALTY') //UserMessage가 아니고
-      {
-        return (
-        <div key={index} className="flex flex-col items-center">
-        <NotificationMessage message={msg} />
-      </div>
-        )
-      }
-      else if (msg.messageType === 'END') // UserMessage가 아니고
-      {
-        return (
-          <>
-            <div key={index} className="flex flex-col items-center mx-[2.5px]">
-            <NotificationMessage message={{...msg, content: `${msg.sender}(이)가 "${msg.content}"(으)로 정답을 외쳤습니다.`}} />
-            </div>
-            <div key={index} className="flex flex-col items-center mx-[2.5px]">
-              <NotificationMessage message={{...msg, content: "정답자가 모두 나왔습니다"}} />
-              <NotificationMessage message={{...msg, content: "5초 뒤 결과페이지로 이동합니다!"}} />
-            </div>
-          </>
-        );
-      }
-      
-      else // 그 외 공지 메시지 처리
-      {
-        return (
-          <div key={index} className="flex flex-col items-center">
-            <NotificationMessage message={msg} />
-          </div>
-        );
-      }
-    };
-    
-
-    return (
-      <div id="chat-container" className="mt-1 overflow-auto h-full flex flex-col pr-3 p-5">
-        {chatMessages.map(renderMessage)}
-      </div>
-    );
+  return (
+    <div className="flex flex-col gap-2">
+      {messages.map(renderMessage)}
+      <div ref={bottomRef} />
+    </div>
+  );
 };
 
 export default ChatRoom;

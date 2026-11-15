@@ -1,12 +1,8 @@
- import React from "react";
- import { ChatMessage } from "../../types/dto";
+import React from 'react';
 
- const NotificationMessage: React.FC<{ message: ChatMessage }> = ({ message }) => {
- return (
-     <>
-     <span className="text-sm sm:text-base text-white">{message.content}</span>
-     </>
- );
- };
+/** 가운데 정렬되는 공지 문구 (입장/퇴장, 정답, 라운드 안내 등) */
+const NotificationMessage: React.FC<{ content: string }> = ({ content }) => (
+  <span className="text-center text-sm text-light-text dark:text-dark-text">{content}</span>
+);
 
- export default NotificationMessage;
+export default NotificationMessage;

@@ -1,160 +1,127 @@
-import { useState } from 'react';
-import { Button, RadioButton, Toast, DropDown, Slider, Wrapper } from '../../shared';
-import { Option } from 'react-dropdown';
-import FullLayout from '../../components/layout/FullLayout';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
-import { firstCategoryRecoil, timerCount, soundEffectStatus } from '../../recoil/recoil';
-import { trackEvent, GA_EVENT, roomApi } from '../../shared';
+import {
+  Button,
+  MultiSelect,
+  RadioCard,
+  Slider,
+  TextField,
+  Toast,
+  Toggle,
+  Wrapper,
+  GA_EVENT,
+  trackEvent,
+  roomApi,
+  session,
+  useSound,
+  joinCategories,
+  FALLBACK_CATEGORIES,
+} from '../../shared';
+import FullLayout from '../../components/layout/FullLayout';
+
+const DEFAULT_TIMER_SECONDS = 30;
+const MAX_NICKNAME_LENGTH = 9;
+
+const isValidNickname = (nickname: string) => nickname !== '' && !nickname.includes(' ') && nickname.length <= MAX_NICKNAME_LENGTH;
+
+const Label = ({ children, caption }: { children: string; caption?: string }) => (
+  <div className="mb-3 sm:mb-2">
+    <div className="text-base font-bold sm:text-[13px]">{children}</div>
+    {caption && <div className="text-xs text-wag-muted sm:text-[10px]">{caption}</div>}
+  </div>
+);
 
 function CreateRoom() {
-  const [isPrivate, setIsPrivate] = useState<boolean | null>(false);
-  const [nickName, setNickname] = useState<string>('');
-  const [soundEffectStatusValue] = useRecoilState(soundEffectStatus);
   const navigate = useNavigate();
+  const play = useSound();
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [customMode, setCustomMode] = useState(true);
+  const [categoryOptions, setCategoryOptions] = useState<string[]>(FALLBACK_CATEGORIES);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [timer, setTimer] = useState(DEFAULT_TIMER_SECONDS);
+  const [nickname, setNickname] = useState('');
 
-  const handlePlaySound = () => {
-    const playSound = () => {
-      if (soundEffectStatusValue) {
-        const audio = new Audio('audio/button_click.mp3');
-        audio.play();
-      }
-    };
-    playSound();
-  };
+  useEffect(() => {
+    roomApi
+      .getCategories()
+      .then((list) => {
+        if (list.length) setCategoryOptions(list);
+      })
+      .catch(() => {
+        /* 실패하면 기본 목록 유지 */
+      });
+  }, []);
 
   const createRoom = async () => {
-    handlePlaySound();
-    if ((await nicknamePossibleClick()) === false) {
-      Toast({ message: '사용 불가한 닉네임입니다!', type: 'warn' });
+    play('click');
+    if (!isValidNickname(nickname)) {
+      Toast({ message: '닉네임은 공백 없이 9자 이내로 입력해주세요!', type: 'warn' });
       return;
     }
+    const category = customMode ? joinCategories([]) : joinCategories(selectedCategories);
 
     trackEvent({
       action: GA_EVENT.CREATE_ROOM.SUBMIT_CREATE,
       category: 'create_room',
-      label: `nickname: ${nickName}, category: ${selectedOption}, timer: ${sliderValue}, private: ${isPrivate}`,
+      label: `nickname: ${nickname}, category: ${category}, timer: ${timer}, private: ${isPrivate}, custom: ${customMode}`,
     });
 
     try {
-      const response = await roomApi.createRoom({
-        privateRoom: isPrivate || false,
-        userNickName: nickName,
-        category: selectedOption,
-        timer: sliderValue,
-      });
-
-      const roomId = response.roomId;
-      localStorage.setItem('nickName', nickName ?? '');
-      localStorage.setItem('roomId', roomId.toString());
-
-      const newResponse = {
-        isPrivateRoom: response.privateRoom,
-        userNickName: nickName,
-        isCaptin: true,
-        roomId: roomId,
-      };
-
-      navigate(`/GameRoom/${roomId}`, { state: newResponse });
-    } catch (error) {
-      console.error('방 생성 요청 중 오류 발생:', error);
-      throw error;
+      const room = await roomApi.create({ privateRoom: isPrivate, userNickName: nickname, category, timer, customMode });
+      session.setNickname(nickname);
+      session.setRoomId(room.roomId);
+      // 방장은 닉네임 모달 없이 바로 소켓에 연결한다 (GameRoom 이 state.isCaptin 으로 판단)
+      navigate(`/GameRoom/${room.roomId}`, { state: { isCaptin: true, roomId: room.roomId } });
+    } catch {
+      Toast({ message: '방을 만들지 못했습니다. 잠시 후 다시 시도해주세요.', type: 'error' });
     }
-  };
-
-  const [, setFirstCategory] = useRecoilState(firstCategoryRecoil);
-  const [selectedOption, setSelectedOption] = useState<string>('전체');
-  const handleOptionSelect = (option: Option) => {
-    setSelectedOption(option.value);
-    setFirstCategory(option.value);
-  };
-
-  const [sliderValue, setSliderValue] = useState(30);
-  const [, setTimerRecoil] = useRecoilState(timerCount);
-
-  const handleSliderChange = (value: number) => {
-    setSliderValue(value);
-    setTimerRecoil(value);
-  };
-
-  const renderButton = () => {
-    if (isPrivate === null) {
-      return <p>방 공개 / 비공개 여부를 선택해주십시오</p>;
-    } else {
-      return (
-        <Button size='lg' onClick={createRoom}>
-          {isPrivate ? '비공개방 생성' : '공개방 생성'}
-        </Button>
-      );
-    }
-  };
-
-  const nicknamePossibleClick = async () => {
-    if (nickName === '' || nickName.includes(' ') || nickName.length > 9) {
-      return false;
-    }
-    return true;
   };
 
   return (
     <Wrapper>
-      <FullLayout>
-        <div className='p-4'>
-          <div className='justify-center text-6xl mb-20'>방 만들기</div>
+      <FullLayout className="sm:max-w-[821px]">
+        <h1 className="mt-6 text-[44px] font-medium sm:mt-2 sm:text-[50px]">방 만들기</h1>
 
-          <div className='rounded-xl font-extrabold min-w-44 '>방 공개 / 비공개 여부 선택</div>
-          <div className='grid grid-cols-1 md:grid-cols-2 mt-5 mb-8 gap-2'>
-            <RadioButton
-              id='public'
-              label='공개'
-              value='false'
-              name='roomType'
-              onChange={() => {
-                setIsPrivate(false);
-              }}
-              checked={isPrivate === false}
-            />
-            <RadioButton
-              id='private'
-              label='비공개'
-              value='true'
-              name='roomType'
-              onChange={() => {
-                setIsPrivate(true);
-              }}
-            />
+        <section className="mt-10 sm:mt-12">
+          <Label>방 공개 / 비공개 여부 선택</Label>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-[7px]">
+            <RadioCard name="roomType" value="public" label="공개" checked={!isPrivate} onChange={() => setIsPrivate(false)} />
+            <RadioCard name="roomType" value="private" label="비공개" checked={isPrivate} onChange={() => setIsPrivate(true)} />
           </div>
+        </section>
 
-          <div className='mb-8'>
-            <div className='rounded-xl font-extrabold min-w-44 mb-3'>게임 카테고리 설정</div>
-            <DropDown onOptionSelect={handleOptionSelect} defaultValue='전체' />
-          </div>
+        <section className="mt-8 sm:mt-6">
+          <Label>서로 이름 지어주기</Label>
+          <Toggle checked={customMode} onChange={setCustomMode} label="서로 이름 지어주기" />
+        </section>
 
-          <div>
-            <div className='rounded-xl font-extrabold min-w-44 mb-3'>턴 당 진행시간</div>
-            <Slider value={sliderValue} onChange={handleSliderChange} />
-          </div>
+        {!customMode && (
+          <section className="mt-8 sm:mt-6">
+            <Label caption="복수선택가능">게임 카테고리 설정</Label>
+            <MultiSelect options={categoryOptions} value={selectedCategories} onChange={setSelectedCategories} />
+          </section>
+        )}
 
-          <input
-            className='relative z-10 w-3/4 h-12 mb-5 mt-5 rounded shadow-md pl-5 text-[#000000]'
-            type='error'
-            required
-            placeholder={'닉네임을 입력해주세요'}
-            onChange={(e) => {
-              setNickname(e.target.value);
-            }}
-            onKeyDown={async (e) => {
-              if (e.nativeEvent.isComposing) return;
-              if (e.key === 'Enter' && nickName?.trim() !== '') {
-                createRoom();
-              } else if (e.key === 'Enter' && nickName?.trim() === '') {
-                Toast({ message: '사용 불가한 닉네임입니다!', type: 'warn' });
-              }
-            }}
-          ></input>
+        <section className="mt-8 sm:mt-6">
+          <Label>턴 당 진행시간</Label>
+          <Slider value={timer} onChange={setTimer} />
+        </section>
 
-          <div className='mt-12'>{renderButton()}</div>
-        </div>
+        <TextField
+          className="mx-auto mt-6 h-12 max-w-[615px] sm:mt-6 sm:h-[39px]"
+          placeholder="닉네임을 입력해주세요"
+          value={nickname}
+          maxLength={MAX_NICKNAME_LENGTH}
+          onChange={(e) => setNickname(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.nativeEvent.isComposing) return;
+            if (e.key === 'Enter') createRoom();
+          }}
+        />
+
+        <Button size="wide" className="mt-10 sm:mt-14" onClick={createRoom}>
+          {isPrivate ? '비공개방 생성' : '공개방 생성'}
+        </Button>
       </FullLayout>
     </Wrapper>
   );

@@ -23,6 +23,7 @@ export const SOCKET_ENDPOINTS = {
   SET_CATEGORY: '/app/chat.setCategory',
   SET_TIMER: '/app/chat.setTimer',
   CHANGE_MODE: '/app/chat.changeMode',
+  SET_CUSTOM_MODE: '/app/chat.setCustomMode',
 } as const;
 
 /**
@@ -31,4 +32,3 @@ export const SOCKET_ENDPOINTS = {
 export const SOCKET_TOPICS = {
   PUBLIC: (roomId: string) => `/topic/public/${roomId}`,
 } as const;
-

@@ -24,3 +24,11 @@ yarn-debug.log*
 yarn-error.log*
 
 *.pem
+### Figma export (scripts/figma) ###
+# 원본 노드 JSON(35MB)과 섹션 단위 PNG는 커밋하지 않음. 개별 화면 PNG(frames/)와 요약(README.md, frames.json)만 유지
+design/figma/nodes.json
+design/figma/*.png
+
+### E2E (scripts/e2e) ###
+scripts/e2e/node_modules/
+scripts/e2e/shots/

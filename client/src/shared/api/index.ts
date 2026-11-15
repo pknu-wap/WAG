@@ -1,5 +1,5 @@
 export * from './instance';
-export { default as roomApi } from './room.api';
-export { default as userApi } from './user.api';
-export { default as answerApi } from './answer.api';
-
+export { roomApi } from './room.api';
+export type { CreateRoomRequest, RoomLookupResult } from './room.api';
+export { userApi } from './user.api';
+export { answerApi } from './answer.api';

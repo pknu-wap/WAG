@@ -1,8 +1,13 @@
-// 소켓 인스턴스
 export { gameSocket } from './gameSocket';
-
-// 타입
-export type { MessageType, MessageCallback, SocketMessage } from './types';
-
-// 상수
+export type {
+  MessageType,
+  MessageCallback,
+  OutgoingMessage,
+  SocketMessage,
+  RoomInfoMessage,
+  ReadyMessage,
+  RoomModeMessage,
+  GameMessage,
+  PlainMessage,
+} from './types';
 export { SOCKET_SERVER_URL, SOCKET_ENDPOINTS, SOCKET_TOPICS } from '../shared/config';
