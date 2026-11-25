@@ -14,7 +14,6 @@ import com.example.server.payload.response.RoomResponse;
 import com.example.server.repository.GameOrderRepository;
 import com.example.server.repository.RoomRepository;
 import com.example.server.repository.RoomUserRepository;
-import com.example.server.service.ChatService;
 import com.example.server.service.GameService;
 import com.example.server.service.MessageService;
 import lombok.RequiredArgsConstructor;
@@ -95,7 +94,7 @@ public class WebSocketEventListener {
                 }
 
                 if(roomUser.isCaptain()){   // 나간 사람이 방장이라면 방장 위임
-                    RoomUser nextCaption = roomUserRepository.findNextCaptinByRandom(roomId)
+                    RoomUser nextCaption = roomUserRepository.findNextCaptainByRandom(roomId)
                             .orElseThrow(() -> new NoSuchRoomUserException(roomId));
                     nextCaption.setCaptain(true);
                     nextCaption.setReady(true);
@@ -122,7 +121,7 @@ public class WebSocketEventListener {
 
 
             if(roomUser.isCaptain()){   // 나간 사람이 방장이라면 방장 위임
-                RoomUser nextCaption = roomUserRepository.findNextCaptinByRandom(roomId)
+                RoomUser nextCaption = roomUserRepository.findNextCaptainByRandom(roomId)
                         .orElseThrow(() -> new NoSuchRoomUserException(roomId));
                 nextCaption.setCaptain(true);
                 nextCaption.setReady(true);

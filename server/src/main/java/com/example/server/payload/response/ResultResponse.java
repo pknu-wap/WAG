@@ -22,7 +22,7 @@ public class ResultResponse {
         this.userCount = room.getUserCount();
         List<ResultUserDto> resultUserDtos = new ArrayList<>();
         for(RoomUser roomUser : roomUsers){
-            resultUserDtos.add(new ResultUserDto(roomUser.getRoomNickname(), roomUser.getProfileImage(),
+            resultUserDtos.add(new ResultUserDto(roomUser.getRoomNickname(),
                     roomUser.getGameOrder().getAnswerName(), roomUser.getGameOrder().getRanking()));
         }
         this.resultUserDtos = resultUserDtos;

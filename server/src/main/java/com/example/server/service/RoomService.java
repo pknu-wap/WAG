@@ -2,7 +2,6 @@ package com.example.server.service;
 
 import com.example.server.domain.Room;
 import com.example.server.domain.RoomUser;
-import com.example.server.domain.User;
 import com.example.server.dto.ChatMessage;
 import com.example.server.dto.ChatReadyMessage;
 import com.example.server.dto.ChatRoomModeMessage;
@@ -11,10 +10,8 @@ import com.example.server.exception.*;
 import com.example.server.payload.request.RoomCreateRequest;
 import com.example.server.payload.response.RoomResponse;
 import com.example.server.repository.*;
-import com.example.server.security.UserPrincipal;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +25,6 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomUserRepository roomUserRepository;
     private final AnswerListRepository answerListRepository;
-    private final UserRepository userRepository;
 
     public RoomResponse create(RoomCreateRequest roomCreateRequest){ // 게임 방 생성
         Room room = new Room();
@@ -66,7 +62,7 @@ public class RoomService {
         return RoomResponse.create(room, userDtos);
     }
 
-    public RoomResponse enterRoomByRoomId(String nickName, Long roomId, UserPrincipal userPrincipal){ // 소켓 + roomId로 방 입장.
+    public RoomResponse enterRoomByRoomId(String nickName, Long roomId){ // 소켓 + roomId로 방 입장.
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new NoSuchRoomException(roomId));
         if(room.isGameStatus()){
             throw new AlreadyStartedRoomException();  // 이미 시작된 방 예외 처리
@@ -78,18 +74,14 @@ public class RoomService {
         } else if (room.getUserCount() == 0) {
             isCaptain = true;
         }
-        addUser(room, nickName, isCaptain, userPrincipal);
+        addUser(room, nickName, isCaptain);
         List<UserDto> userDtos = UserDto.makeUserDtos(roomUserRepository.findByRoomId(room.getId()));
         return RoomResponse.create(room, userDtos);
     }
 
-    public void addUser(Room room, String nickName,Boolean isCaptain, UserPrincipal userPrincipal){  // 방에 유저 추가 로직
+    public void addUser(Room room, String nickName,Boolean isCaptain){  // 방에 유저 추가 로직
         RoomUser roomUser = RoomUserInit(room, nickName, isCaptain);
 
-        // if (userPrincipal != null && userPrincipal.getId() != null) {
-        //     Optional<User> userOptional = userRepository.findById((userPrincipal.getId()));
-        //     userOptional.ifPresent(roomUser::setUser);
-        // }
         room.setUserCount(room.getUserCount()+1);
 
         roomUserRepository.save(roomUser);
@@ -165,7 +157,7 @@ public class RoomService {
         if(room.getCategory().equals(chatMessage.getContent())){  // 기존의 카테고리와 같은 카테고리로 변경할 경우
             throw new CategoryException("기존의 카테고리와 같은 카테고리입니다. ");
         }
-        if(!chatMessage.getContent().equals("전체")){    // 카테고리가 전체인 경우를 제외하고 검사
+        if(!chatMessage.getContent().equals("전체") && !chatMessage.getContent().equals("CUSTOM")){    // 카테고리가 전체인 경우를 제외하고 검사
             answerListRepository.haveCategory(chatMessage.getContent())   // 존재하는 카테고리인지 확인 여부
                     .orElseThrow(()->new NoSuchCategoryException(chatMessage.getContent()));
         }

@@ -27,5 +27,6 @@ public class ChatMessage {
         CATEGORY,
         TIMER,
         CHANGE,
+        SET_NAME
     }
 }

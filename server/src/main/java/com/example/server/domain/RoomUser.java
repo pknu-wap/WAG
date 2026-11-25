@@ -20,13 +20,8 @@ public class RoomUser {
     @NotNull
     private String roomNickname;
 
-    private String profileImage;
-
     @NotNull
     private boolean isReady;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    private User user;
 
     @OneToOne(fetch = FetchType.LAZY , cascade = CascadeType.ALL, orphanRemoval = true)
     private GameOrder gameOrder;
