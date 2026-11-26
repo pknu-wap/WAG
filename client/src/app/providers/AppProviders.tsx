@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { RecoilRoot } from 'recoil';
 import { BrowserRouter } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+// import 'react-toastify/dist/ReactToastify.css';
 import store from '../../modules';
 import Header from '../../components/layout/Header';
 import SquareBubble from '../../components/layout/SquareBubble';
@@ -30,7 +30,7 @@ const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
               </FullLayout>
               <ToastContainer />
             </SquareBubble>
-            <MaintenanceBanner />
+            {/* <MaintenanceBanner /> */}
           </BrowserRouter>
         </RecoilRoot>
       </Provider>
